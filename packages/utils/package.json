@@ -1,0 +1,9 @@
+{
+  "name": "@hana-img-viewer/utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

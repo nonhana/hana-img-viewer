@@ -1,0 +1,32 @@
+{
+  "name": "hana-img-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/*",
+    "readme.md",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hana-img-viewer/utils": "workspace:^1.0.0"
+  },
+  "devDependencies": {
+    "vite-plugin-dts": "^4.3.0"
+  }
+}
