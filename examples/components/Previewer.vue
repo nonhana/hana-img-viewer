@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HanaImgViewer } from 'hana-img-viewer'
+import HanaImgViewer from 'hana-img-viewer'
 import demoImg from '../assets/110645642.png'
 </script>
 

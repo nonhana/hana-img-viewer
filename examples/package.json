@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "hana-img-viewer": "workspace:^1.0.0"
+    "hana-img-viewer": "workspace:*"
   },
   "devDependencies": {}
 }

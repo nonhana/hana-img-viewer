@@ -6,6 +6,7 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   plugins: [vue(), dts({ tsconfigPath: './tsconfig.json' })],
   build: {
+    minify: false,
     lib: {
       entry: './src/index.ts',
       name: 'HanaImgViewer',
@@ -15,7 +16,7 @@ export default defineConfig({
       external: ['vue'],
       input: ['./src/index.ts'],
       output: {
-        format: 'es',
+        format: 'esm',
         entryFileNames: '[name].js',
         exports: 'named',
         globals: {

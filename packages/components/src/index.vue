@@ -111,24 +111,24 @@ export default defineComponent({
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  .img_container {
-    object-fit: cover;
-    img {
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-    }
-  }
-  span {
-    font-size: 0.8rem;
-    color: #666;
-  }
+}
+.img_container {
+  object-fit: cover;
+}
+img {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+span {
+  font-size: 0.8rem;
+  color: #666;
 }
 </style>
