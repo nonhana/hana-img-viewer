@@ -23,9 +23,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@hana-img-viewer/utils": "workspace:^1.0.0"
-  },
   "devDependencies": {
     "vite-plugin-dts": "^4.3.0"
   }

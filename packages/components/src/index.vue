@@ -1,7 +1,7 @@
 <script lang="ts">
 import { computed, CSSProperties, defineComponent, ref } from 'vue'
 import useImgViewer from './composables/useImgViewer'
-import { preventDefault } from '@hana-img-viewer/utils'
+import { preventDefault } from './utils'
 import { imgViewerPropsObj } from './type'
 
 export default defineComponent({

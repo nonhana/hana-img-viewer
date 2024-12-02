@@ -1,6 +1,6 @@
 import { ref, Ref } from 'vue'
 import useTransformer from './useTransformer'
-import { setStyles } from '@hana-img-viewer/utils'
+import { setStyles } from '../utils'
 import { ImgViewerProps } from '../type'
 
 export default function useImgViewer(

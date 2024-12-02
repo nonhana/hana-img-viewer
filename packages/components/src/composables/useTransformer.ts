@@ -1,5 +1,5 @@
 import { computed, Ref, ref, watch } from 'vue'
-import { getDistance, setStyles } from '@hana-img-viewer/utils'
+import { getDistance, setStyles } from '../utils'
 import { ImgViewerProps } from '../type'
 
 // 获取目标元素的 transform 位置（初始化）
