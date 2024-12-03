@@ -1,9 +1,6 @@
 {
   "name": "monorepo_demo",
   "private": "true",
-  "scripts": {
-    "hello": "echo 'Hello, World!'"
-  },
   "devDependencies": {
     "@types/node": "^22.10.1",
     "@vitejs/plugin-vue": "^5.2.1",
