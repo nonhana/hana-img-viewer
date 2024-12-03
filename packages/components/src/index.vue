@@ -97,38 +97,41 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="img_container" :style="imgStyle">
+  <div class="img-viewer">
+    <div class="img-viewer__container" :style="imgStyle">
       <img
         ref="imgRef"
+        class="img-viewer__image"
         :src="src"
         :alt="alt"
         :style="{ visibility: displaying ? 'hidden' : 'visible' }"
         @click="handleClick"
       />
     </div>
-    <span v-if="alt">{{ alt }}</span>
+    <span v-if="alt" class="img-viewer__alt">{{ alt }}</span>
   </div>
 </template>
 
-<style scoped>
-.wrapper {
-  position: relative;
+<style scoped lang="scss">
+.img-viewer {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-}
-.img_container {
-  object-fit: cover;
-}
-img {
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-span {
-  font-size: 0.8rem;
-  color: #666;
+
+  &__container {
+    object-fit: cover;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  &__alt {
+    font-size: 0.8rem;
+    color: #666;
+  }
 }
 </style>

@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import Previewer from './components/Previewer.vue'
+import Previewer from './src/components/Previewer.vue'
 </script>
 
 <template>
   <Previewer />
 </template>
-
-<style scoped></style>

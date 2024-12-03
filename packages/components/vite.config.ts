@@ -4,26 +4,55 @@ import dts from 'vite-plugin-dts'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), dts({ tsconfigPath: './tsconfig.json' })],
+  plugins: [
+    vue(),
+    dts({ tsconfigPath: './tsconfig.json' }),
+    dts({ tsconfigPath: './tsconfig.json', outDir: 'dist/lib' }),
+    {
+      name: 'handle-css',
+      generateBundle(_, bundle) {
+        const keys = Object.keys(bundle)
+        for (const key of keys) {
+          const bundler: any = bundle[key]
+          if (bundler.name !== 'index') continue
+          this.emitFile({
+            type: 'asset',
+            fileName: key,
+            source: "import './index.css';\n" + bundler.code,
+          })
+        }
+      },
+    },
+  ],
   build: {
-    minify: false,
+    target: 'modules',
+    outDir: 'dist/es',
+    minify: true,
+    cssCodeSplit: true,
     lib: {
       entry: './src/index.ts',
-      name: 'HanaImgViewer',
-      fileName: (format) => `lib.${format}.js`,
     },
     rollupOptions: {
       external: ['vue'],
       input: ['./src/index.ts'],
-      output: {
-        format: 'esm',
-        entryFileNames: '[name].js',
-        exports: 'named',
-        globals: {
-          vue: 'Vue',
+      output: [
+        {
+          format: 'esm',
+          exports: 'named',
+          entryFileNames: '[name].js',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          dir: 'dist/es',
         },
-        dir: 'dist',
-      },
+        {
+          format: 'cjs',
+          exports: 'named',
+          entryFileNames: '[name].js',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          dir: 'dist/lib',
+        },
+      ],
     },
   },
 })
