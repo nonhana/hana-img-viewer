@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "cd ../packages/components && vite build && cd ../../examples && vite build",
+    "postinstall": "pnpm --filter hana-img-viewer build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "keywords": [],

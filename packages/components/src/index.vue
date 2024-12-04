@@ -11,11 +11,11 @@ export default defineComponent({
     const imgStyle = computed<CSSProperties>(() => ({
       width:
         (typeof props.width === 'number' ? `${props.width}px` : props.width) ??
-        'auto',
+        'fit-content',
       height:
         (typeof props.height === 'number'
           ? `${props.height}px`
-          : props.height) ?? 'auto',
+          : props.height) ?? 'fit-content',
     }))
 
     const displaying = ref(false) // 是否正在查看大图
@@ -98,7 +98,7 @@ export default defineComponent({
 
 <template>
   <div class="img-viewer">
-    <div class="img-viewer__container" :style="imgStyle">
+    <div :style="imgStyle">
       <img
         ref="imgRef"
         class="img-viewer__image"
@@ -119,13 +119,10 @@ export default defineComponent({
   align-items: center;
   gap: 0.5rem;
 
-  &__container {
-    object-fit: cover;
-  }
-
   &__image {
     width: 100%;
     height: 100%;
+    object-fit: cover;
     cursor: pointer;
   }
 
