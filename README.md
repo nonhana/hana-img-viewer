@@ -68,25 +68,25 @@ import demoImg from '../assets/114388636.jpg'
 
 ## Props
 
-以下是提供的所有属性：
+Following are the props that you can pass to the `hana-img-viewer` component.
 
-| **Prop**           | **Type**           | **Default** | **Description**                              |
-| ------------------ | ------------------ | ----------- | -------------------------------------------- |
-| `src`              | `string`           | -           | 必填，图片的 URL。                           |
-| `alt`              | `string`           | `''`        | 图片的替代文本，用于描述图片内容。           |
-| `width`            | `string \| number` | `auto`      | 图片的宽度。                                 |
-| `height`           | `string \| number` | `auto`      | 图片的高度。                                 |
-| `duration`         | `number`           | `500`       | 过渡动画的持续时间（单位：毫秒）。           |
-| `maskBgColor`      | `string`           | `'black'`   | 遮罩层的背景颜色。                           |
-| `maskOpacity`      | `number`           | `0.1`       | 遮罩层的透明度，范围为 0 ~ 1。               |
-| `previewZIndex`    | `number`           | `1000`      | 预览层的 `z-index` 值，用于控制层级关系。    |
-| `previewMaxWidth`  | `string \| number` | `'80vw'`    | 图片预览区域的最大宽度。                     |
-| `previewMaxHeight` | `string \| number` | `'80vh'`    | 图片预览区域的最大高度。                     |
-| `zoomStep`         | `number`           | `0.2`       | 缩放时的步进值，每次放大或缩小时的比例增量。 |
-| `zoomMin`          | `number`           | `0.2`       | 最小缩放比例。                               |
-| `zoomMax`          | `number`           | `10`        | 最大缩放比例。                               |
-| `dblClickZoom`     | `boolean`          | `true`      | 是否启用双击放大功能。                       |
-| `dblClickZoomTo`   | `number`           | `2`         | 双击放大时的目标比例。                       |
+| **Prop**           | **Type**           | **Default** | **Description**                             |
+| ------------------ | ------------------ | ----------- | ------------------------------------------- |
+| `src`              | `string`           | -           | Required. Image URL.                        |
+| `alt`              | `string`           | `''`        | Alternative text describing the image.      |
+| `width`            | `string \| number` | `auto`      | Image width.                                |
+| `height`           | `string \| number` | `auto`      | Image height.                               |
+| `duration`         | `number`           | `500`       | Transition animation duration (ms).         |
+| `maskBgColor`      | `string`           | `'black'`   | Mask background color.                      |
+| `maskOpacity`      | `number`           | `0.1`       | Mask opacity (0-1).                         |
+| `previewZIndex`    | `number`           | `1000`      | `z-index` of the preview layer.             |
+| `previewMaxWidth`  | `string \| number` | `'80vw'`    | Max width of the preview area.              |
+| `previewMaxHeight` | `string \| number` | `'80vh'`    | Max height of the preview area.             |
+| `zoomStep`         | `number`           | `0.2`       | Zoom step, the increment ratio for scaling. |
+| `zoomMin`          | `number`           | `0.2`       | Minimum zoom ratio.                         |
+| `zoomMax`          | `number`           | `10`        | Maximum zoom ratio.                         |
+| `dblClickZoom`     | `boolean`          | `true`      | Enable double-click zoom.                   |
+| `dblClickZoomTo`   | `number`           | `2`         | Target zoom ratio for double-click.         |
 
 ## License
 
