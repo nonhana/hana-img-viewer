@@ -1,6 +1,6 @@
 {
   "name": "hana-img-viewer",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "",
   "type": "module",
   "main": "./dist/lib/index.js",
