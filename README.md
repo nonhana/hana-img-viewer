@@ -88,8 +88,6 @@ import demoImg from '../assets/114388636.jpg'
 | `dblClickZoom`     | `boolean`          | `true`      | 是否启用双击放大功能。                       |
 | `dblClickZoomTo`   | `number`           | `2`         | 双击放大时的目标比例。                       |
 
----
-
 ## License
 
 MIT
