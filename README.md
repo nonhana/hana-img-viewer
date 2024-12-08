@@ -2,7 +2,7 @@
 
 **A lightweight and easy-to-use image previewer for Vue 3.**
 
-<img src="https://moe.greyflowers.pics/fa1e1de3b21e1827c9ad15a1faaf9ce7_hana-img-viewer-1.gif" alt="hana-img-viewer-1" style="height: 400px" />
+![hana-img-viewer-1](https://moe.greyflowers.pics/fa1e1de3b21e1827c9ad15a1faaf9ce7_hana-img-viewer-1.gif)
 
 ## Features
 
