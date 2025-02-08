@@ -30,7 +30,7 @@ import demoImg from '../assets/114388636.jpg'
 
 <template>
   <div class="wrapper">
-    <hana-img-viewer :src="demoImg" :alt="demoImg" />
+    <HanaImgViewer :src="demoImg" :alt="demoImg" />
   </div>
 </template>
 ```
@@ -40,9 +40,9 @@ import demoImg from '../assets/114388636.jpg'
 In your Vue3 + TypeScript project, you can register the component globally in the `main.ts` file.
 
 ```ts [main.ts]
+import HanaImgViewer from 'hana-img-viewer'
 import { createApp } from 'vue'
 import App from './App.vue'
-import HanaImgViewer from 'hana-img-viewer'
 
 const app = createApp(App)
 

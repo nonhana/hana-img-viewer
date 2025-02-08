@@ -1,6 +1,7 @@
-import { computed, Ref, ref, watch } from 'vue'
+import type { Ref } from 'vue'
+import type { ImgViewerProps } from '../type'
+import { computed, ref, watch } from 'vue'
 import { getDistance, setStyles } from '../utils'
-import { ImgViewerProps } from '../type'
 
 // 获取目标元素的 transform 位置（初始化）
 function getTargetPosition(targetRef: Ref<HTMLElement | null>) {
@@ -15,7 +16,8 @@ function getTargetPosition(targetRef: Ref<HTMLElement | null>) {
         X = Number.parseFloat(matrixValues[4]) || 0
         Y = Number.parseFloat(matrixValues[5]) || 0
       }
-    } else {
+    }
+    else {
       X = 0
       Y = 0
     }
@@ -26,7 +28,7 @@ function getTargetPosition(targetRef: Ref<HTMLElement | null>) {
 
 export default function useTransformer(
   targetRef: Ref<HTMLElement | null>,
-  props: ImgViewerProps
+  props: ImgViewerProps,
 ) {
   const { zoomStep, zoomMax, zoomMin, dblClickZoomTo } = props
 
@@ -55,7 +57,7 @@ export default function useTransformer(
         currentTranslateX.value === 0 ? '-50%' : `${currentTranslateX.value}px`
       }, ${
         currentTranslateY.value === 0 ? '-50%' : `${currentTranslateY.value}px`
-      }) scale(${zoomLevel.value})`
+      }) scale(${zoomLevel.value})`,
   )
 
   const handleWheel = (event: WheelEvent) => {
@@ -84,15 +86,16 @@ export default function useTransformer(
         const touch2 = e.touches[1]
         const newDistance = getDistance(
           [touch1.pageX, touch1.pageY],
-          [touch2.pageX, touch2.pageY]
+          [touch2.pageX, touch2.pageY],
         )
         const scaleChange = newDistance / initialDistance
         zoomLevel.value = Math.max(
           zoomMin,
-          Math.min(zoomMax, zoomLevel.value * scaleChange)
+          Math.min(zoomMax, zoomLevel.value * scaleChange),
         )
         initialDistance = newDistance
-      } else if (e.touches.length === 1) {
+      }
+      else if (e.touches.length === 1) {
         const touch = e.touches[0]
         const deltaX = touch.pageX - initialMouseX
         const deltaY = touch.pageY - initialMouseY
@@ -122,9 +125,10 @@ export default function useTransformer(
         const touch2 = e.touches[1]
         initialDistance = getDistance(
           [touch1.pageX, touch1.pageY],
-          [touch2.pageX, touch2.pageY]
+          [touch2.pageX, touch2.pageY],
         )
-      } else if (e.touches.length === 1) {
+      }
+      else if (e.touches.length === 1) {
         const touch = e.touches[0]
         initialMouseX = touch.pageX
         initialMouseY = touch.pageY

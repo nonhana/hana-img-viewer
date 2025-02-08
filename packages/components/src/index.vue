@@ -1,8 +1,9 @@
 <script lang="ts">
-import { computed, CSSProperties, defineComponent, ref } from 'vue'
+import type { CSSProperties } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import useImgViewer from './composables/useImgViewer'
-import { preventDefault } from './utils'
 import { imgViewerPropsObj } from './type'
+import { preventDefault } from './utils'
 
 export default defineComponent({
   name: 'HanaImgViewer',
@@ -10,8 +11,8 @@ export default defineComponent({
   setup(props) {
     const imgStyle = computed<CSSProperties>(() => ({
       width:
-        (typeof props.width === 'number' ? `${props.width}px` : props.width) ??
-        'fit-content',
+        (typeof props.width === 'number' ? `${props.width}px` : props.width)
+        ?? 'fit-content',
       height:
         (typeof props.height === 'number'
           ? `${props.height}px`
@@ -31,6 +32,7 @@ export default defineComponent({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && displaying.value) {
+        // eslint-disable-next-line ts/no-use-before-define
         toggleDisplay()
       }
     }
@@ -69,7 +71,8 @@ export default defineComponent({
           document.body.style.overflow = 'auto'
           toggleEventListener('off')
         }, props.duration)
-      } else {
+      }
+      else {
         displaying.value = true
         document.body.style.overflow = 'hidden'
         toggleEventListener('on')
@@ -106,7 +109,7 @@ export default defineComponent({
         :alt="alt"
         :style="{ visibility: displaying ? 'hidden' : 'visible' }"
         @click="handleClick"
-      />
+      >
     </div>
     <span v-if="alt" class="img-viewer__alt">{{ alt }}</span>
   </div>

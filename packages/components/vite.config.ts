@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 // https://vite.dev/config/
@@ -14,11 +14,12 @@ export default defineConfig({
         const keys = Object.keys(bundle)
         for (const key of keys) {
           const bundler: any = bundle[key]
-          if (bundler.name !== 'index') continue
+          if (bundler.name !== 'index')
+            continue
           this.emitFile({
             type: 'asset',
             fileName: key,
-            source: "import './index.css';\n" + bundler.code,
+            source: `import './index.css';\n${bundler.code}`,
           })
         }
       },

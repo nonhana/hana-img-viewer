@@ -1,10 +1,16 @@
 {
   "name": "monorepo_demo",
   "private": "true",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.1.1",
     "@types/node": "^22.10.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "cpy": "^11.1.0",
+    "eslint": "^9.20.0",
     "fast-glob": "^3.3.2",
     "sass": "^1.81.1",
     "typescript": "^5.7.2",

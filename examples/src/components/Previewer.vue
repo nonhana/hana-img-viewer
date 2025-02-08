@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import demoImg1 from '../assets/116811075-1.jpg'
 import demoImg2 from '../assets/114388636.jpg'
+import demoImg1 from '../assets/116811075-1.jpg'
 </script>
 
 <template>

@@ -1,11 +1,12 @@
-import { ref, Ref } from 'vue'
-import useTransformer from './useTransformer'
+import type { Ref } from 'vue'
+import type { ImgViewerProps } from '../type'
+import { ref } from 'vue'
 import { setStyles } from '../utils'
-import { ImgViewerProps } from '../type'
+import useTransformer from './useTransformer'
 
 export default function useImgViewer(
   imgRef: Ref<HTMLImageElement | null>, // 图片 DOM
-  props: ImgViewerProps
+  props: ImgViewerProps,
 ) {
   const {
     maskBgColor,
@@ -55,7 +56,8 @@ export default function useImgViewer(
 
   // 生成新的大图
   const generateNewImg = (): void => {
-    if (!imgRef.value) return
+    if (!imgRef.value)
+      return
 
     const img = document.createElement('img')
     img.src = imgRef.value.src

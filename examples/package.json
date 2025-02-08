@@ -1,17 +1,17 @@
 {
   "name": "examples",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
   "scripts": {
     "dev": "vite",
     "postinstall": "pnpm --filter hana-img-viewer build",
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "hana-img-viewer": "workspace:*"
   }
