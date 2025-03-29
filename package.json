@@ -1,21 +1,22 @@
 {
   "name": "monorepo_demo",
   "private": "true",
+  "packageManager": "pnpm@10.7.0",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.1.1",
-    "@types/node": "^22.10.1",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@antfu/eslint-config": "^4.11.0",
+    "@types/node": "^22.13.14",
+    "@vitejs/plugin-vue": "^5.2.3",
     "cpy": "^11.1.0",
-    "eslint": "^9.20.0",
-    "fast-glob": "^3.3.2",
-    "sass": "^1.81.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.1",
+    "eslint": "^9.23.0",
+    "fast-glob": "^3.3.3",
+    "sass": "^1.86.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.3",
     "vue": "^3.5.13",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^2.2.8"
   }
 }
