@@ -1,6 +1,6 @@
 # hana-img-viewer
 
-**A lightweight and easy-to-use image previewer for Vue 3.**
+A lightweight and easy-to-use image previewer for Vue 3.
 
 ## Features
 
@@ -11,7 +11,7 @@
 ## Installation
 
 ```bash
-pnpm add hana-img-viewer -D
+pnpm add hana-img-viewer
 ```
 
 ## Basic Usage
