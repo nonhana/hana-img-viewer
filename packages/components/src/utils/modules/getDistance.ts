@@ -1,4 +1,4 @@
-function getDistance(
+export function getDistance(
   point1: [x: number, y: number],
   point2: [x: number, y: number],
 ): number {
@@ -6,5 +6,3 @@ function getDistance(
   const dy = point2[1] - point1[1]
   return Math.sqrt(dx * dx + dy * dy)
 }
-
-export { getDistance }

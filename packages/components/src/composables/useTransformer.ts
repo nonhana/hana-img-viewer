@@ -1,36 +1,21 @@
 import type { Ref } from 'vue'
-import type { ImgViewerProps } from '../type'
+import type { ImgViewerProps } from '../types'
 import { computed, ref, watch } from 'vue'
-import { getDistance, setStyles } from '../utils'
-
-// 获取目标元素的 transform 位置（初始化）
-function getTargetPosition(targetRef: Ref<HTMLElement | null>) {
-  if (targetRef.value) {
-    let X = 0
-    let Y = 0
-    const transform = window.getComputedStyle(targetRef.value).transform
-    if (transform !== 'none') {
-      const match = transform.match(/matrix\((.+)\)/)
-      if (match) {
-        const matrixValues = match[1].split(', ')
-        X = Number.parseFloat(matrixValues[4]) || 0
-        Y = Number.parseFloat(matrixValues[5]) || 0
-      }
-    }
-    else {
-      X = 0
-      Y = 0
-    }
-    return [X, Y] as const
-  }
-  return [0, 0] as const
-}
+import { getDistance, getTargetPosition, setStyles } from '../utils'
 
 export default function useTransformer(
   targetRef: Ref<HTMLElement | null>,
   props: ImgViewerProps,
 ) {
   const { zoomStep, zoomMax, zoomMin, dblClickZoomTo } = props
+
+  const dragging = ref(false) // 是否正在拖动大图
+
+  watch(dragging, (newV) => {
+    if (targetRef.value) {
+      targetRef.value.style.cursor = newV ? 'grabbing' : 'grab'
+    }
+  })
 
   let initialDistance = 0 // 缩放时，初始两指距离
 
@@ -44,28 +29,24 @@ export default function useTransformer(
 
   const zoomLevel = ref(1) // 缩放级别，初始为 1
 
-  const dragging = ref(false) // 是否正在拖动大图
-  watch(dragging, (newV) => {
-    if (targetRef.value) {
-      targetRef.value.style.cursor = newV ? 'grabbing' : 'grab'
-    }
-  })
+  const targetImgTransform = computed(() => {
+    const translateX = currentTranslateX.value === 0
+      ? '-50%'
+      : `${currentTranslateX.value}px`
 
-  const newImgTransform = computed(
-    () =>
-      `translate(${
-        currentTranslateX.value === 0 ? '-50%' : `${currentTranslateX.value}px`
-      }, ${
-        currentTranslateY.value === 0 ? '-50%' : `${currentTranslateY.value}px`
-      }) scale(${zoomLevel.value})`,
-  )
+    const translateY = currentTranslateY.value === 0
+      ? '-50%'
+      : `${currentTranslateY.value}px`
+
+    return `translate(${translateX}, ${translateY}) scale(${zoomLevel.value})`
+  })
 
   const handleWheel = (event: WheelEvent) => {
     if (targetRef.value) {
       zoomLevel.value += event.deltaY < 0 ? zoomStep : -zoomStep
       zoomLevel.value = Math.max(zoomMin, Math.min(zoomMax, zoomLevel.value))
       setStyles(targetRef.value, {
-        transform: newImgTransform.value,
+        transform: targetImgTransform.value,
       })
     }
   }
@@ -74,7 +55,7 @@ export default function useTransformer(
     if (targetRef.value) {
       zoomLevel.value = zoomLevel.value > 1 ? 1 : dblClickZoomTo
       setStyles(targetRef.value, {
-        transform: newImgTransform.value,
+        transform: targetImgTransform.value,
       })
     }
   }
@@ -105,7 +86,7 @@ export default function useTransformer(
       }
 
       setStyles(targetRef.value, {
-        transform: newImgTransform.value,
+        transform: targetImgTransform.value,
       })
     }
   }
@@ -149,7 +130,7 @@ export default function useTransformer(
       currentTranslateY.value = initialBoxY + deltaY
 
       setStyles(targetRef.value, {
-        transform: newImgTransform.value,
+        transform: targetImgTransform.value,
       })
     }
   }
@@ -179,10 +160,10 @@ export default function useTransformer(
   }
 
   return {
-    handleWheel,
-    handleDblclick,
-    handleTouchStart,
-    handleMouseDown,
+    handleWheel, // 绑 window
+    handleTouchStart, // 绑 window
+    handleDblclick, // 绑 imgCopyRef
+    handleMouseDown, // 绑 imgCopyRef
     initTransformer,
   }
 }

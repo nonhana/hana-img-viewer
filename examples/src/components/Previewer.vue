@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HanaImgViewer } from 'hana-img-viewer'
 import demoImg2 from '../assets/114388636.jpg'
 import demoImg1 from '../assets/116811075-1.jpg'
 import GithubSVG from './GithubSVG.vue'
@@ -9,8 +10,8 @@ import GithubSVG from './GithubSVG.vue'
     <a class="icon" href="https://github.com/nonhana/hana-img-viewer" target="_blank">
       <GithubSVG />
     </a>
-    <hana-img-viewer class="image" :src="demoImg1" :alt="demoImg1" />
-    <hana-img-viewer class="image" :src="demoImg2" :alt="demoImg2" />
+    <HanaImgViewer class="image" :src="demoImg1" :alt="demoImg1" />
+    <HanaImgViewer class="image" :src="demoImg2" :alt="demoImg2" />
   </div>
 </template>
 

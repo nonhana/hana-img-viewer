@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
@@ -6,54 +7,33 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   plugins: [
     vue(),
-    dts({ tsconfigPath: './tsconfig.json' }),
-    dts({ tsconfigPath: './tsconfig.json', outDir: 'dist/lib' }),
-    {
-      name: 'handle-css',
-      generateBundle(_, bundle) {
-        const keys = Object.keys(bundle)
-        for (const key of keys) {
-          const bundler: any = bundle[key]
-          if (bundler.name !== 'index')
-            continue
-          this.emitFile({
-            type: 'asset',
-            fileName: key,
-            source: `import './index.css';\n${bundler.code}`,
-          })
-        }
-      },
-    },
+    dts({
+      tsconfigPath: './tsconfig.json',
+      outDir: 'dist',
+      staticImport: true,
+      insertTypesEntry: true,
+    }),
   ],
   build: {
-    target: 'modules',
-    outDir: 'dist/es',
+    target: 'esnext',
+    outDir: 'dist',
     minify: true,
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     lib: {
-      entry: './src/index.ts',
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'HanaImgViewer',
+      fileName: 'index',
+      formats: ['es'],
     },
     rollupOptions: {
       external: ['vue'],
-      input: ['./src/index.ts'],
-      output: [
-        {
-          format: 'esm',
-          exports: 'named',
-          entryFileNames: '[name].js',
-          preserveModules: true,
-          preserveModulesRoot: 'src',
-          dir: 'dist/es',
+      output: {
+        globals: {
+          vue: 'Vue',
         },
-        {
-          format: 'cjs',
-          exports: 'named',
-          entryFileNames: '[name].js',
-          preserveModules: true,
-          preserveModulesRoot: 'src',
-          dir: 'dist/lib',
-        },
-      ],
+        assetFileNames: 'index.[ext]',
+        intro: () => 'import "./index.css";',
+      },
     },
   },
 })

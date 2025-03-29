@@ -1,7 +1,3 @@
-import type { CSSProperties } from 'vue'
-
-function setStyles(el: HTMLElement, styles: CSSProperties) {
+export function setStyles(el: HTMLElement, styles: Partial<CSSStyleDeclaration>) {
   Object.assign(el.style, styles)
 }
-
-export { setStyles }

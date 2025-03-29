@@ -1,7 +1,8 @@
 import type { Ref } from 'vue'
-import type { ImgViewerProps } from '../type'
-import { ref } from 'vue'
+import type { ImgViewerProps } from '../types'
+import { ref, watch } from 'vue'
 import { setStyles } from '../utils'
+import useEventListeners from './useEventListeners'
 import useTransformer from './useTransformer'
 
 export default function useImgViewer(
@@ -18,9 +19,20 @@ export default function useImgViewer(
     dblClickZoom,
   } = props
 
+  const displaying = ref(false) // 是否正在查看大图
+
+  watch(displaying, (status) => {
+    if (imgRef.value) {
+      setStyles(imgRef.value, {
+        visibility: status ? 'hidden' : 'visible',
+      })
+    }
+  })
+
   const maskRef = ref<HTMLDivElement | null>(null) // 遮罩层 DOM
   const imgCopyRef = ref<HTMLImageElement | null>(null) // 大图 DOM
 
+  // hook1 - 处理图片缩放
   const {
     handleWheel, // 绑 window
     handleTouchStart, // 绑 window
@@ -39,7 +51,7 @@ export default function useImgViewer(
       width: '100%',
       height: '100%',
       backgroundColor: maskBgColor,
-      opacity: 0,
+      opacity: '0',
       zIndex: `${previewZIndex - 1}`,
       transition: `all ${duration / 1000}s`,
     })
@@ -47,7 +59,7 @@ export default function useImgViewer(
     document.body.appendChild(mask)
 
     requestAnimationFrame(() => {
-      setStyles(mask, { opacity: maskOpacity })
+      setStyles(mask, { opacity: String(maskOpacity) })
     })
 
     mask.onclick = cb
@@ -90,9 +102,9 @@ export default function useImgViewer(
     requestAnimationFrame(() => {
       setStyles(img, {
         width:
-          imgAspectRatio > windowAspectRatio ? `${previewMaxWidth}` : 'auto',
+            imgAspectRatio > windowAspectRatio ? `${previewMaxWidth}` : 'auto',
         height:
-          imgAspectRatio > windowAspectRatio ? 'auto' : `${previewMaxHeight}`,
+            imgAspectRatio > windowAspectRatio ? 'auto' : `${previewMaxHeight}`,
         top: `calc(50vh + ${scrollY}px)`,
         left: '50%',
         transform: 'translate(-50%, -50%)',
@@ -108,7 +120,7 @@ export default function useImgViewer(
   // 清除所有生成的 DOM
   const clearDOM = () => {
     if (maskRef.value && imgCopyRef.value && imgRef.value) {
-      setStyles(maskRef.value, { opacity: 0 })
+      setStyles(maskRef.value, { opacity: '0' })
 
       setStyles(imgCopyRef.value, {
         transition: `all ${duration / 1000}s`,
@@ -124,9 +136,9 @@ export default function useImgViewer(
         setStyles(imgCopyRef.value!, {
           transform: 'none',
           width:
-            imgAspectRatio > windowAspectRatio ? `${rect.width}px` : 'auto',
+              imgAspectRatio > windowAspectRatio ? `${rect.width}px` : 'auto',
           height:
-            imgAspectRatio > windowAspectRatio ? 'auto' : `${rect.height}px`,
+              imgAspectRatio > windowAspectRatio ? 'auto' : `${rect.height}px`,
           top: `${rect.top + scrollY}px`,
           left: `${rect.left + scrollX}px`,
         })
@@ -142,11 +154,49 @@ export default function useImgViewer(
     }
   }
 
-  return {
-    generateMask,
-    generateNewImg,
-    clearDOM,
+  // 监听键盘事件退出
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && displaying.value) {
+      toggleDisplay()
+    }
+  }
+
+  // hook2 - 处理事件监听
+  const {
+    toggleEventListener,
+  } = useEventListeners({
     handleWheel,
     handleTouchStart,
+    handleKeyDown,
+  })
+
+  // 切换查看大图状态
+  function toggleDisplay() {
+    if (displaying.value) {
+      clearDOM()
+      setTimeout(() => {
+        displaying.value = false
+        document.body.style.overflow = 'auto'
+        toggleEventListener('off')
+      }, props.duration)
+    }
+    else {
+      displaying.value = true
+      document.body.style.overflow = 'hidden'
+      toggleEventListener('on')
+    }
+  }
+
+  // 点击原图片
+  function handleImgClick() {
+    if (imgRef.value) {
+      toggleDisplay()
+      generateMask(toggleDisplay)
+      generateNewImg()
+    }
+  }
+
+  return {
+    handleImgClick,
   }
 }

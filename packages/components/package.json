@@ -1,24 +1,27 @@
 {
   "name": "hana-img-viewer",
   "type": "module",
-  "version": "0.0.0",
-  "description": "",
-  "author": "",
-  "license": "ISC",
-  "keywords": [],
+  "version": "1.0.0",
+  "description": "A lightweight and easy-to-use image previewer for Vue 3",
+  "author": "nonhana",
+  "license": "MIT",
+  "keywords": [
+    "image",
+    "previewer",
+    "vue",
+    "component"
+  ],
   "exports": {
     ".": {
-      "import": "./dist/es/index.js",
-      "require": "./dist/lib/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
-  "main": "./dist/lib/index.js",
-  "module": "./dist/es/index.js",
-  "types": "./dist/es/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "./dist/**/*",
-    "package.json",
-    "readme.md"
+    "dist"
   ],
   "scripts": {
     "build": "vite build"
