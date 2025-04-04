@@ -32,7 +32,6 @@ export default defineConfig({
           vue: 'Vue',
         },
         assetFileNames: 'index.[ext]',
-        intro: () => 'import "./index.css";',
       },
     },
   },

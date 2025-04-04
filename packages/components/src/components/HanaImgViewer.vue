@@ -26,37 +26,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="img-viewer">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
     <div :style="imgStyle">
       <img
         ref="imgRef"
-        class="img-viewer__image"
         :src="src"
         :alt="alt"
+        style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
         @click="handleClick"
       >
     </div>
-    <span v-if="alt" class="img-viewer__alt">{{ alt }}</span>
+    <span v-if="alt" style="font-size: 0.8rem; color: #666;">{{ alt }}</span>
   </div>
 </template>
-
-<style scoped lang="scss">
-.img-viewer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-  }
-
-  &__alt {
-    font-size: 0.8rem;
-    color: #666;
-  }
-}
-</style>
