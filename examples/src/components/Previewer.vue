@@ -10,8 +10,12 @@ import GithubSVG from './GithubSVG.vue'
     <a class="icon" href="https://github.com/nonhana/hana-img-viewer" target="_blank">
       <GithubSVG />
     </a>
-    <HanaImgViewer class="image" :src="demoImg1" :alt="demoImg1" />
-    <HanaImgViewer class="image" :src="demoImg2" :alt="demoImg2" />
+    <div class="image">
+      <HanaImgViewer :src="demoImg1" :alt="demoImg1" />
+    </div>
+    <div class="image">
+      <HanaImgViewer :src="demoImg2" :alt="demoImg2" />
+    </div>
   </div>
 </template>
 

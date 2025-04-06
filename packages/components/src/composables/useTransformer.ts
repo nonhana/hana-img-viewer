@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
 import type { ImgViewerProps } from '../types'
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { getDistance, getTargetPosition, setStyles } from '../utils'
 
-export default function useTransformer(
+export function useTransformer(
   targetRef: Ref<HTMLElement | null>,
   props: ImgViewerProps,
 ) {
@@ -41,6 +41,7 @@ export default function useTransformer(
     return `translate(${translateX}, ${translateY}) scale(${zoomLevel.value})`
   })
 
+  // 处理鼠标滚轮事件
   const handleWheel = (event: WheelEvent) => {
     if (targetRef.value) {
       zoomLevel.value += event.deltaY < 0 ? zoomStep : -zoomStep
@@ -51,6 +52,7 @@ export default function useTransformer(
     }
   }
 
+  // 处理双击事件
   const handleDblclick = () => {
     if (targetRef.value) {
       zoomLevel.value = zoomLevel.value > 1 ? 1 : dblClickZoomTo
@@ -60,37 +62,42 @@ export default function useTransformer(
     }
   }
 
+  // 处理触摸移动事件
   const handleTouchMove = (e: TouchEvent) => {
-    if (targetRef.value) {
-      if (e.touches.length === 2) {
-        const touch1 = e.touches[0]
-        const touch2 = e.touches[1]
-        const newDistance = getDistance(
-          [touch1.pageX, touch1.pageY],
-          [touch2.pageX, touch2.pageY],
-        )
-        const scaleChange = newDistance / initialDistance
-        zoomLevel.value = Math.max(
-          zoomMin,
-          Math.min(zoomMax, zoomLevel.value * scaleChange),
-        )
-        initialDistance = newDistance
-      }
-      else if (e.touches.length === 1) {
-        const touch = e.touches[0]
-        const deltaX = touch.pageX - initialMouseX
-        const deltaY = touch.pageY - initialMouseY
+    if (!targetRef.value)
+      return
 
-        currentTranslateX.value = initialBoxX + deltaX
-        currentTranslateY.value = initialBoxY + deltaY
-      }
-
-      setStyles(targetRef.value, {
-        transform: targetImgTransform.value,
-      })
+    // 双指操作 - 缩放
+    if (e.touches.length === 2) {
+      const [touch1, touch2] = [e.touches[0], e.touches[1]]
+      const newDistance = getDistance(
+        [touch1.pageX, touch1.pageY],
+        [touch2.pageX, touch2.pageY],
+      )
+      const scaleChange = newDistance / initialDistance
+      zoomLevel.value = Math.max(
+        zoomMin,
+        Math.min(zoomMax, zoomLevel.value * scaleChange),
+      )
+      initialDistance = newDistance
     }
+    // 单指操作 - 拖动
+    else if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      const deltaX = touch.pageX - initialMouseX
+      const deltaY = touch.pageY - initialMouseY
+
+      currentTranslateX.value = initialBoxX + deltaX
+      currentTranslateY.value = initialBoxY + deltaY
+    }
+
+    // 更新样式
+    setStyles(targetRef.value, {
+      transform: targetImgTransform.value,
+    })
   }
 
+  // 处理触摸结束事件
   const handleTouchEnd = (e: TouchEvent) => {
     if (e.touches.length < 2) {
       initialDistance = 0
@@ -99,58 +106,74 @@ export default function useTransformer(
     }
   }
 
+  // 处理触摸开始事件
   const handleTouchStart = (e: TouchEvent) => {
-    if (targetRef.value) {
-      if (e.touches.length === 2) {
-        const touch1 = e.touches[0]
-        const touch2 = e.touches[1]
-        initialDistance = getDistance(
-          [touch1.pageX, touch1.pageY],
-          [touch2.pageX, touch2.pageY],
-        )
-      }
-      else if (e.touches.length === 1) {
-        const touch = e.touches[0]
-        initialMouseX = touch.pageX
-        initialMouseY = touch.pageY
-        ;[initialBoxX, initialBoxY] = getTargetPosition(targetRef)
-      }
+    if (!targetRef.value)
+      return
 
-      document.addEventListener('touchmove', handleTouchMove)
-      document.addEventListener('touchend', handleTouchEnd)
+    // 双指操作 - 缩放
+    if (e.touches.length === 2) {
+      const [touch1, touch2] = [e.touches[0], e.touches[1]]
+      initialDistance = getDistance(
+        [touch1.pageX, touch1.pageY],
+        [touch2.pageX, touch2.pageY],
+      )
     }
+    // 单指操作 - 拖动
+    else if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      initialMouseX = touch.pageX
+      initialMouseY = touch.pageY
+      const position = getTargetPosition(targetRef)
+      initialBoxX = position[0]
+      initialBoxY = position[1]
+    }
+
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
   }
 
+  // 处理鼠标移动事件
   const handleMouseMove = (e: MouseEvent) => {
-    if (targetRef.value) {
-      const deltaX = e.clientX - initialMouseX
-      const deltaY = e.clientY - initialMouseY
+    if (!targetRef.value)
+      return
 
-      currentTranslateX.value = initialBoxX + deltaX
-      currentTranslateY.value = initialBoxY + deltaY
+    const deltaX = e.clientX - initialMouseX
+    const deltaY = e.clientY - initialMouseY
 
-      setStyles(targetRef.value, {
-        transform: targetImgTransform.value,
-      })
-    }
+    currentTranslateX.value = initialBoxX + deltaX
+    currentTranslateY.value = initialBoxY + deltaY
+
+    // 更新样式
+    setStyles(targetRef.value, {
+      transform: targetImgTransform.value,
+    })
   }
 
+  // 处理鼠标抬起事件
   const handleMouseUp = () => {
     dragging.value = false
+    // 移除事件监听
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
   }
 
+  // 处理鼠标按下事件
   const handleMouseDown = (e: MouseEvent) => {
-    if (targetRef.value) {
-      dragging.value = true
-      initialMouseX = e.clientX
-      initialMouseY = e.clientY
-      ;[initialBoxX, initialBoxY] = getTargetPosition(targetRef)
+    if (!targetRef.value)
+      return
 
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-    }
+    dragging.value = true
+    initialMouseX = e.clientX
+    initialMouseY = e.clientY
+
+    const position = getTargetPosition(targetRef)
+    initialBoxX = position[0]
+    initialBoxY = position[1]
+
+    // 添加事件监听
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
   }
 
   const initTransformer = () => {
@@ -159,11 +182,28 @@ export default function useTransformer(
     zoomLevel.value = 1
   }
 
+  // 需要在其他处理函数定义完成后，再定义清理函数
+  // 清理所有事件监听
+  const cleanupListeners = () => {
+    document.removeEventListener('wheel', handleWheel)
+    document.removeEventListener('touchstart', handleTouchStart)
+    document.removeEventListener('touchmove', handleTouchMove)
+    document.removeEventListener('touchend', handleTouchEnd)
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  // 组件卸载时清理
+  onUnmounted(() => {
+    cleanupListeners()
+  })
+
   return {
     handleWheel, // 绑 window
     handleTouchStart, // 绑 window
     handleDblclick, // 绑 imgCopyRef
     handleMouseDown, // 绑 imgCopyRef
     initTransformer,
+    cleanupListeners, // 导出清理函数
   }
 }
