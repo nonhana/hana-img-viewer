@@ -10,7 +10,6 @@ export function useEventListeners(handlers: EventHandlers) {
   const { handleWheel, handleTouchStart, handleKeyDown } = handlers
 
   function toggleEventListener(type: 'on' | 'off') {
-    // 检查是否在客户端环境
     if (typeof window === 'undefined')
       return
 

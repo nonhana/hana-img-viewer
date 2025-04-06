@@ -9,25 +9,22 @@ export function useTransformer(
 ) {
   const { zoomStep, zoomMax, zoomMin, dblClickZoomTo } = props
 
-  const dragging = ref(false) // 是否正在拖动大图
+  const dragging = ref(false)
+  const currentTranslateX = ref(0)
+  const currentTranslateY = ref(0)
+  const zoomLevel = ref(1)
+
+  let initialDistance = 0
+  let initialMouseX = 0
+  let initialMouseY = 0
+  let initialBoxX = 0
+  let initialBoxY = 0
 
   watch(dragging, (newV) => {
     if (targetRef.value) {
       targetRef.value.style.cursor = newV ? 'grabbing' : 'grab'
     }
   })
-
-  let initialDistance = 0 // 缩放时，初始两指距离
-
-  let initialMouseX = 0 // 按下鼠标时，鼠标的初始位置 X
-  let initialMouseY = 0 // 按下鼠标时，鼠标的初始位置 Y
-  let initialBoxX = 0 // 初始大图的 transform X 偏移
-  let initialBoxY = 0 // 初始大图的 transform Y 偏移
-
-  const currentTranslateX = ref(0) // 当前大图的 transform X 偏移
-  const currentTranslateY = ref(0) // 当前大图的 transform Y 偏移
-
-  const zoomLevel = ref(1) // 缩放级别，初始为 1
 
   const targetImgTransform = computed(() => {
     const translateX = currentTranslateX.value === 0
@@ -41,33 +38,36 @@ export function useTransformer(
     return `translate(${translateX}, ${translateY}) scale(${zoomLevel.value})`
   })
 
-  // 处理鼠标滚轮事件
+  const updateTransform = () => {
+    if (!targetRef.value)
+      return
+    setStyles(targetRef.value, { transform: targetImgTransform.value })
+  }
+
+  const adjustZoom = (delta = 0, setTo?: number) => {
+    if (setTo !== undefined) {
+      zoomLevel.value = setTo
+    }
+    else {
+      zoomLevel.value += delta
+    }
+
+    zoomLevel.value = Math.max(zoomMin, Math.min(zoomMax, zoomLevel.value))
+    updateTransform()
+  }
+
   const handleWheel = (event: WheelEvent) => {
-    if (targetRef.value) {
-      zoomLevel.value += event.deltaY < 0 ? zoomStep : -zoomStep
-      zoomLevel.value = Math.max(zoomMin, Math.min(zoomMax, zoomLevel.value))
-      setStyles(targetRef.value, {
-        transform: targetImgTransform.value,
-      })
-    }
+    adjustZoom(event.deltaY < 0 ? zoomStep : -zoomStep)
   }
 
-  // 处理双击事件
   const handleDblclick = () => {
-    if (targetRef.value) {
-      zoomLevel.value = zoomLevel.value > 1 ? 1 : dblClickZoomTo
-      setStyles(targetRef.value, {
-        transform: targetImgTransform.value,
-      })
-    }
+    adjustZoom(0, zoomLevel.value > 1 ? 1 : dblClickZoomTo)
   }
 
-  // 处理触摸移动事件
   const handleTouchMove = (e: TouchEvent) => {
     if (!targetRef.value)
       return
 
-    // 双指操作 - 缩放
     if (e.touches.length === 2) {
       const [touch1, touch2] = [e.touches[0], e.touches[1]]
       const newDistance = getDistance(
@@ -75,13 +75,9 @@ export function useTransformer(
         [touch2.pageX, touch2.pageY],
       )
       const scaleChange = newDistance / initialDistance
-      zoomLevel.value = Math.max(
-        zoomMin,
-        Math.min(zoomMax, zoomLevel.value * scaleChange),
-      )
+      adjustZoom(0, zoomLevel.value * scaleChange)
       initialDistance = newDistance
     }
-    // 单指操作 - 拖动
     else if (e.touches.length === 1) {
       const touch = e.touches[0]
       const deltaX = touch.pageX - initialMouseX
@@ -89,29 +85,19 @@ export function useTransformer(
 
       currentTranslateX.value = initialBoxX + deltaX
       currentTranslateY.value = initialBoxY + deltaY
-    }
-
-    // 更新样式
-    setStyles(targetRef.value, {
-      transform: targetImgTransform.value,
-    })
-  }
-
-  // 处理触摸结束事件
-  const handleTouchEnd = (e: TouchEvent) => {
-    if (e.touches.length < 2) {
-      initialDistance = 0
-      document.removeEventListener('touchmove', handleTouchMove)
-      document.removeEventListener('touchend', handleTouchEnd)
+      updateTransform()
     }
   }
 
-  // 处理触摸开始事件
+  const handleTouchEnd = () => {
+    document.removeEventListener('touchmove', handleTouchMove)
+    document.removeEventListener('touchend', handleTouchEnd)
+  }
+
   const handleTouchStart = (e: TouchEvent) => {
     if (!targetRef.value)
       return
 
-    // 双指操作 - 缩放
     if (e.touches.length === 2) {
       const [touch1, touch2] = [e.touches[0], e.touches[1]]
       initialDistance = getDistance(
@@ -119,7 +105,6 @@ export function useTransformer(
         [touch2.pageX, touch2.pageY],
       )
     }
-    // 单指操作 - 拖动
     else if (e.touches.length === 1) {
       const touch = e.touches[0]
       initialMouseX = touch.pageX
@@ -133,7 +118,6 @@ export function useTransformer(
     document.addEventListener('touchend', handleTouchEnd)
   }
 
-  // 处理鼠标移动事件
   const handleMouseMove = (e: MouseEvent) => {
     if (!targetRef.value)
       return
@@ -143,22 +127,15 @@ export function useTransformer(
 
     currentTranslateX.value = initialBoxX + deltaX
     currentTranslateY.value = initialBoxY + deltaY
-
-    // 更新样式
-    setStyles(targetRef.value, {
-      transform: targetImgTransform.value,
-    })
+    updateTransform()
   }
 
-  // 处理鼠标抬起事件
   const handleMouseUp = () => {
     dragging.value = false
-    // 移除事件监听
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
   }
 
-  // 处理鼠标按下事件
   const handleMouseDown = (e: MouseEvent) => {
     if (!targetRef.value)
       return
@@ -171,7 +148,6 @@ export function useTransformer(
     initialBoxX = position[0]
     initialBoxY = position[1]
 
-    // 添加事件监听
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
   }
@@ -182,8 +158,6 @@ export function useTransformer(
     zoomLevel.value = 1
   }
 
-  // 需要在其他处理函数定义完成后，再定义清理函数
-  // 清理所有事件监听
   const cleanupListeners = () => {
     document.removeEventListener('wheel', handleWheel)
     document.removeEventListener('touchstart', handleTouchStart)
@@ -193,17 +167,14 @@ export function useTransformer(
     document.removeEventListener('mouseup', handleMouseUp)
   }
 
-  // 组件卸载时清理
-  onUnmounted(() => {
-    cleanupListeners()
-  })
+  onUnmounted(cleanupListeners)
 
   return {
-    handleWheel, // 绑 window
-    handleTouchStart, // 绑 window
-    handleDblclick, // 绑 imgCopyRef
-    handleMouseDown, // 绑 imgCopyRef
+    handleWheel,
+    handleTouchStart,
+    handleDblclick,
+    handleMouseDown,
     initTransformer,
-    cleanupListeners, // 导出清理函数
+    cleanupListeners,
   }
 }

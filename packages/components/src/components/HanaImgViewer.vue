@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import { useWindowScroll, useWindowSize } from '@vueuse/core'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useElementRect } from '../composables/useElementRect'
 import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
+import { useWindowState } from '../composables/useWindowState'
 import { imgViewerPropsObj } from '../types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
 const props = defineProps(imgViewerPropsObj)
 
-// SSR 兼容标志
 const isMounted = ref(false)
 onMounted(() => {
   isMounted.value = true
@@ -52,7 +51,6 @@ function toggleDisplay() {
   }
 }
 
-// 在 transformerApi 使用之前保证客户端环境
 type TransformerApi = ReturnType<typeof useTransformer>
 const transformerApi = ref<TransformerApi>({
   handleWheel: () => {},
@@ -64,19 +62,16 @@ const transformerApi = ref<TransformerApi>({
 })
 
 onMounted(() => {
-  // 仅在客户端挂载后初始化变换功能
   transformerApi.value = useTransformer(previewerRef, props)
 })
 
 onBeforeUnmount(() => {
-  // 确保在组件卸载前清理事件监听
   transformerApi.value.cleanupListeners()
 })
 
 const previewerDblclick = ref<(() => void) | undefined>()
 const previewerMouseDown = ref<((e: MouseEvent) => void) | undefined>()
 
-// 仅在客户端环境下创建rect对象
 const { rect: imgRect } = useElementRect(imgRef, {
   throttle: true,
   throttleDelay: 100,
@@ -84,11 +79,8 @@ const { rect: imgRect } = useElementRect(imgRef, {
 
 const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
 
-// 使用 vueuse 确保 SSR 兼容
-const { width, height } = useWindowSize()
+const { width, height, scrollX, scrollY } = useWindowState()
 const windowAspectRatio = computed(() => width.value / height.value)
-
-const { x: scrollX, y: scrollY } = useWindowScroll()
 
 const transitionDuration = computed(() => `${props.duration}ms`)
 
@@ -132,7 +124,6 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
-// 客户端专用的事件监听管理
 type EventListenerApi = ReturnType<typeof useEventListeners>
 const eventListenerApi = ref<EventListenerApi>({
   toggleEventListener: (_type: 'on' | 'off') => {},
@@ -202,14 +193,14 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
       ref="maskRef"
       :style="{
         position: 'fixed',
-        top: '0',
-        left: '0',
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
         backgroundColor: maskBgColor,
         zIndex: previewZIndex - 1,
         transition: `all ${transitionDuration}`,
-        ...maskStyle,
+        opacity: maskStyle.opacity,
       }"
       @click="toggleDisplay"
     />
