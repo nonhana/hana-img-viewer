@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { HanaImgViewer } from 'hana-img-viewer'
+import { ref } from 'vue'
 import demoImg2 from '../assets/114388636.jpg'
 import demoImg1 from '../assets/116811075-1.jpg'
 import GithubSVG from './GithubSVG.vue'
+
+const demoImg1Displaying = ref(false)
+const demoImg1Animating = ref(false)
 </script>
 
 <template>
@@ -11,7 +15,9 @@ import GithubSVG from './GithubSVG.vue'
       <GithubSVG />
     </a>
     <div class="image">
-      <HanaImgViewer :src="demoImg1" :alt="demoImg1" />
+      <HanaImgViewer v-model:displaying="demoImg1Displaying" v-model:is-animating="demoImg1Animating" :src="demoImg1" :alt="demoImg1" />
+      <div>是否正在显示：{{ demoImg1Displaying }}</div>
+      <div>是否正在动画：{{ demoImg1Animating }}</div>
     </div>
     <div class="image">
       <HanaImgViewer :src="demoImg2" :alt="demoImg2" />

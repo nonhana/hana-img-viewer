@@ -5,11 +5,12 @@ import { useElementRect } from '../composables/useElementRect'
 import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
 import { useWindowState } from '../composables/useWindowState'
-import { imgViewerPropsObj } from '../types'
+import { imgViewerEmitsObj, imgViewerPropsObj } from '../types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
 const props = defineProps(imgViewerPropsObj)
+const emit = defineEmits(imgViewerEmitsObj)
 
 const isMounted = ref(false)
 onMounted(() => {
@@ -20,9 +21,66 @@ const imgRef = ref<HTMLImageElement | null>(null)
 const maskRef = ref<HTMLDivElement | null>(null)
 const previewerRef = ref<HTMLImageElement | null>(null)
 
-const displaying = ref(false)
-const applyingPreviewStyles = ref(false)
-const isAnimating = ref(false)
+const _displaying = ref(false)
+const _applyingPreviewStyles = ref(false)
+const _isAnimating = ref(false)
+
+const displaying = computed({
+  get: () => props.displaying !== undefined ? props.displaying : _displaying.value,
+  set: (value) => {
+    if (props.displaying !== undefined) {
+      emit('update:displaying', value)
+    }
+    else {
+      _displaying.value = value
+    }
+    emit('displayChange', value)
+  },
+})
+
+const applyingPreviewStyles = computed({
+  get: () => props.applyingPreviewStyles !== undefined ? props.applyingPreviewStyles : _applyingPreviewStyles.value,
+  set: (value) => {
+    if (props.applyingPreviewStyles !== undefined) {
+      emit('update:applyingPreviewStyles', value)
+    }
+    else {
+      _applyingPreviewStyles.value = value
+    }
+    emit('previewStylesChange', value)
+  },
+})
+
+const isAnimating = computed({
+  get: () => props.isAnimating !== undefined ? props.isAnimating : _isAnimating.value,
+  set: (value) => {
+    if (props.isAnimating !== undefined) {
+      emit('update:isAnimating', value)
+    }
+    else {
+      _isAnimating.value = value
+    }
+    emit('animatingChange', value)
+  },
+})
+
+watch(() => props.displaying, (newVal) => {
+  if (newVal !== undefined && newVal !== _displaying.value) {
+    _displaying.value = newVal
+  }
+})
+
+watch(() => props.applyingPreviewStyles, (newVal) => {
+  if (newVal !== undefined && newVal !== _applyingPreviewStyles.value) {
+    _applyingPreviewStyles.value = newVal
+  }
+})
+
+watch(() => props.isAnimating, (newVal) => {
+  if (newVal !== undefined && newVal !== _isAnimating.value) {
+    _isAnimating.value = newVal
+  }
+})
 
 function animatingTrigger() {
   isAnimating.value = true
@@ -66,9 +124,9 @@ onBeforeUnmount(() => {
 })
 
 const previewerEvents = ref<{
-  dblclick: (() => void)
-  mousedown: ((e: MouseEvent) => void)
-} | null>(null)
+  dblclick?: (() => void)
+  mousedown?: ((e: MouseEvent) => void)
+}>({})
 
 const { rect: imgRect } = useElementRect(imgRef, {
   throttle: true,
@@ -189,7 +247,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
 
   if (shouldUnbindEvents) {
     eventListenerApi.value.toggleEventListener('off')
-    previewerEvents.value = null
+    previewerEvents.value = {}
   }
 })
 </script>
