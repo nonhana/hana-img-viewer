@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useElementRect } from '../composables/useElementRect'
 import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
@@ -38,6 +38,9 @@ const imgStyle = computed<CSSProperties>(() => ({
 }))
 
 function toggleDisplay() {
+  if (isAnimating.value)
+    return
+
   animatingTrigger()
 
   if (displaying.value) {
@@ -52,25 +55,20 @@ function toggleDisplay() {
 }
 
 type TransformerApi = ReturnType<typeof useTransformer>
-const transformerApi = ref<TransformerApi>({
-  handleWheel: () => {},
-  handleTouchStart: () => {},
-  handleDblclick: () => {},
-  handleMouseDown: () => {},
-  initTransformer: () => {},
-  cleanupListeners: () => {},
-})
+const transformerApi = shallowRef<TransformerApi | null>(null)
 
 onMounted(() => {
   transformerApi.value = useTransformer(previewerRef, props)
 })
 
 onBeforeUnmount(() => {
-  transformerApi.value.cleanupListeners()
+  transformerApi.value?.cleanupListeners()
 })
 
-const previewerDblclick = ref<(() => void) | undefined>()
-const previewerMouseDown = ref<((e: MouseEvent) => void) | undefined>()
+const previewerEvents = ref<{
+  dblclick: (() => void)
+  mousedown: ((e: MouseEvent) => void)
+} | null>(null)
 
 const { rect: imgRect } = useElementRect(imgRef, {
   throttle: true,
@@ -84,29 +82,33 @@ const windowAspectRatio = computed(() => width.value / height.value)
 
 const transitionDuration = computed(() => `${props.duration}ms`)
 
-const previewerInitialWidth = computed(() => {
-  if (!imgRect.value)
-    return 'auto'
-  return imgAspectRatio.value > windowAspectRatio.value ? `${imgRect.value.width}px` : 'auto'
-})
+const previewerInitialWidth = computed(() =>
+  imgRect.value
+    ? imgAspectRatio.value > windowAspectRatio.value
+      ? `${imgRect.value.width}px`
+      : 'auto'
+    : 'auto',
+)
 
-const previewerInitialHeight = computed(() => {
-  if (!imgRect.value)
-    return 'auto'
-  return imgAspectRatio.value > windowAspectRatio.value ? 'auto' : `${imgRect.value.height}px`
-})
+const previewerInitialHeight = computed(() =>
+  imgRect.value
+    ? imgAspectRatio.value > windowAspectRatio.value
+      ? 'auto'
+      : `${imgRect.value.height}px`
+    : 'auto',
+)
 
-const previewerInitialTop = computed(() => {
-  if (!imgRect.value)
-    return '0px'
-  return `${imgRect.value.top + scrollY.value}px`
-})
+const previewerInitialTop = computed(() =>
+  imgRect.value
+    ? `${imgRect.value.top + scrollY.value}px`
+    : '0px',
+)
 
-const previewerInitialLeft = computed(() => {
-  if (!imgRect.value)
-    return '0px'
-  return `${imgRect.value.left + scrollX.value}px`
-})
+const previewerInitialLeft = computed(() =>
+  imgRect.value
+    ? `${imgRect.value.left + scrollX.value}px`
+    : '0px',
+)
 
 const previewerTargetWidth = computed(() =>
   imgAspectRatio.value > windowAspectRatio.value ? `${props.previewMaxWidth}` : 'auto',
@@ -129,12 +131,14 @@ const eventListenerApi = ref<EventListenerApi>({
   toggleEventListener: (_type: 'on' | 'off') => {},
 })
 
-onMounted(() => {
-  eventListenerApi.value = useEventListeners({
-    handleWheel: transformerApi.value.handleWheel,
-    handleTouchStart: transformerApi.value.handleTouchStart,
-    handleKeyDown,
-  })
+watchEffect(() => {
+  if (transformerApi.value) {
+    eventListenerApi.value = useEventListeners({
+      handleWheel: transformerApi.value.handleWheel,
+      handleTouchStart: transformerApi.value.handleTouchStart,
+      handleKeyDown,
+    })
+  }
 })
 
 const maskStyle = computed(() => ({
@@ -150,10 +154,10 @@ const previewerStyle = computed(() => ({
   transform: applyingPreviewStyles.value ? 'translate(-50%, -50%)' : 'none',
 }))
 
-watch(displaying, (isDisplaying) => {
-  transformerApi.value.initTransformer()
+watchEffect(() => {
+  transformerApi.value?.initTransformer()
 
-  if (isDisplaying) {
+  if (displaying.value) {
     if (typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden'
     }
@@ -169,19 +173,23 @@ watch(displaying, (isDisplaying) => {
 })
 
 watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisplaying, wasAnimating]) => {
+  if (!transformerApi.value)
+    return
+
   const shouldBindEvents = isDisplaying && !isCurrentlyAnimating && wasDisplaying && wasAnimating && applyingPreviewStyles.value
   const shouldUnbindEvents = isDisplaying && isCurrentlyAnimating && wasDisplaying && !wasAnimating
 
   if (shouldBindEvents) {
-    previewerDblclick.value = transformerApi.value.handleDblclick
-    previewerMouseDown.value = transformerApi.value.handleMouseDown
+    previewerEvents.value = {
+      dblclick: transformerApi.value.handleDblclick,
+      mousedown: transformerApi.value.handleMouseDown,
+    }
     eventListenerApi.value.toggleEventListener('on')
   }
 
   if (shouldUnbindEvents) {
     eventListenerApi.value.toggleEventListener('off')
-    previewerMouseDown.value = undefined
-    previewerDblclick.value = undefined
+    previewerEvents.value = null
   }
 })
 </script>
@@ -219,8 +227,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
         zIndex: previewZIndex,
         ...previewerStyle,
       }"
-      @dblclick="previewerDblclick"
-      @mousedown="previewerMouseDown"
+      v-on="previewerEvents"
     >
   </Teleport>
 

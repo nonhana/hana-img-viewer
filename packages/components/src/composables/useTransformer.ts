@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import type { ImgViewerProps } from '../types'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watchEffect } from 'vue'
 import { getDistance, getTargetPosition, setStyles } from '../utils'
 
 export function useTransformer(
@@ -20,9 +20,9 @@ export function useTransformer(
   let initialBoxX = 0
   let initialBoxY = 0
 
-  watch(dragging, (newV) => {
+  watchEffect(() => {
     if (targetRef.value) {
-      targetRef.value.style.cursor = newV ? 'grabbing' : 'grab'
+      targetRef.value.style.cursor = dragging.value ? 'grabbing' : 'grab'
     }
   })
 

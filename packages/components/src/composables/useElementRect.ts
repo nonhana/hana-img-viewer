@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import { throttle } from 'throttle-debounce'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, onWatcherCleanup, ref, watchEffect } from 'vue'
 
 interface UseElementRectOptions {
   throttle?: boolean
@@ -54,27 +54,27 @@ export function useElementRect(
 
   onUnmounted(cleanup)
 
-  watch(target, (el, _, onCleanup) => {
+  watchEffect(() => {
     cleanup()
 
-    if (!el)
+    if (!target.value)
       return
 
     updateRect()
 
     if (typeof ResizeObserver !== 'undefined') {
       observer = new ResizeObserver(executeUpdate)
-      observer.observe(el)
+      observer.observe(target.value)
     }
 
-    if (el.tagName === 'IMG') {
-      const img = el as HTMLImageElement
+    if (target.value.tagName === 'IMG') {
+      const img = target.value as HTMLImageElement
       if (!img.complete) {
         img.addEventListener('load', updateRect, { once: true })
       }
     }
 
-    onCleanup(cleanup)
+    onWatcherCleanup(cleanup)
   })
 
   return {

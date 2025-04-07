@@ -7,6 +7,8 @@ A lightweight and easy-to-use image previewer for Vue 3.
 - Support touch gestures, drag and pan physical effect sliding, two-finger specified position to zoom in and out
 - Based on `typescript`, type safe
 - Just like use the `<img>` tag, you can use the `src` attribute to specify the image source
+- SSR friendly
+- Lightweight, only 10KB
 
 ## Installation
 
