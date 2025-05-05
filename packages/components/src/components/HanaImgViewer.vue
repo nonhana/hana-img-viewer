@@ -82,6 +82,7 @@ watch(() => props.isAnimating, (newVal) => {
   }
 })
 
+// 触发动画
 function animatingTrigger() {
   isAnimating.value = true
   setTimeout(() => {
@@ -136,6 +137,15 @@ const { rect: imgRect } = useElementRect(imgRef, {
 const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
 
 const { width, height, scrollX, scrollY } = useWindowState()
+
+const initialScrollX = ref(0)
+const initialScrollY = ref(0)
+
+watch(imgRect, () => {
+  initialScrollX.value = scrollX.value
+  initialScrollY.value = scrollY.value
+})
+
 const windowAspectRatio = computed(() => width.value / height.value)
 
 const transitionDuration = computed(() => `${props.duration}ms`)
@@ -158,13 +168,13 @@ const previewerInitialHeight = computed(() =>
 
 const previewerInitialTop = computed(() =>
   imgRect.value
-    ? `${imgRect.value.top + scrollY.value}px`
+    ? `${imgRect.value.top + initialScrollY.value}px`
     : '0px',
 )
 
 const previewerInitialLeft = computed(() =>
   imgRect.value
-    ? `${imgRect.value.left + scrollX.value}px`
+    ? `${imgRect.value.left + initialScrollX.value}px`
     : '0px',
 )
 
@@ -253,6 +263,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
 </script>
 
 <template>
+  <!-- mask 遮罩层 -->
   <Teleport v-if="isMounted" to="body">
     <div
       v-if="displaying"
@@ -272,6 +283,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
     />
   </Teleport>
 
+  <!-- 预览图 -->
   <Teleport v-if="isMounted" to="body">
     <img
       v-if="displaying"

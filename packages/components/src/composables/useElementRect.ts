@@ -31,6 +31,7 @@ export function useElementRect(
   const cleanup = () => {
     observer?.disconnect()
     observer = null
+    window.removeEventListener('resize', executeUpdate)
   }
 
   onMounted(() => {
@@ -43,6 +44,8 @@ export function useElementRect(
       observer = new ResizeObserver(executeUpdate)
       observer.observe(target.value)
     }
+
+    window.addEventListener('resize', executeUpdate)
 
     if (target.value.tagName === 'IMG') {
       const img = target.value as HTMLImageElement
@@ -66,6 +69,8 @@ export function useElementRect(
       observer = new ResizeObserver(executeUpdate)
       observer.observe(target.value)
     }
+
+    window.addEventListener('resize', executeUpdate)
 
     if (target.value.tagName === 'IMG') {
       const img = target.value as HTMLImageElement
