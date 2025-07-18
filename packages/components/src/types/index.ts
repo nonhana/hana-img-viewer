@@ -4,7 +4,8 @@ export const defaultImgViewerProps = {
   duration: 500,
   maskBgColor: 'black',
   maskOpacity: 0.1,
-  previewZIndex: 1000,
+  previewZIndex: 9999,
+  autoZIndex: true,
   previewMaxWidth: '80vw',
   previewMaxHeight: '80vh',
   zoomStep: 0.2,
@@ -29,6 +30,7 @@ export const imgViewerPropsObj = {
   maskBgColor: { type: String, default: defaultImgViewerProps.maskBgColor },
   maskOpacity: { type: Number, default: defaultImgViewerProps.maskOpacity },
   previewZIndex: { type: Number, default: defaultImgViewerProps.previewZIndex },
+  autoZIndex: { type: Boolean, default: defaultImgViewerProps.autoZIndex },
   previewMaxWidth: {
     type: [String, Number],
     default: defaultImgViewerProps.previewMaxWidth,

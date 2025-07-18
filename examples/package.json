@@ -13,6 +13,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "element-plus": "^2.10.4",
     "hana-img-viewer": "workspace:*"
+  },
+  "devDependencies": {
+    "unplugin-auto-import": "^19.3.0",
+    "unplugin-vue-components": "^28.8.0"
   }
 }

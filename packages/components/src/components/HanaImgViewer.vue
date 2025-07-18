@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, watchEffect } from 'vue'
+import { useAdaptivePreview } from '../composables/useAdaptivePreview'
 import { useElementRect } from '../composables/useElementRect'
 import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
 import { useWindowState } from '../composables/useWindowState'
 import { imgViewerEmitsObj, imgViewerPropsObj } from '../types'
+import { getCorrectInitialPosition } from '../utils'
 
 defineOptions({ name: 'HanaImgViewer' })
 
@@ -90,6 +92,9 @@ function animatingTrigger() {
   }, props.duration)
 }
 
+// 位置更新触发器
+const positionUpdateTrigger = ref(0)
+
 const imgStyle = computed<CSSProperties>(() => ({
   width: (typeof props.width === 'number' ? `${props.width}px` : props.width) ?? 'fit-content',
   height: (typeof props.height === 'number' ? `${props.height}px` : props.height) ?? 'fit-content',
@@ -99,6 +104,11 @@ const imgStyle = computed<CSSProperties>(() => ({
 function toggleDisplay() {
   if (isAnimating.value)
     return
+
+  // 在开始显示之前，强制更新位置计算
+  if (!displaying.value) {
+    positionUpdateTrigger.value++
+  }
 
   animatingTrigger()
 
@@ -134,17 +144,16 @@ const { rect: imgRect } = useElementRect(imgRef, {
   throttleDelay: 100,
 })
 
+const { finalZIndex, isInModal: _isInModal } = useAdaptivePreview({
+  imgRef,
+  props,
+})
+
 const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
 
 const { width, height, scrollX, scrollY } = useWindowState()
 
-const initialScrollX = ref(0)
-const initialScrollY = ref(0)
-
-watch(imgRect, () => {
-  initialScrollX.value = scrollX.value
-  initialScrollY.value = scrollY.value
-})
+// 移除了初始滚动位置的追踪，因为现在使用实时滚动位置进行更精确的计算
 
 const windowAspectRatio = computed(() => width.value / height.value)
 
@@ -166,17 +175,27 @@ const previewerInitialHeight = computed(() =>
     : 'auto',
 )
 
-const previewerInitialTop = computed(() =>
-  imgRect.value
-    ? `${imgRect.value.top + initialScrollY.value}px`
-    : '0px',
-)
+// 获取当前实时位置的函数
+function getCurrentRealTimePosition() {
+  if (!imgRef.value) return { top: 0, left: 0 }
+  return getCorrectInitialPosition(imgRef.value, scrollX.value, scrollY.value)
+}
 
-const previewerInitialLeft = computed(() =>
-  imgRect.value
-    ? `${imgRect.value.left + initialScrollX.value}px`
-    : '0px',
-)
+const previewerInitialTop = computed(() => {
+  // 添加触发器作为依赖，确保能重新计算
+  const _ = positionUpdateTrigger.value
+  
+  const position = getCurrentRealTimePosition()
+  return `${position.top}px`
+})
+
+const previewerInitialLeft = computed(() => {
+  // 添加触发器作为依赖，确保能重新计算
+  const _ = positionUpdateTrigger.value
+  
+  const position = getCurrentRealTimePosition()
+  return `${position.left}px`
+})
 
 const previewerTargetWidth = computed(() =>
   imgAspectRatio.value > windowAspectRatio.value ? `${props.previewMaxWidth}` : 'auto',
@@ -275,7 +294,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
         width: '100%',
         height: '100%',
         backgroundColor: maskBgColor,
-        zIndex: previewZIndex - 1,
+        zIndex: finalZIndex - 1,
         transition: `all ${transitionDuration}`,
         opacity: maskStyle.opacity,
       }"
@@ -294,7 +313,7 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
         position: 'absolute',
         objectFit: 'cover',
         cursor: 'grab',
-        zIndex: previewZIndex,
+        zIndex: finalZIndex,
         ...previewerStyle,
       }"
       v-on="previewerEvents"
