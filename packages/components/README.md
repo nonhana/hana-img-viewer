@@ -2,13 +2,13 @@
 
 A lightweight and easy-to-use image previewer for Vue 3.
 
-![hana-img-viewer](https://moe.greyflowers.pics/hana-img-viewer.gif)
-
 ## Features
 
 - Support touch gestures, drag and pan physical effect sliding, two-finger specified position to zoom in and out
 - Based on `typescript`, type safe
 - Just like use the `<img>` tag, you can use the `src` attribute to specify the image source
+- SSR friendly
+- Lightweight, only 10KB
 
 ## Installation
 
@@ -79,8 +79,7 @@ Following are the props that you can pass to the `hana-img-viewer` component.
 | `duration`         | `number`           | `500`       | Transition animation duration (ms).         |
 | `maskBgColor`      | `string`           | `'black'`   | Mask background color.                      |
 | `maskOpacity`      | `number`           | `0.1`       | Mask opacity (0-1).                         |
-| `previewZIndex`    | `number`           | `9999`      | `z-index` of the preview layer.             |
-| `autoZIndex`       | `boolean`          | `true`      | Auto-detect and set higher z-index for modal containers. |
+| `previewZIndex`    | `number`           | `1000`      | `z-index` of the preview layer.             |
 | `previewMaxWidth`  | `string \| number` | `'80vw'`    | Max width of the preview area.              |
 | `previewMaxHeight` | `string \| number` | `'80vh'`    | Max height of the preview area.             |
 | `zoomStep`         | `number`           | `0.2`       | Zoom step, the increment ratio for scaling. |

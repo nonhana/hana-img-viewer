@@ -2,8 +2,6 @@
 
 A lightweight and easy-to-use image previewer for Vue 3.
 
-![hana-img-viewer](https://moe.greyflowers.pics/hana-img-viewer.gif)
-
 ## Features
 
 - Support touch gestures, drag and pan physical effect sliding, two-finger specified position to zoom in and out
