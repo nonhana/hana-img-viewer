@@ -30,6 +30,6 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "vite-plugin-dts": "^4.3.0"
+    "vite-plugin-dts": "catalog:"
   }
 }

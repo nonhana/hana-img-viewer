@@ -3,6 +3,12 @@ import type { ImgViewerProps } from '../types'
 import { computed, onUnmounted, ref, watchEffect } from 'vue'
 import { getDistance, getTargetPosition, setStyles } from '../utils'
 
+/**
+ * 图片缩放器
+ * @param targetRef - 目标元素的 ref，通常是预览图的 ref
+ * @param props - 图片查看器组件的 props
+ * @returns 图片缩放器 API
+ */
 export function useTransformer(
   targetRef: Ref<HTMLElement | null>,
   props: ImgViewerProps,
@@ -56,14 +62,17 @@ export function useTransformer(
     updateTransform()
   }
 
+  /** 滚动时触发缩放 */
   const handleWheel = (event: WheelEvent) => {
     adjustZoom(event.deltaY < 0 ? zoomStep : -zoomStep)
   }
 
+  /** 处理双击缩放行为 */
   const handleDblclick = () => {
     adjustZoom(0, zoomLevel.value > 1 ? 1 : dblClickZoomTo)
   }
 
+  /** 处理在手机上的触摸行为 */
   const handleTouchMove = (e: TouchEvent) => {
     if (!targetRef.value)
       return

@@ -1,7 +1,7 @@
 {
   "name": "monorepo_demo",
   "private": "true",
-  "packageManager": "pnpm@10.7.1",
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -10,21 +10,18 @@
     "hana-img-viewer": "link:packages/components"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.11.0",
-    "@types/node": "^22.13.14",
-    "@types/throttle-debounce": "^5.0.2",
-    "@vitejs/plugin-vue": "^5.2.3",
-    "cpy": "^11.1.0",
-    "eslint": "^9.23.0",
-    "fast-glob": "^3.3.3",
-    "sass": "^1.86.0",
-    "throttle-debounce": "^5.0.2",
-    "typescript": "^5.8.2",
-    "vite": "^6.2.3",
-    "vue": "^3.5.13",
-    "vue-tsc": "^2.2.8"
-  },
-  "pnpm": {
-    "overrides": {}
+    "@antfu/eslint-config": "catalog:",
+    "@types/node": "catalog:",
+    "@types/throttle-debounce": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "cpy": "catalog:",
+    "eslint": "catalog:",
+    "fast-glob": "catalog:",
+    "sass": "catalog:",
+    "throttle-debounce": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vue": "catalog:",
+    "vue-tsc": "catalog:"
   }
 }

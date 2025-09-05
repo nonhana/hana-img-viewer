@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { HanaImgViewer } from 'hana-img-viewer'
 import { ref } from 'vue'
-import demoImg2 from '../assets/114388636.jpg'
-import demoImg1 from '../assets/116811075-1.jpg'
 import GithubSVG from './GithubSVG.vue'
+
+const demoImg1 = 'https://pixiv-r2.caelum.moe/121909597.png'
+const demoImg2 = 'https://pixiv-r2.caelum.moe/129115891.png'
 
 const demoImg1Displaying = ref(false)
 const demoImg1Animating = ref(false)

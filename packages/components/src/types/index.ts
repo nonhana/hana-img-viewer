@@ -16,7 +16,6 @@ export const defaultImgViewerProps = {
 }
 
 export const imgViewerPropsObj = {
-  /* ===== 支持v-model绑定 ===== */
   displaying: { type: Boolean, default: undefined },
   applyingPreviewStyles: { type: Boolean, default: undefined },
   isAnimating: { type: Boolean, default: undefined },

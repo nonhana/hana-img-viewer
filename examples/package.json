@@ -2,6 +2,7 @@
   "name": "examples",
   "type": "module",
   "version": "1.0.0",
+  "private": "true",
   "description": "",
   "author": "",
   "license": "ISC",
@@ -13,11 +14,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "element-plus": "^2.10.4",
+    "element-plus": "catalog:",
     "hana-img-viewer": "workspace:*"
   },
   "devDependencies": {
-    "unplugin-auto-import": "^19.3.0",
-    "unplugin-vue-components": "^28.8.0"
+    "unplugin-auto-import": "catalog:",
+    "unplugin-vue-components": "catalog:"
   }
 }

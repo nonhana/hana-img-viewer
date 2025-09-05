@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useAdaptivePreview } from '../composables/useAdaptivePreview'
 import { useElementRect } from '../composables/useElementRect'
 import { useEventListeners } from '../composables/useEventListeners'
@@ -15,18 +15,18 @@ const props = defineProps(imgViewerPropsObj)
 const emit = defineEmits(imgViewerEmitsObj)
 
 const isMounted = ref(false)
-onMounted(() => {
-  isMounted.value = true
-})
+onMounted(() => isMounted.value = true)
 
-const imgRef = ref<HTMLImageElement | null>(null)
-const maskRef = ref<HTMLDivElement | null>(null)
-const previewerRef = ref<HTMLImageElement | null>(null)
+// 原图 ref
+const imgRef = useTemplateRef('imgRef')
+// 预览图 ref
+const previewerRef = useTemplateRef('previewerRef')
 
 const _displaying = ref(false)
 const _applyingPreviewStyles = ref(false)
 const _isAnimating = ref(false)
 
+// writableComputed - 同步 prop 和内部状态 - 实现 displaying 双向绑定
 const displaying = computed({
   get: () => props.displaying !== undefined ? props.displaying : _displaying.value,
   set: (value) => {
@@ -40,6 +40,7 @@ const displaying = computed({
   },
 })
 
+// writableComputed - 同步 prop 和内部状态 - 实现 applyingPreviewStyles 双向绑定
 const applyingPreviewStyles = computed({
   get: () => props.applyingPreviewStyles !== undefined ? props.applyingPreviewStyles : _applyingPreviewStyles.value,
   set: (value) => {
@@ -53,6 +54,7 @@ const applyingPreviewStyles = computed({
   },
 })
 
+// writableComputed - 实现 isAnimating 双向绑定
 const isAnimating = computed({
   get: () => props.isAnimating !== undefined ? props.isAnimating : _isAnimating.value,
   set: (value) => {
@@ -92,23 +94,16 @@ function animatingTrigger() {
   }, props.duration)
 }
 
-// 位置更新触发器
-const positionUpdateTrigger = ref(0)
-
 const imgStyle = computed<CSSProperties>(() => ({
   width: (typeof props.width === 'number' ? `${props.width}px` : props.width) ?? 'fit-content',
   height: (typeof props.height === 'number' ? `${props.height}px` : props.height) ?? 'fit-content',
   visibility: displaying.value ? 'hidden' : 'visible',
 }))
 
+// 触发 display 切换
 function toggleDisplay() {
   if (isAnimating.value)
     return
-
-  // 在开始显示之前，强制更新位置计算
-  if (!displaying.value) {
-    positionUpdateTrigger.value++
-  }
 
   animatingTrigger()
 
@@ -126,13 +121,9 @@ function toggleDisplay() {
 type TransformerApi = ReturnType<typeof useTransformer>
 const transformerApi = shallowRef<TransformerApi | null>(null)
 
-onMounted(() => {
-  transformerApi.value = useTransformer(previewerRef, props)
-})
+onMounted(() => transformerApi.value = useTransformer(previewerRef, props))
 
-onBeforeUnmount(() => {
-  transformerApi.value?.cleanupListeners()
-})
+onBeforeUnmount(() => transformerApi.value?.cleanupListeners())
 
 const previewerEvents = ref<{
   dblclick?: (() => void)
@@ -144,7 +135,7 @@ const { rect: imgRect } = useElementRect(imgRef, {
   throttleDelay: 100,
 })
 
-const { finalZIndex, isInModal: _isInModal } = useAdaptivePreview({
+const { finalZIndex } = useAdaptivePreview({
   imgRef,
   props,
 })
@@ -152,8 +143,6 @@ const { finalZIndex, isInModal: _isInModal } = useAdaptivePreview({
 const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
 
 const { width, height, scrollX, scrollY } = useWindowState()
-
-// 移除了初始滚动位置的追踪，因为现在使用实时滚动位置进行更精确的计算
 
 const windowAspectRatio = computed(() => width.value / height.value)
 
@@ -175,24 +164,19 @@ const previewerInitialHeight = computed(() =>
     : 'auto',
 )
 
-// 获取当前实时位置的函数
+// 获取当前实时位置
 function getCurrentRealTimePosition() {
-  if (!imgRef.value) return { top: 0, left: 0 }
+  if (!imgRef.value)
+    return { top: 0, left: 0 }
   return getCorrectInitialPosition(imgRef.value, scrollX.value, scrollY.value)
 }
 
 const previewerInitialTop = computed(() => {
-  // 添加触发器作为依赖，确保能重新计算
-  const _ = positionUpdateTrigger.value
-  
   const position = getCurrentRealTimePosition()
   return `${position.top}px`
 })
 
 const previewerInitialLeft = computed(() => {
-  // 添加触发器作为依赖，确保能重新计算
-  const _ = positionUpdateTrigger.value
-  
   const position = getCurrentRealTimePosition()
   return `${position.left}px`
 })
@@ -286,7 +270,6 @@ watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisp
   <Teleport v-if="isMounted" to="body">
     <div
       v-if="displaying"
-      ref="maskRef"
       :style="{
         position: 'fixed',
         top: 0,
