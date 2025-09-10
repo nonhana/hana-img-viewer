@@ -31,7 +31,9 @@ export function useElementRect(
   const cleanup = () => {
     observer?.disconnect()
     observer = null
-    window.removeEventListener('resize', executeUpdate)
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', executeUpdate)
+    }
   }
 
   onMounted(() => {
@@ -58,8 +60,6 @@ export function useElementRect(
   onUnmounted(cleanup)
 
   watchEffect(() => {
-    cleanup()
-
     if (!target.value)
       return
 
@@ -70,7 +70,9 @@ export function useElementRect(
       observer.observe(target.value)
     }
 
-    window.addEventListener('resize', executeUpdate)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', executeUpdate)
+    }
 
     if (target.value.tagName === 'IMG') {
       const img = target.value as HTMLImageElement
