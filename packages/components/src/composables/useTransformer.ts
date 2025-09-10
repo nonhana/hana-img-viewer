@@ -13,7 +13,7 @@ export function useTransformer(
   targetRef: Ref<HTMLElement | null>,
   props: ImgViewerProps,
 ) {
-  const { zoomStep, zoomMax, zoomMin, dblClickZoomTo } = props
+  const { zoomStep, zoomMax, zoomMin, dblClickZoomTo, zoomFactorRad } = props
 
   const dragging = ref(false)
   const currentTranslateX = ref(0)
@@ -64,7 +64,7 @@ export function useTransformer(
 
   /** 滚动时触发缩放 */
   const handleWheel = (event: WheelEvent) => {
-    adjustZoom(event.deltaY < 0 ? zoomStep : -zoomStep)
+    adjustZoom(event.deltaY < 0 ? zoomStep * zoomFactorRad : -zoomStep * zoomFactorRad)
   }
 
   /** 处理双击缩放行为 */

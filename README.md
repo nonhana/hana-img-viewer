@@ -8,7 +8,7 @@ A lightweight and easy-to-use image previewer for Vue 3.
 - Based on `typescript`, type safe
 - Just like use the `<img>` tag, you can use the `src` attribute to specify the image source
 - SSR friendly
-- Lightweight, only 10KB
+- Lightweight, only 5KB after gzip
 
 ## Installation
 
@@ -87,6 +87,7 @@ Following are the props that you can pass to the `hana-img-viewer` component.
 | `zoomMax`          | `number`           | `10`        | Maximum zoom ratio.                         |
 | `dblClickZoom`     | `boolean`          | `true`      | Enable double-click zoom.                   |
 | `dblClickZoomTo`   | `number`           | `2`         | Target zoom ratio for double-click.         |
+| `zoomFactorRad`    | `number`           | `0.1`       | Zoom factor for wheel event.                |
 
 ## License
 

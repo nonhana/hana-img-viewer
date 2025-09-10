@@ -13,5 +13,7 @@ declare module 'vue' {
     ElDialog: typeof import('element-plus/es')['ElDialog']
     GithubSVG: typeof import('./src/components/GithubSVG.vue')['default']
     Previewer: typeof import('./src/components/Previewer.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
   }
 }
