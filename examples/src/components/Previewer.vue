@@ -20,7 +20,7 @@ const demoImg1Animating = ref(false)
       <div>是否正在显示：{{ demoImg1Displaying }}</div>
       <div>是否正在动画：{{ demoImg1Animating }}</div>
     </div>
-    <div class="image">
+    <div class="image" style="margin-top: 100px;">
       <HanaImgViewer :src="demoImg2" :alt="demoImg2" />
     </div>
   </div>

@@ -11,10 +11,10 @@ function open() {
 
 <template>
   <el-button @click="open">
-    Open
+    弹窗内图片预览
   </el-button>
   <el-dialog v-model="visible" title="Dialog" width="30%">
-    <div style="height: 2000px; background-color: #f00; width: 100%;" />
+    <div style="height: 2000px; width: 100%;" />
     <HanaImgViewer src="https://pixiv-r2.caelum.moe/121909597.png" alt="121909597.png" />
   </el-dialog>
 </template>
