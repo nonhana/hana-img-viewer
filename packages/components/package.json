@@ -5,6 +5,11 @@
   "description": "A lightweight and easy-to-use image previewer for Vue 3",
   "author": "nonhana",
   "license": "MIT",
+  "homepage": "https://github.com/nonhana/hana-img-viewer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonhana/hana-img-viewer.git"
+  },
   "keywords": [
     "image",
     "previewer",
