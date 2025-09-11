@@ -1,16 +1,16 @@
 import type { Ref } from 'vue'
 
-export function getTargetPosition(targetRef: Ref<HTMLElement | null>): readonly [number, number] {
+export function getTargetPosition(targetRef: Ref<HTMLElement | null>) {
   if (!targetRef.value)
-    return [0, 0]
+    return [0, 0] as const
 
   const transform = window.getComputedStyle(targetRef.value).transform
   if (transform === 'none')
-    return [0, 0]
+    return [0, 0] as const
 
   const match = transform.match(/matrix\((.+)\)/)
   if (!match)
-    return [0, 0]
+    return [0, 0] as const
 
   const values = match[1].split(', ')
   return [

@@ -13,7 +13,7 @@ export const defaultImgViewerProps = {
   zoomMax: 10,
   dblClickZoom: true,
   dblClickZoomTo: 2,
-  zoomFactorRad: 0.1,
+  zoomFactorRad: 1,
 }
 
 export const imgViewerPropsObj = {

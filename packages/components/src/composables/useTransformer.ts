@@ -1,11 +1,11 @@
 import type { Ref } from 'vue'
 import type { ImgViewerProps } from '../types'
 import { computed, onUnmounted, ref, watchEffect } from 'vue'
-import { getDistance, getTargetPosition, setStyles } from '../utils'
+import { getDistance, setStyles } from '../utils'
 
 /**
  * 图片缩放器
- * @param targetRef - 目标元素的 ref，通常是预览图的 ref
+ * @param targetRef - 预览图 ref
  * @param props - 图片查看器组件的 props
  * @returns 图片缩放器 API
  */
@@ -33,14 +33,8 @@ export function useTransformer(
   })
 
   const targetImgTransform = computed(() => {
-    const translateX = currentTranslateX.value === 0
-      ? '-50%'
-      : `${currentTranslateX.value}px`
-
-    const translateY = currentTranslateY.value === 0
-      ? '-50%'
-      : `${currentTranslateY.value}px`
-
+    const translateX = `calc(-50% + ${currentTranslateX.value}px)`
+    const translateY = `calc(-50% + ${currentTranslateY.value}px)`
     return `translate(${translateX}, ${translateY}) scale(${zoomLevel.value})`
   })
 
@@ -50,29 +44,87 @@ export function useTransformer(
     setStyles(targetRef.value, { transform: targetImgTransform.value })
   }
 
-  const adjustZoom = (delta = 0, setTo?: number) => {
-    if (setTo !== undefined) {
-      zoomLevel.value = setTo
-    }
-    else {
-      zoomLevel.value += delta
-    }
+  /** 在光标位置进行缩放 */
+  const zoomAtPoint = (targetZoom: number, clientX: number, clientY: number) => {
+    if (!targetRef.value)
+      return
 
-    zoomLevel.value = Math.max(zoomMin, Math.min(zoomMax, zoomLevel.value))
+    const oldZoom = zoomLevel.value
+    const newZoom = Math.max(zoomMin, Math.min(zoomMax, targetZoom))
+    if (newZoom === oldZoom)
+      return
+
+    const rect = targetRef.value.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+
+    const ratio = newZoom / oldZoom
+    const deltaCenterX = (clientX - centerX) * (1 - ratio)
+    const deltaCenterY = (clientY - centerY) * (1 - ratio)
+
+    currentTranslateX.value += deltaCenterX
+    currentTranslateY.value += deltaCenterY
+    zoomLevel.value = newZoom
     updateTransform()
   }
 
-  /** 滚动时触发缩放 */
-  const handleWheel = (event: WheelEvent) => {
-    adjustZoom(event.deltaY < 0 ? zoomStep * zoomFactorRad : -zoomStep * zoomFactorRad)
+  const adjustZoom = ({
+    delta = 0,
+    setTo,
+    clientX,
+    clientY,
+  }: {
+    delta?: number
+    setTo?: number
+    clientX?: number
+    clientY?: number
+  }) => {
+    if (!targetRef.value)
+      return
+
+    const oldZoom = zoomLevel.value
+    const targetZoom = setTo !== undefined ? setTo : oldZoom + delta
+
+    // 默认以图片中心为锚点进行缩放
+    const rect = targetRef.value.getBoundingClientRect()
+    const fallbackX = rect.left + rect.width / 2
+    const fallbackY = rect.top + rect.height / 2
+
+    zoomAtPoint(targetZoom, clientX ?? fallbackX, clientY ?? fallbackY)
   }
 
-  /** 处理双击缩放行为 */
+  let wheelingTimeout: NodeJS.Timeout
+  let isTrackPad = false
+  const wheelingDebounce = 150 // 150ms 内没有新的 wheel 事件，则重置 isTrackPad = 30
+
+  const handleWheel = (e: WheelEvent) => {
+    clearTimeout(wheelingTimeout)
+
+    wheelingTimeout = setTimeout(() => {
+      isTrackPad = false
+    }, wheelingDebounce)
+
+    // 判断是否是触摸板：deltaY 有小数部分 或 deltaY 绝对值很小
+    if (Math.abs(e.deltaY) % 1 !== 0 || Math.abs(e.deltaY) < 30) {
+      isTrackPad = true
+    }
+
+    const delta = isTrackPad
+      ? e.deltaY < 0 ? zoomStep * zoomFactorRad / 10 : -zoomStep * zoomFactorRad / 10
+      : e.deltaY < 0 ? zoomStep * zoomFactorRad : -zoomStep * zoomFactorRad
+    adjustZoom({ delta, clientX: e.clientX, clientY: e.clientY })
+  }
+
   const handleDblclick = () => {
-    adjustZoom(0, zoomLevel.value > 1 ? 1 : dblClickZoomTo)
+    const nextZoom = zoomLevel.value > 1 ? 1 : dblClickZoomTo
+    if (nextZoom === 1) {
+      zoomLevel.value = 1
+      updateTransform()
+      return
+    }
+    adjustZoom({ setTo: nextZoom })
   }
 
-  /** 处理在手机上的触摸行为 */
   const handleTouchMove = (e: TouchEvent) => {
     if (!targetRef.value)
       return
@@ -83,8 +135,11 @@ export function useTransformer(
         [touch1.pageX, touch1.pageY],
         [touch2.pageX, touch2.pageY],
       )
+      const midX = (touch1.pageX + touch2.pageX) / 2
+      const midY = (touch1.pageY + touch2.pageY) / 2
       const scaleChange = newDistance / initialDistance
-      adjustZoom(0, zoomLevel.value * scaleChange)
+      const targetZoom = zoomLevel.value * scaleChange
+      adjustZoom({ setTo: targetZoom, clientX: midX, clientY: midY })
       initialDistance = newDistance
     }
     else if (e.touches.length === 1) {
@@ -118,9 +173,8 @@ export function useTransformer(
       const touch = e.touches[0]
       initialMouseX = touch.pageX
       initialMouseY = touch.pageY
-      const position = getTargetPosition(targetRef)
-      initialBoxX = position[0]
-      initialBoxY = position[1]
+      initialBoxX = currentTranslateX.value
+      initialBoxY = currentTranslateY.value
     }
 
     document.addEventListener('touchmove', handleTouchMove)
@@ -153,9 +207,8 @@ export function useTransformer(
     initialMouseX = e.clientX
     initialMouseY = e.clientY
 
-    const position = getTargetPosition(targetRef)
-    initialBoxX = position[0]
-    initialBoxY = position[1]
+    initialBoxX = currentTranslateX.value
+    initialBoxY = currentTranslateY.value
 
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
