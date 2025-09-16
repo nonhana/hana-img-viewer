@@ -1,6 +1,6 @@
+export * from './modules/addPassive'
 export * from './modules/getDistance'
 export * from './modules/getHighestZIndex'
-export * from './modules/getScrollOffset'
 export * from './modules/getTargetPosition'
 export * from './modules/preventDefault'
 export * from './modules/setDomStyles'

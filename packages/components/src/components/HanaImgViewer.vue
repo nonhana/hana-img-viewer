@@ -7,7 +7,6 @@ import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
 import { useWindowState } from '../composables/useWindowState'
 import { imgViewerEmitsObj, imgViewerPropsObj } from '../types'
-// import { getCorrectInitialPosition } from '../utils'
 
 defineOptions({ name: 'HanaImgViewer' })
 
