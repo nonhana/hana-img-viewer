@@ -7,7 +7,7 @@ import { useEventListeners } from '../composables/useEventListeners'
 import { useTransformer } from '../composables/useTransformer'
 import { useWindowState } from '../composables/useWindowState'
 import { imgViewerEmitsObj, imgViewerPropsObj } from '../types'
-import { getCorrectInitialPosition } from '../utils'
+// import { getCorrectInitialPosition } from '../utils'
 
 defineOptions({ name: 'HanaImgViewer' })
 
@@ -142,7 +142,7 @@ const { finalZIndex } = useAdaptivePreview({
 
 const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
 
-const { width, height, scrollX, scrollY } = useWindowState()
+const { width, height, scrollY } = useWindowState()
 
 const windowAspectRatio = computed(() => width.value / height.value)
 
@@ -164,21 +164,19 @@ const previewerInitialHeight = computed(() =>
     : 'auto',
 )
 
-// 获取当前实时位置
-function getCurrentRealTimePosition() {
-  if (!imgRef.value)
-    return { top: 0, left: 0 }
-  return getCorrectInitialPosition(imgRef.value, scrollX.value, scrollY.value)
-}
+// // 获取当前实时位置
+// function getCurrentRealTimePosition() {
+//   if (!imgRef.value)
+//     return { top: 0, left: 0 }
+//   return getCorrectInitialPosition(imgRef.value, scrollX.value, scrollY.value)
+// }
 
 const previewerInitialTop = computed(() => {
-  const position = getCurrentRealTimePosition()
-  return `${position.top}px`
+  return imgRect.value ? `${imgRect.value.top}px` : '0px'
 })
 
 const previewerInitialLeft = computed(() => {
-  const position = getCurrentRealTimePosition()
-  return `${position.left}px`
+  return imgRect.value ? `${imgRect.value.left}px` : '0px'
 })
 
 const previewerTargetWidth = computed(() =>
