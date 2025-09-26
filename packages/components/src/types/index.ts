@@ -1,7 +1,7 @@
 import type { ExtractPropTypes } from 'vue'
 
 export const defaultImgViewerProps = {
-  duration: 300,
+  duration: 500,
   maskBgColor: 'black',
   maskOpacity: 0.1,
   previewZIndex: 9999,

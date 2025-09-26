@@ -76,7 +76,7 @@ Following are the props that you can pass to the `hana-img-viewer` component.
 | `alt`              | `string`           | `''`        | Alternative text describing the image.      |
 | `width`            | `string \| number` | `auto`      | Image width.                                |
 | `height`           | `string \| number` | `auto`      | Image height.                               |
-| `duration`         | `number`           | `300`       | Transition animation duration (ms).         |
+| `duration`         | `number`           | `500`       | Transition animation duration (ms).         |
 | `maskBgColor`      | `string`           | `'black'`   | Mask background color.                      |
 | `maskOpacity`      | `number`           | `0.1`       | Mask opacity (0-1).                         |
 | `previewZIndex`    | `number`           | `1000`      | `z-index` of the preview layer.             |
