@@ -1,7 +1,7 @@
 {
   "name": "hana-img-viewer",
   "type": "module",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "A lightweight and easy-to-use image previewer for Vue 3",
   "author": "nonhana",
   "license": "MIT",
