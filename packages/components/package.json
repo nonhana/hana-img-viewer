@@ -32,7 +32,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build"
   },
   "devDependencies": {
     "vite-plugin-dts": "catalog:"
