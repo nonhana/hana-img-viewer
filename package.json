@@ -1,7 +1,7 @@
 {
   "name": "monorepo_demo",
   "private": "true",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
