@@ -1,315 +1,408 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
-import { useAdaptivePreview } from '../composables/useAdaptivePreview'
-import { useElementRect } from '../composables/useElementRect'
-import { useEventListeners } from '../composables/useEventListeners'
-import { useTransformer } from '../composables/useTransformer'
-import { useWindowState } from '../composables/useWindowState'
-import { imgViewerEmitsObj, imgViewerPropsObj } from '../types'
+import type { DragState, PinchState, WheelState } from '../composables/core'
+import type { Point } from '../types/utils'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useFLIP, useGesture, useTransform, useZoom } from '../composables/core'
+import { useControllable, useEventListener, useScrollLock } from '../composables/utils'
+import { imagePreviewEmitsObj, imagePreviewPropsObj } from '../types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
-const props = defineProps(imgViewerPropsObj)
-const emit = defineEmits(imgViewerEmitsObj)
+const props = defineProps(imagePreviewPropsObj)
+const emit = defineEmits(imagePreviewEmitsObj)
 
+// ===== 模板引用 =====
+const thumbnailRef = useTemplateRef('thumbnailRef')
+const previewRef = useTemplateRef('previewRef')
+
+// ===== 图片加载状态 =====
+type LoadState = 'idle' | 'loading' | 'loaded' | 'error'
+const loadState = ref<LoadState>('idle')
+
+// ===== 客户端挂载检测 =====
 const isMounted = ref(false)
-onMounted(() => isMounted.value = true)
+onMounted(() => {
+  isMounted.value = true
+})
 
-// 原图 ref
-const imgRef = useTemplateRef('imgRef')
-// 预览图 ref
-const previewerRef = useTemplateRef('previewerRef')
-
-const _displaying = ref(false)
-const _applyingPreviewStyles = ref(false)
-const _isAnimating = ref(false)
-
-// writableComputed - 同步 prop 和内部状态 - 实现 displaying 双向绑定
-const displaying = computed({
-  get: () => props.displaying !== undefined ? props.displaying : _displaying.value,
-  set: (value) => {
-    if (props.displaying !== undefined) {
-      emit('update:displaying', value)
+// ===== 受控状态管理 =====
+const isOpen = useControllable({
+  prop: () => props.open,
+  defaultValue: false,
+  onChange: (value) => {
+    emit('update:open', value)
+    if (value) {
+      emit('open')
     }
     else {
-      _displaying.value = value
+      emit('close')
     }
-    emit('displayChange', value)
   },
 })
 
-// writableComputed - 同步 prop 和内部状态 - 实现 applyingPreviewStyles 双向绑定
-const applyingPreviewStyles = computed({
-  get: () => props.applyingPreviewStyles !== undefined ? props.applyingPreviewStyles : _applyingPreviewStyles.value,
-  set: (value) => {
-    if (props.applyingPreviewStyles !== undefined) {
-      emit('update:applyingPreviewStyles', value)
-    }
-    else {
-      _applyingPreviewStyles.value = value
-    }
-    emit('previewStylesChange', value)
+// ===== 缩放管理 =====
+const {
+  zoom,
+  zoomIn,
+  zoomOut,
+  setZoom,
+  toggleDoubleClickZoom,
+  reset: resetZoom,
+  canZoomIn,
+  canZoomOut,
+  isInitialZoom,
+} = useZoom({
+  initialZoom: 1,
+  minZoom: () => props.minZoom,
+  maxZoom: () => props.maxZoom,
+  step: () => props.zoomStep,
+  doubleClickZoom: () => props.doubleClickZoom,
+  onZoomChange: (z) => {
+    emit('update:zoom', z)
+    emit('zoomChange', z)
   },
 })
 
-// writableComputed - 实现 isAnimating 双向绑定
-const isAnimating = computed({
-  get: () => props.isAnimating !== undefined ? props.isAnimating : _isAnimating.value,
-  set: (value) => {
-    if (props.isAnimating !== undefined) {
-      emit('update:isAnimating', value)
-    }
-    else {
-      _isAnimating.value = value
-    }
-    emit('animatingChange', value)
+// 同步外部 zoom prop
+watch(() => props.zoom, (newZoom) => {
+  if (newZoom !== undefined && newZoom !== zoom.value) {
+    setZoom(newZoom)
+  }
+})
+
+// ===== 变换管理 =====
+const {
+  transform,
+  style: transformStyle,
+  set: setTransform,
+  zoomAt,
+  pan,
+  reset: resetTransform,
+} = useTransform({
+  initial: { x: 0, y: 0, scale: 1, rotate: 0 },
+  scaleRange: () => ({ min: props.minZoom, max: props.maxZoom }),
+})
+
+// 同步 zoom 和 transform.scale
+watch(zoom, (newZoom) => {
+  if (Math.abs(newZoom - transform.value.scale) > 0.001) {
+    setTransform({ scale: newZoom })
+  }
+})
+
+// ===== FLIP 动画 =====
+const {
+  isAnimating,
+  flip,
+  flipReverse,
+  cancel: cancelAnimation,
+} = useFLIP({
+  duration: () => props.duration,
+  easing: () => props.easing,
+})
+
+// ===== 滚动锁定 =====
+const { lock: lockScroll, unlock: unlockScroll } = useScrollLock()
+
+// ===== 手势管理 =====
+const {
+  isDragging,
+  isPinching,
+  isWheeling,
+  isInteracting,
+} = useGesture({
+  target: previewRef,
+  enabled: () => isOpen.value && !isAnimating.value,
+  enableDrag: () => props.enableDrag,
+  enablePinch: () => props.enablePinch,
+  enableWheel: () => props.enableZoom,
+  wheelZoomRatio: () => props.wheelZoomRatio,
+  onDrag: (state: DragState) => {
+    pan(state.delta)
+  },
+  onPinch: (state: PinchState) => {
+    // 双指缩放：以双指中心点为锚点
+    const newScale = transform.value.scale * state.deltaScale
+    zoomAt(newScale, state.center)
+    zoom.value = newScale
+  },
+  onWheel: (state: WheelState) => {
+    // 滚轮缩放：以光标位置为锚点
+    const newScale = transform.value.scale + state.delta
+    zoomAt(newScale, state.center)
+    zoom.value = newScale
+  },
+  onDoubleClick: (position: Point) => {
+    if (!props.enableDoubleClick)
+      return
+    toggleDoubleClickZoom()
+    // 以双击位置为锚点
+    zoomAt(zoom.value, position)
   },
 })
 
-watch(() => props.displaying, (newVal) => {
-  if (newVal !== undefined && newVal !== _displaying.value) {
-    _displaying.value = newVal
-  }
-})
+// ===== 键盘事件 =====
+useEventListener(
+  () => (isOpen.value && props.enableKeyboard) ? window : null,
+  'keydown',
+  (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      closePreview()
+    }
+  },
+)
 
-watch(() => props.applyingPreviewStyles, (newVal) => {
-  if (newVal !== undefined && newVal !== _applyingPreviewStyles.value) {
-    _applyingPreviewStyles.value = newVal
-  }
-})
-
-watch(() => props.isAnimating, (newVal) => {
-  if (newVal !== undefined && newVal !== _isAnimating.value) {
-    _isAnimating.value = newVal
-  }
-})
-
-// 触发动画
-function animatingTrigger() {
-  isAnimating.value = true
-  setTimeout(() => {
-    isAnimating.value = false
-  }, props.duration)
-}
-
-const imgStyle = computed<CSSProperties>(() => ({
-  width: (typeof props.width === 'number' ? `${props.width}px` : props.width) ?? 'fit-content',
-  height: (typeof props.height === 'number' ? `${props.height}px` : props.height) ?? 'fit-content',
-  visibility: displaying.value ? 'hidden' : 'visible',
+// ===== 缩略图样式 =====
+const thumbnailContainerStyle = computed<CSSProperties>(() => ({
+  display: 'inline-block',
+  width: typeof props.width === 'number' ? `${props.width}px` : props.width,
+  height: typeof props.height === 'number' ? `${props.height}px` : props.height,
 }))
 
-// 触发 display 切换
-function toggleDisplay() {
-  if (isAnimating.value)
+const thumbnailStyle = computed<CSSProperties>(() => ({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  cursor: 'pointer',
+  visibility: isOpen.value ? 'hidden' : 'visible',
+}))
+
+// ===== 遮罩样式 =====
+const maskStyle = computed<CSSProperties>(() => ({
+  position: 'fixed',
+  inset: 0,
+  backgroundColor: props.maskColor,
+  opacity: isOpen.value ? props.maskOpacity : 0,
+  zIndex: props.zIndex - 1,
+  transition: `opacity ${props.duration}ms ${props.easing}`,
+  cursor: 'pointer',
+}))
+
+// ===== 预览图样式 =====
+const previewContainerStyle = computed<CSSProperties>(() => ({
+  position: 'fixed',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: props.zIndex,
+  pointerEvents: 'none',
+}))
+
+const previewImageStyle = computed<CSSProperties>(() => ({
+  maxWidth: '90vw',
+  maxHeight: '90vh',
+  objectFit: 'contain',
+  cursor: isInteracting.value ? 'grabbing' : 'grab',
+  transform: transformStyle.value,
+  transformOrigin: 'center center',
+  willChange: isInteracting.value ? 'transform' : 'auto',
+  pointerEvents: 'auto',
+  userSelect: 'none',
+  touchAction: 'none',
+}))
+
+// ===== 打开预览 =====
+async function openPreview(): Promise<void> {
+  if (isOpen.value || isAnimating.value)
     return
 
-  animatingTrigger()
+  // 重置状态
+  resetTransform()
+  resetZoom()
+  loadState.value = 'loading'
 
-  if (displaying.value) {
-    applyingPreviewStyles.value = false
-    setTimeout(() => {
-      displaying.value = false
-    }, props.duration)
-  }
-  else {
-    displaying.value = true
-  }
-}
+  // 锁定滚动
+  lockScroll()
 
-type TransformerApi = ReturnType<typeof useTransformer>
-const transformerApi = shallowRef<TransformerApi | null>(null)
+  // 显示预览
+  isOpen.value = true
 
-onMounted(() => transformerApi.value = useTransformer(previewerRef, props))
+  // 等待 DOM 更新
+  await nextTick()
 
-onBeforeUnmount(() => transformerApi.value?.cleanupListeners())
-
-const previewerEvents = ref<{
-  dblclick?: (() => void)
-  mousedown?: ((e: MouseEvent) => void)
-}>({})
-
-const { rect: imgRect } = useElementRect(imgRef, {
-  throttle: true,
-  throttleDelay: 100,
-})
-
-const { finalZIndex } = useAdaptivePreview({
-  imgRef,
-  props,
-})
-
-const imgAspectRatio = computed(() => imgRect.value ? (imgRect.value.width / imgRect.value.height) : 0)
-
-const { width, height, scrollY } = useWindowState()
-
-const windowAspectRatio = computed(() => width.value / height.value)
-
-const transitionDuration = computed(() => `${props.duration}ms`)
-
-const previewerInitialWidth = computed(() =>
-  imgRect.value
-    ? imgAspectRatio.value > windowAspectRatio.value
-      ? `${imgRect.value.width}px`
-      : 'auto'
-    : 'auto',
-)
-
-const previewerInitialHeight = computed(() =>
-  imgRect.value
-    ? imgAspectRatio.value > windowAspectRatio.value
-      ? 'auto'
-      : `${imgRect.value.height}px`
-    : 'auto',
-)
-
-// // 获取当前实时位置
-// function getCurrentRealTimePosition() {
-//   if (!imgRef.value)
-//     return { top: 0, left: 0 }
-//   return getCorrectInitialPosition(imgRef.value, scrollX.value, scrollY.value)
-// }
-
-const previewerInitialTop = computed(() => {
-  return imgRect.value ? `${imgRect.value.top}px` : '0px'
-})
-
-const previewerInitialLeft = computed(() => {
-  return imgRect.value ? `${imgRect.value.left}px` : '0px'
-})
-
-const previewerTargetWidth = computed(() =>
-  imgAspectRatio.value > windowAspectRatio.value ? `${props.previewMaxWidth}` : 'auto',
-)
-
-const previewerTargetHeight = computed(() =>
-  imgAspectRatio.value > windowAspectRatio.value ? 'auto' : `${props.previewMaxHeight}`,
-)
-
-const previewerTargetTop = computed(() => `calc(50vh + ${scrollY.value}px)`)
-
-function handleKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && displaying.value) {
-    toggleDisplay()
-  }
-}
-
-type EventListenerApi = ReturnType<typeof useEventListeners>
-const eventListenerApi = ref<EventListenerApi>({
-  toggleEventListener: (_type: 'on' | 'off') => {},
-})
-
-watchEffect(() => {
-  if (transformerApi.value) {
-    eventListenerApi.value = useEventListeners({
-      handleWheel: transformerApi.value.handleWheel,
-      handleTouchStart: transformerApi.value.handleTouchStart,
-      handleKeyDown,
-    })
-  }
-})
-
-const maskStyle = computed(() => ({
-  opacity: applyingPreviewStyles.value ? props.maskOpacity : 0,
-}))
-
-const previewerStyle = computed(() => ({
-  transition: isAnimating.value ? `all ${transitionDuration.value}` : 'none',
-  width: applyingPreviewStyles.value ? previewerTargetWidth.value : previewerInitialWidth.value,
-  height: applyingPreviewStyles.value ? previewerTargetHeight.value : previewerInitialHeight.value,
-  top: applyingPreviewStyles.value ? previewerTargetTop.value : previewerInitialTop.value,
-  left: applyingPreviewStyles.value ? '50%' : previewerInitialLeft.value,
-  transform: applyingPreviewStyles.value ? 'translate(-50%, -50%)' : 'none',
-}))
-
-watchEffect(() => {
-  transformerApi.value?.initTransformer()
-
-  if (displaying.value) {
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = 'hidden'
-    }
-    requestAnimationFrame(() => {
-      applyingPreviewStyles.value = true
-    })
-  }
-  else {
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = 'auto'
-    }
-  }
-})
-
-watch([displaying, isAnimating], ([isDisplaying, isCurrentlyAnimating], [wasDisplaying, wasAnimating]) => {
-  if (!transformerApi.value)
+  if (!thumbnailRef.value || !previewRef.value)
     return
 
-  const shouldBindEvents = isDisplaying && !isCurrentlyAnimating && wasDisplaying && wasAnimating && applyingPreviewStyles.value
-  const shouldUnbindEvents = isDisplaying && isCurrentlyAnimating && wasDisplaying && !wasAnimating
+  // 获取缩略图位置
+  const thumbnailRect = thumbnailRef.value.getBoundingClientRect()
+  // 获取预览图最终位置
+  const previewRect = previewRef.value.getBoundingClientRect()
 
-  if (shouldBindEvents) {
-    previewerEvents.value = {
-      dblclick: transformerApi.value.handleDblclick,
-      mousedown: transformerApi.value.handleMouseDown,
-    }
-    eventListenerApi.value.toggleEventListener('on')
+  // 执行 FLIP 动画
+  await flip(thumbnailRect, previewRect, previewRef.value)
+}
+
+// ===== 关闭预览 =====
+async function closePreview(): Promise<void> {
+  if (!isOpen.value || isAnimating.value)
+    return
+
+  // 取消正在进行的动画
+  cancelAnimation()
+
+  if (!thumbnailRef.value || !previewRef.value) {
+    isOpen.value = false
+    unlockScroll()
+    return
   }
 
-  if (shouldUnbindEvents) {
-    eventListenerApi.value.toggleEventListener('off')
-    previewerEvents.value = {}
+  // 1. 先保存当前的 transform 状态（在重置之前）
+  const currentTransformSnapshot = {
+    x: transform.value.x,
+    y: transform.value.y,
+    scale: transform.value.scale,
   }
+
+  // 2. 重置变换状态（这样 Vue 的响应式样式会变为 translate(0,0)）
+  resetTransform()
+
+  // 3. 等待 DOM 更新，获取重置后的基准位置
+  await nextTick()
+
+  // 4. 获取重置后的预览图基准位置（没有拖拽偏移的居中位置）
+  const previewRect = previewRef.value.getBoundingClientRect()
+  // 获取缩略图位置
+  const thumbnailRect = thumbnailRef.value.getBoundingClientRect()
+
+  // 5. 执行反向 FLIP 动画，从当前实际位置（包含拖拽偏移）到缩略图位置
+  await flipReverse(previewRect, thumbnailRect, previewRef.value, currentTransformSnapshot)
+
+  // 关闭预览
+  isOpen.value = false
+
+  // 解锁滚动
+  unlockScroll()
+}
+
+// ===== 处理遮罩点击 =====
+function handleMaskClick(): void {
+  if (props.closeOnMaskClick && !isAnimating.value) {
+    closePreview()
+  }
+}
+
+// ===== 处理图片加载 =====
+function handleImageLoad(event: Event): void {
+  loadState.value = 'loaded'
+  emit('load', event)
+}
+
+function handleImageError(event: Event): void {
+  loadState.value = 'error'
+  emit('error', event)
+}
+
+// ===== 暴露方法和状态 =====
+defineExpose({
+  // 状态
+  isOpen,
+  isAnimating,
+  zoom,
+  transform,
+  loadState,
+  canZoomIn,
+  canZoomOut,
+  isInitialZoom,
+  isDragging,
+  isPinching,
+  isWheeling,
+  isInteracting,
+  // 方法
+  open: openPreview,
+  close: closePreview,
+  zoomIn,
+  zoomOut,
+  setZoom,
+  resetZoom,
+  resetTransform,
 })
 </script>
 
 <template>
-  <!-- mask 遮罩层 -->
+  <div :style="thumbnailContainerStyle">
+    <!-- 缩略图插槽 -->
+    <slot name="thumbnail" :open="openPreview">
+      <img
+        ref="thumbnailRef"
+        :src="src"
+        :alt="alt"
+        :style="thumbnailStyle"
+        @click="openPreview"
+      >
+    </slot>
+  </div>
+
+  <!-- 遮罩层 -->
   <Teleport v-if="isMounted" to="body">
     <div
-      v-if="displaying"
-      :style="{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: maskBgColor,
-        zIndex: finalZIndex - 1,
-        transition: `all ${transitionDuration}`,
-        opacity: maskStyle.opacity,
-      }"
-      @click="toggleDisplay"
+      v-if="isOpen"
+      :style="maskStyle"
+      @click="handleMaskClick"
     />
   </Teleport>
 
-  <!-- 预览图 -->
+  <!-- 预览图容器 -->
   <Teleport v-if="isMounted" to="body">
-    <img
-      v-if="displaying"
-      ref="previewerRef"
-      :src="src"
-      draggable="false"
-      :style="{
-        position: 'absolute',
-        objectFit: 'cover',
-        cursor: 'grab',
-        zIndex: finalZIndex,
-        ...previewerStyle,
-      }"
-      v-on="previewerEvents"
+    <div
+      v-if="isOpen"
+      :style="previewContainerStyle"
     >
-  </Teleport>
+      <!-- 加载状态插槽 -->
+      <slot v-if="loadState === 'loading'" name="loading">
+        <div
+          :style="{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: '14px',
+          }"
+        >
+          加载中...
+        </div>
+      </slot>
 
-  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-    <div :style="imgStyle">
+      <!-- 错误状态插槽 -->
+      <slot v-else-if="loadState === 'error'" name="error">
+        <div
+          :style="{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: '14px',
+          }"
+        >
+          加载失败
+        </div>
+      </slot>
+
+      <!-- 预览图片 -->
       <img
-        ref="imgRef"
-        :src="src"
+        ref="previewRef"
+        :src="previewSrc || src"
         :alt="alt"
-        style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
-        @click="toggleDisplay"
+        :style="previewImageStyle"
+        draggable="false"
+        @load="handleImageLoad"
+        @error="handleImageError"
       >
+
+      <!-- 工具栏插槽 -->
+      <slot
+        name="toolbar"
+        :zoom="zoom"
+        :zoom-in="zoomIn"
+        :zoom-out="zoomOut"
+        :reset="resetZoom"
+        :close="closePreview"
+        :can-zoom-in="canZoomIn"
+        :can-zoom-out="canZoomOut"
+      />
     </div>
-    <span v-if="alt" style="font-size: 0.8rem; color: #666;">{{ alt }}</span>
-  </div>
+  </Teleport>
 </template>

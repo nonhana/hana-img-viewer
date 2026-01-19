@@ -1,6 +1,11 @@
-export * from './modules/addPassive'
-export * from './modules/getDistance'
-export * from './modules/getHighestZIndex'
-export * from './modules/getTargetPosition'
-export * from './modules/preventDefault'
-export * from './modules/setDomStyles'
+/**
+ * 工具函数入口
+ *
+ * 提供通用的辅助函数
+ */
+
+// ===== 通用工具 =====
+export * from './helpers'
+
+// ===== 数学工具 =====
+export * from './math'
