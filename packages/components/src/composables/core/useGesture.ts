@@ -203,31 +203,26 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
   const cleanupFns: (() => void)[] = []
 
   // ===== 拖拽手势 =====
-  const { isDragging: dragState, stop: stopDrag } = useDrag({
+  const { isDragging: dragState, cancel: cancelDrag, stop: stopDrag } = useDrag({
     target,
     enabled: () => toValue(enabled) && toValue(enableDrag) && !isPinching.value,
-    onDragStart: (state) => {
-      // 双击检测
-      if (onDoubleClick) {
-        const isDoubleClick = doubleClickDetector.detect(state.position)
-        if (isDoubleClick) {
-          onDoubleClick(state.position, state.event as unknown as MouseEvent)
-          return
-        }
+    filter: (event) => {
+      if (!onDoubleClick)
+        return true
+
+      const position = { x: event.clientX, y: event.clientY }
+      const isDoubleClick = doubleClickDetector.detect(position)
+
+      if (isDoubleClick) {
+        onDoubleClick(position, event)
+        return false
       }
 
-      isDragging.value = true
-      onDragStart?.(state)
+      return true
     },
-    onDrag: (state) => {
-      onDrag?.(state)
-    },
-    onDragEnd: (state) => {
-      isDragging.value = false
-      onDragEnd?.(state)
-    },
-    // 触摸设备上，单指拖拽不阻止默认行为，允许页面滚动
-    // 只有在预览打开时才阻止
+    onDragStart,
+    onDrag,
+    onDragEnd,
     preventDefault: true,
     pointerTypes: ['mouse', 'touch', 'pen'],
   })
@@ -238,20 +233,12 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
     target,
     enabled: () => toValue(enabled) && toValue(enablePinch),
     onPinchStart: (state) => {
-      isPinching.value = true
-      // 如果正在拖拽，强制结束
-      if (isDragging.value) {
-        isDragging.value = false
-      }
+      // 手势冲突：双指缩放开始时取消正在进行的拖拽
+      cancelDrag()
       onPinchStart?.(state)
     },
-    onPinch: (state) => {
-      onPinch?.(state)
-    },
-    onPinchEnd: (state) => {
-      isPinching.value = false
-      onPinchEnd?.(state)
-    },
+    onPinch,
+    onPinchEnd,
   })
   cleanupFns.push(stopPinch)
 
@@ -260,19 +247,11 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
     target,
     enabled: () => toValue(enabled) && toValue(enableWheel),
     zoomRatio: wheelZoomRatio,
-    onWheel: (state) => {
-      isWheeling.value = true
-      onWheel?.(state)
-
-      // 延迟重置滚轮状态
-      setTimeout(() => {
-        isWheeling.value = false
-      }, 150)
-    },
+    onWheel,
   })
   cleanupFns.push(stopWheel)
 
-  // 同步内部状态
+  // Single Source of Truth
   watch(dragState, v => isDragging.value = v)
   watch(pinchState, v => isPinching.value = v)
   watch(wheelState, v => isWheeling.value = v)

@@ -36,6 +36,16 @@ export interface UseDragOptions {
    */
   enabled?: MaybeRefOrGetter<boolean>
   /**
+   * 拖拽过滤器，在拖拽开始前调用
+   *
+   * 返回 `false` 可阻止本次拖拽（不会触发 onDragStart，isDragging 不会变为 true）。
+   * 这对于实现双击检测等需要"拦截"拖拽开始的场景非常有用。
+   *
+   * @param event - 原始 PointerEvent
+   * @returns 是否允许开始拖拽
+   */
+  filter?: (event: PointerEvent) => boolean
+  /**
    * 拖拽开始回调
    */
   onDragStart?: (state: DragState) => void
@@ -72,6 +82,8 @@ export interface UseDragReturn {
   isDragging: Readonly<Ref<boolean>>
   /** 当前偏移量 */
   offset: Readonly<Ref<Point>>
+  /** 取消当前正在进行的拖拽（不会触发 onDragEnd） */
+  cancel: () => void
   /** 停止拖拽监听 */
   stop: () => void
 }
@@ -108,6 +120,7 @@ export function useDrag(options: UseDragOptions): UseDragReturn {
   const {
     target,
     enabled = true,
+    filter,
     onDragStart,
     onDrag,
     onDragEnd,
@@ -178,6 +191,10 @@ export function useDrag(options: UseDragOptions): UseDragReturn {
 
     // 如果已经有活动的指针，忽略新的
     if (activePointerId !== null)
+      return
+
+    // 过滤器检查：返回 false 可阻止拖拽开始
+    if (filter && !filter(event))
       return
 
     // 阻止默认行为和冒泡
@@ -338,12 +355,43 @@ export function useDrag(options: UseDragOptions): UseDragReturn {
   }
 
   /**
+   * 取消当前正在进行的拖拽
+   *
+   * 与正常结束拖拽不同，cancel 不会触发 onDragEnd 回调。
+   * 用于手势冲突场景，如双指缩放开始时需要立即取消拖拽。
+   */
+  const cancel = (): void => {
+    if (!isDragging.value)
+      return
+
+    // 释放指针捕获
+    const el = toValue(target)
+    if (el && activePointerId !== null) {
+      try {
+        el.releasePointerCapture(activePointerId)
+      }
+      catch {
+        // 可能已经被释放
+      }
+    }
+
+    // 取消待执行的 RAF
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
+    }
+
+    // 重置状态
+    isDragging.value = false
+    activePointerId = null
+  }
+
+  /**
    * 停止拖拽监听
    */
   const stop = (): void => {
+    cancel()
     cleanup()
-    isDragging.value = false
-    activePointerId = null
   }
 
   // 初始化
@@ -355,6 +403,7 @@ export function useDrag(options: UseDragOptions): UseDragReturn {
   return {
     isDragging: readonly(isDragging),
     offset: readonly(offset),
+    cancel,
     stop,
   }
 }

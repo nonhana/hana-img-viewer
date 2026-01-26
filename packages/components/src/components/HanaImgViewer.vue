@@ -197,7 +197,7 @@ const previewImageStyle = computed<CSSProperties>(() => ({
   maxWidth: '90vw',
   maxHeight: '90vh',
   objectFit: 'contain',
-  cursor: isInteracting.value ? 'grabbing' : 'grab',
+  cursor: isAnimating.value ? 'default' : isInteracting.value ? 'grabbing' : 'grab',
   transform: transformStyle.value,
   transformOrigin: 'center center',
   willChange: isInteracting.value ? 'transform' : 'auto',
