@@ -221,11 +221,9 @@ export function useFLIP(options: UseFLIPOptions = {}): UseFLIPReturn {
     const keyframes: Keyframe[] = [
       {
         transform: `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`,
-        opacity: 0.8,
       },
       {
         transform: 'translate(0, 0) scale(1, 1)',
-        opacity: 1,
       },
     ]
 
@@ -268,11 +266,9 @@ export function useFLIP(options: UseFLIPOptions = {}): UseFLIPReturn {
     const keyframes: Keyframe[] = [
       {
         transform: `translate(${startX}px, ${startY}px) scale(${startScale})`,
-        opacity: 1,
       },
       {
         transform: `translate(${endX}px, ${endY}px) scale(${scaleX}, ${scaleY})`,
-        opacity: 0.8,
       },
     ]
 

@@ -41,6 +41,9 @@ const isOpen = useControllable({
   },
 })
 
+// 遮罩层单独管理
+const isMaskOpen = ref(false)
+
 // ===== 缩放管理 =====
 const {
   zoom,
@@ -173,11 +176,11 @@ const maskStyle = computed<CSSProperties>(() => ({
   position: 'fixed',
   inset: 0,
   backgroundColor: props.maskColor,
-  opacity: isOpen.value ? props.maskOpacity : 0,
   zIndex: props.zIndex - 1,
-  transition: `opacity ${props.duration}ms ${props.easing}`,
-  cursor: 'pointer',
-}))
+  opacity: props.maskOpacity,
+} as CSSProperties))
+
+const maskDuration = computed(() => `${props.duration}ms`)
 
 // ===== 预览图样式 =====
 const previewContainerStyle = computed<CSSProperties>(() => ({
@@ -217,6 +220,7 @@ async function openPreview(): Promise<void> {
   lockScroll()
 
   // 显示预览
+  isMaskOpen.value = true
   isOpen.value = true
 
   // 等待 DOM 更新
@@ -242,6 +246,7 @@ async function closePreview(): Promise<void> {
   // 取消正在进行的动画
   cancelAnimation()
 
+  isMaskOpen.value = false
   if (!thumbnailRef.value || !previewRef.value) {
     isOpen.value = false
     unlockScroll()
@@ -336,11 +341,13 @@ defineExpose({
 
   <!-- 遮罩层 -->
   <Teleport v-if="isMounted" to="body">
-    <div
-      v-if="isOpen"
-      :style="maskStyle"
-      @click="handleMaskClick"
-    />
+    <Transition name="hana-mask-fade">
+      <div
+        v-if="isMaskOpen"
+        :style="maskStyle"
+        @click="handleMaskClick"
+      />
+    </Transition>
   </Teleport>
 
   <!-- 预览图容器 -->
@@ -406,3 +413,18 @@ defineExpose({
     </div>
   </Teleport>
 </template>
+
+<style>
+.hana-mask-fade-enter-active,
+.hana-mask-fade-leave-active {
+  transition: opacity v-bind('maskDuration') v-bind('props.easing');
+}
+.hana-mask-fade-enter-from,
+.hana-mask-fade-leave-to {
+  opacity: 0 !important;
+}
+.hana-mask-fade-enter-to,
+.hana-mask-fade-leave-from {
+  opacity: v-bind('props.maskOpacity') !important;
+}
+</style>
