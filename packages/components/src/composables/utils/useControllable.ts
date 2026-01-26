@@ -83,39 +83,3 @@ export function useControllable<T>(
 
   return state
 }
-
-/**
- * 使用 v-model 的简化版本
- *
- * 专门为 Vue 的 v-model 设计，自动处理 `update:xxx` 事件
- *
- * @param props - 组件 props
- * @param key - prop 键名
- * @param emit - emit 函数
- * @param defaultValue - 默认值
- * @returns 可读写的 Ref
- *
- * @example
- * ```ts
- * const props = defineProps<{ modelValue?: string }>()
- * const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
- *
- * const value = useVModel(props, 'modelValue', emit, '')
- * ```
- */
-export function useVModel<
-  P extends Record<string, unknown>,
-  K extends keyof P,
-  E extends (event: `update:${K & string}`, value: P[K]) => void,
->(
-  props: P,
-  key: K,
-  emit: E,
-  defaultValue: NonNullable<P[K]>,
-): WritableComputedRef<NonNullable<P[K]>> {
-  return useControllable({
-    prop: () => props[key] as NonNullable<P[K]> | undefined,
-    defaultValue,
-    onChange: value => emit(`update:${key as string}` as `update:${K & string}`, value as P[K]),
-  }) as WritableComputedRef<NonNullable<P[K]>>
-}

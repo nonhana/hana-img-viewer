@@ -167,26 +167,20 @@ export function useFLIP(options: UseFLIPOptions = {}): UseFLIPReturn {
     onStart?.()
 
     try {
-      // 创建动画
       currentAnimation = element.animate(keyframes, {
         duration: toValue(duration),
         easing: toValue(easing),
         fill: 'forwards',
       })
 
-      // 等待动画完成
       await currentAnimation.finished
 
-      // 关键：动画完成后，需要清除 fill: 'forwards' 的效果
-      // 否则动画的 transform 会覆盖 Vue 的内联样式
-      // commitStyles() 将动画最终状态写入元素的内联样式
-      // cancel() 移除动画的填充效果，让 Vue 的响应式样式生效
       if (currentAnimation) {
         currentAnimation.commitStyles()
         currentAnimation.cancel()
       }
 
-      // 动画成功完成
+      // 动画完成回调
       onFinish?.()
     }
     catch (error) {
@@ -282,98 +276,6 @@ export function useFLIP(options: UseFLIPOptions = {}): UseFLIPReturn {
     isAnimating: readonly(isAnimating),
     flip,
     flipReverse,
-    cancel,
-  }
-}
-
-/**
- * 创建简单的淡入淡出动画
- *
- * 用于遮罩层等不需要 FLIP 的元素
- */
-export function useFade(options: UseFLIPOptions = {}) {
-  const {
-    duration = 300,
-    easing = 'ease-out',
-    onStart,
-    onFinish,
-  } = options
-
-  const isAnimating = ref(false)
-  let currentAnimation: Animation | null = null
-
-  const fadeIn = async (element: HTMLElement): Promise<void> => {
-    currentAnimation?.cancel()
-    isAnimating.value = true
-    onStart?.()
-
-    currentAnimation = element.animate(
-      [
-        { opacity: 0 },
-        { opacity: 1 },
-      ],
-      {
-        duration: toValue(duration),
-        easing: toValue(easing),
-        fill: 'forwards',
-      },
-    )
-
-    try {
-      await currentAnimation.finished
-      onFinish?.()
-    }
-    catch {
-      // 动画被取消
-    }
-    finally {
-      currentAnimation = null
-      isAnimating.value = false
-    }
-  }
-
-  const fadeOut = async (element: HTMLElement): Promise<void> => {
-    currentAnimation?.cancel()
-    isAnimating.value = true
-    onStart?.()
-
-    currentAnimation = element.animate(
-      [
-        { opacity: 1 },
-        { opacity: 0 },
-      ],
-      {
-        duration: toValue(duration),
-        easing: toValue(easing),
-        fill: 'forwards',
-      },
-    )
-
-    try {
-      await currentAnimation.finished
-      onFinish?.()
-    }
-    catch {
-      // 动画被取消
-    }
-    finally {
-      currentAnimation = null
-      isAnimating.value = false
-    }
-  }
-
-  const cancel = (): void => {
-    currentAnimation?.cancel()
-    currentAnimation = null
-    isAnimating.value = false
-  }
-
-  tryOnScopeDispose(cancel)
-
-  return {
-    isAnimating: readonly(isAnimating),
-    fadeIn,
-    fadeOut,
     cancel,
   }
 }

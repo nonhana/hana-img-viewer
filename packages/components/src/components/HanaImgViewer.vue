@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import type { DragState, PinchState, WheelState } from '../composables/core'
-import type { Point } from '../types/utils'
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useFLIP, useGesture, useTransform, useZoom } from '../composables/core'
 import { useControllable, useEventListener, useScrollLock } from '../composables/utils'
@@ -121,22 +119,22 @@ const {
   enablePinch: () => props.enablePinch,
   enableWheel: () => props.enableZoom,
   wheelZoomRatio: () => props.wheelZoomRatio,
-  onDrag: (state: DragState) => {
+  onDrag: (state) => {
     pan(state.delta)
   },
-  onPinch: (state: PinchState) => {
+  onPinch: (state) => {
     // 双指缩放：以双指中心点为锚点
     const newScale = transform.value.scale * state.deltaScale
     zoomAt(newScale, state.center)
     zoom.value = newScale
   },
-  onWheel: (state: WheelState) => {
+  onWheel: (state) => {
     // 滚轮缩放：以光标位置为锚点
     const newScale = transform.value.scale + state.delta
     zoomAt(newScale, state.center)
     zoom.value = newScale
   },
-  onDoubleClick: (position: Point) => {
+  onDoubleClick: (position) => {
     if (!props.enableDoubleClick)
       return
     toggleDoubleClickZoom()
@@ -149,7 +147,7 @@ const {
 useEventListener(
   () => (isOpen.value && props.enableKeyboard) ? window : null,
   'keydown',
-  (event: KeyboardEvent) => {
+  (event) => {
     if (event.key === 'Escape') {
       closePreview()
     }
@@ -199,7 +197,7 @@ const previewImageStyle = computed<CSSProperties>(() => ({
   objectFit: 'contain',
   cursor: isAnimating.value ? 'default' : isInteracting.value ? 'grabbing' : 'grab',
   transform: transformStyle.value,
-  transformOrigin: 'center center',
+  transformOrigin: 'center',
   willChange: isInteracting.value ? 'transform' : 'auto',
   pointerEvents: 'auto',
   userSelect: 'none',
