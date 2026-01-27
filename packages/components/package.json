@@ -36,6 +36,7 @@
     "prepublish": "pnpm build"
   },
   "devDependencies": {
+    "vite-plugin-css-injected-by-js": "catalog:",
     "vite-plugin-dts": "catalog:"
   }
 }
