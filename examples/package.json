@@ -1,12 +1,7 @@
 {
   "name": "examples",
   "type": "module",
-  "version": "1.0.0",
   "private": "true",
-  "description": "",
-  "author": "",
-  "license": "ISC",
-  "keywords": [],
   "scripts": {
     "dev": "vite",
     "postinstall": "pnpm --filter hana-img-viewer build",
