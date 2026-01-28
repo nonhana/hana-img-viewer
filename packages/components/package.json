@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "prepublish": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "vite-plugin-css-injected-by-js": "catalog:",
