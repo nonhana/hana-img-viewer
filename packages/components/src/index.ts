@@ -25,11 +25,9 @@ export {
 } from './composables/utils'
 
 // ===== 类型导出 =====
-// Props 默认值和定义对象（用于扩展组件）
+// Props 默认值
 export {
-  imagePreviewEmitsObj,
   imagePreviewPropsDefaults,
-  imagePreviewPropsObj,
 } from './types'
 
 export type {
