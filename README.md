@@ -11,6 +11,7 @@ A lightweight and elegant image previewer for Vue 3 with smooth FLIP animations 
 - **TypeScript**: Full type safety with complete type definitions
 - **SSR Friendly**: Works seamlessly with server-side rendering
 - **Lightweight**: Only ~5KB gzipped
+- **Flexible Styling**: Style the thumbnail container and image separately
 - **Vue 3 Composition API**: Built with modern Vue 3 patterns
 
 ## Installation
@@ -73,8 +74,10 @@ Then use in any component:
 | `src` | `string` | - | **Required**. Image URL. |
 | `alt` | `string` | `''` | Alternative text for the image. |
 | `previewSrc` | `string` | - | High-resolution image URL for preview (defaults to `src`). |
-| `width` | `string \| number` | - | Thumbnail width. |
-| `height` | `string \| number` | - | Thumbnail height. |
+| `containerClass` | `HTMLAttributes['class']` | - | Extra class for the thumbnail container. |
+| `containerStyle` | `StyleValue` | - | Extra style for the thumbnail container. |
+| `thumbnailClass` | `HTMLAttributes['class']` | - | Extra class for the thumbnail image. |
+| `thumbnailStyle` | `StyleValue` | - | Extra style for the thumbnail image. |
 | `duration` | `number` | `300` | Animation duration in milliseconds. |
 | `easing` | `string` | `'cubic-bezier(0.4, 0, 0.2, 1)'` | Animation easing function. |
 | `maskColor` | `string` | `'#000'` | Mask background color. |
@@ -206,6 +209,20 @@ const zoom = ref(1)
       </div>
     </template>
   </HanaImgViewer>
+</template>
+```
+
+### Thumbnail Styling
+
+```vue
+<template>
+  <HanaImgViewer
+    src="/image.jpg"
+    container-class="inline-block overflow-hidden rounded-2xl"
+    :container-style="{ width: '240px', aspectRatio: '4 / 3' }"
+    thumbnail-class="transition-transform duration-300"
+    :thumbnail-style="{ width: '100%', height: '100%', objectFit: 'cover' }"
+  />
 </template>
 ```
 
