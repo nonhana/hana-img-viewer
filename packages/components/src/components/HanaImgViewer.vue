@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import type { CSSProperties } from 'vue'
-import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import type { CSSProperties, HTMLAttributes, StyleValue } from 'vue'
+import type { ImagePreviewEmits, ImagePreviewProps } from '../types'
+import { computed, getCurrentInstance, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useFLIP, useGesture, useTransform, useZoom } from '../composables/core'
 import { useControllable, useEventListener, useScrollLock } from '../composables/utils'
-import { imagePreviewEmitsObj, imagePreviewPropsObj } from '../types'
+import { imagePreviewPropsDefaults } from '../types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
-const props = defineProps(imagePreviewPropsObj)
-const emit = defineEmits(imagePreviewEmitsObj)
+const props = withDefaults(defineProps<ImagePreviewProps>(), imagePreviewPropsDefaults)
+const emit = defineEmits<ImagePreviewEmits>()
+const instance = getCurrentInstance()
 
 // ===== 模板引用 =====
 const thumbnailRef = useTemplateRef('thumbnailRef')
@@ -27,6 +29,11 @@ onMounted(() => {
 // ===== 受控状态管理 =====
 const isOpen = useControllable({
   prop: () => props.open,
+  isControlled: () => {
+    const vnodeProps = instance?.vnode.props ?? {}
+    return Object.hasOwn(vnodeProps, 'open')
+      || Object.hasOwn(vnodeProps, 'onUpdate:open')
+  },
   defaultValue: false,
   onChange: (value) => {
     emit('update:open', value)
@@ -155,19 +162,32 @@ useEventListener(
 )
 
 // ===== 缩略图样式 =====
-const thumbnailContainerStyle = computed<CSSProperties>(() => ({
+const thumbnailContainerBaseStyle = computed<CSSProperties>(() => ({
   display: 'inline-block',
-  width: typeof props.width === 'number' ? `${props.width}px` : props.width,
-  height: typeof props.height === 'number' ? `${props.height}px` : props.height,
 }))
 
-const thumbnailStyle = computed<CSSProperties>(() => ({
+const mergedThumbnailContainerStyle = computed<StyleValue>(() => [
+  thumbnailContainerBaseStyle.value,
+  props.containerStyle,
+])
+
+const thumbnailBaseStyle = computed<CSSProperties>(() => ({
+  display: 'block',
   width: '100%',
   height: '100%',
   objectFit: 'cover',
   cursor: 'pointer',
   visibility: isOpen.value ? 'hidden' : 'visible',
 }))
+
+const thumbnailContainerClass = computed<HTMLAttributes['class']>(() => props.containerClass)
+
+const thumbnailClass = computed<HTMLAttributes['class']>(() => props.thumbnailClass)
+
+const mergedThumbnailStyle = computed<StyleValue>(() => [
+  thumbnailBaseStyle.value,
+  props.thumbnailStyle,
+])
 
 // ===== 遮罩样式 =====
 const maskStyle = computed<CSSProperties>(() => ({
@@ -324,14 +344,15 @@ defineExpose({
 </script>
 
 <template>
-  <div :style="thumbnailContainerStyle">
+  <div :class="thumbnailContainerClass" :style="mergedThumbnailContainerStyle">
     <!-- 缩略图插槽 -->
     <slot name="thumbnail" :open="openPreview">
       <img
         ref="thumbnailRef"
         :src="src"
         :alt="alt"
-        :style="thumbnailStyle"
+        :class="thumbnailClass"
+        :style="mergedThumbnailStyle"
         @click="openPreview"
       >
     </slot>
