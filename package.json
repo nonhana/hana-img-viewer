@@ -5,8 +5,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "pnpm -F hana-img-viewer build",
-    "changeset": "changeset",
-    "version": "changeset version",
     "release": "pnpm build && changeset publish"
   },
   "dependencies": {
