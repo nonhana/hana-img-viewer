@@ -125,6 +125,7 @@ const {
   enableDrag: () => props.enableDrag,
   enablePinch: () => props.enablePinch,
   enableWheel: () => props.enableZoom,
+  enableGlobalZoom: () => props.enableGlobalZoom,
   wheelZoomRatio: () => props.wheelZoomRatio,
   onDrag: (state) => {
     pan(state.delta)

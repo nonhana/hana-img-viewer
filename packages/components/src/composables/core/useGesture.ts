@@ -43,6 +43,15 @@ export interface UseGestureOptions {
    */
   enableWheel?: MaybeRefOrGetter<boolean>
   /**
+   * 是否启用全局缩放监听（wheel / pinch）
+   *
+   * 开启后，当手势功能启用时会将缩放监听目标切换为 window，
+   * 从而支持光标或双指中心在图片元素外时继续缩放。
+   *
+   * @default false
+   */
+  enableGlobalZoom?: MaybeRefOrGetter<boolean>
+  /**
    * 滚轮缩放系数
    * @default 1
    */
@@ -180,6 +189,7 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
     enableDrag = true,
     enablePinch = true,
     enableWheel = true,
+    enableGlobalZoom = false,
     wheelZoomRatio = 1,
     onDrag,
     onDragStart,
@@ -201,6 +211,17 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
 
   // 清理函数
   const cleanupFns: (() => void)[] = []
+
+  /**
+   * 缩放手势（wheel / pinch）的事件目标
+   *
+   * 默认使用图片元素本身；当启用全局缩放后，在手势启用期间切换为 window。
+   */
+  const zoomEventTarget = (): EventTarget | null | undefined => {
+    if (!toValue(enableGlobalZoom))
+      return toValue(target)
+    return toValue(enabled) ? window : null
+  }
 
   // ===== 拖拽手势 =====
   const { isDragging: dragState, cancel: cancelDrag, stop: stopDrag } = useDrag({
@@ -230,7 +251,7 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
 
   // ===== 双指缩放 =====
   const { isPinching: pinchState, stop: stopPinch } = usePinch({
-    target,
+    target: zoomEventTarget,
     enabled: () => toValue(enabled) && toValue(enablePinch),
     onPinchStart: (state) => {
       // 手势冲突：双指缩放开始时取消正在进行的拖拽
@@ -244,7 +265,7 @@ export function useGesture(options: UseGestureOptions): UseGestureReturn {
 
   // ===== 滚轮缩放 =====
   const { isWheeling: wheelState, stop: stopWheel } = useWheel({
-    target,
+    target: zoomEventTarget,
     enabled: () => toValue(enabled) && toValue(enableWheel),
     zoomRatio: wheelZoomRatio,
     onWheel,

@@ -85,6 +85,12 @@ export interface ImagePreviewProps {
    */
   enablePinch?: boolean
   /**
+   * 启用全局缩放监听
+   *
+   * 开启后，预览打开时支持在图片元素外使用滚轮或双指继续缩放。
+   */
+  enableGlobalZoom?: boolean
+  /**
    * 启用双击缩放
    */
   enableDoubleClick?: boolean
@@ -120,6 +126,7 @@ type ImagePreviewDefaultProps = Required<Pick<ImagePreviewProps, | 'alt'
   | 'enableZoom'
   | 'enableDrag'
   | 'enablePinch'
+  | 'enableGlobalZoom'
   | 'enableDoubleClick'
   | 'enableKeyboard'
   | 'closeOnMaskClick'>>
@@ -143,6 +150,7 @@ export const imagePreviewPropsDefaults = {
   enableZoom: true,
   enableDrag: true,
   enablePinch: true,
+  enableGlobalZoom: true,
   enableDoubleClick: true,
   enableKeyboard: true,
   closeOnMaskClick: true,

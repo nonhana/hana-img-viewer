@@ -30,9 +30,9 @@ export interface PinchState {
  */
 export interface UsePinchOptions {
   /**
-   * 监听目标元素
+   * 监听目标（元素 / window / document）
    */
-  target: MaybeRefOrGetter<HTMLElement | null | undefined>
+  target: MaybeRefOrGetter<EventTarget | null | undefined>
   /**
    * 是否启用双指缩放
    * @default true
@@ -280,7 +280,7 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
     const { stop: stopTouchStart } = useEventListener(
       target,
       'touchstart',
-      handleTouchStart,
+      evt => handleTouchStart(evt as TouchEvent),
       { passive: false },
     )
     cleanupFns.push(stopTouchStart)
@@ -288,7 +288,7 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
     const { stop: stopTouchMove } = useEventListener(
       target,
       'touchmove',
-      handleTouchMove,
+      evt => handleTouchMove(evt as TouchEvent),
       { passive: false },
     )
     cleanupFns.push(stopTouchMove)
@@ -296,14 +296,14 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
     const { stop: stopTouchEnd } = useEventListener(
       target,
       'touchend',
-      handleTouchEnd,
+      evt => handleTouchEnd(evt as TouchEvent),
     )
     cleanupFns.push(stopTouchEnd)
 
     const { stop: stopTouchCancel } = useEventListener(
       target,
       'touchcancel',
-      handleTouchEnd,
+      evt => handleTouchEnd(evt as TouchEvent),
     )
     cleanupFns.push(stopTouchCancel)
   }

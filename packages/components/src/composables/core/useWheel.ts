@@ -23,9 +23,9 @@ export interface WheelState {
  */
 export interface UseWheelOptions {
   /**
-   * 监听目标元素
+   * 监听目标（元素 / window / document）
    */
-  target: MaybeRefOrGetter<HTMLElement | null | undefined>
+  target: MaybeRefOrGetter<EventTarget | null | undefined>
   /**
    * 是否启用滚轮缩放
    * @default true
@@ -246,7 +246,7 @@ export function useWheel(options: UseWheelOptions): UseWheelReturn {
     const { stop: stopWheel } = useEventListener(
       target,
       'wheel',
-      handleWheel,
+      evt => handleWheel(evt as WheelEvent),
       { passive: false },
     )
     cleanupFns.push(stopWheel)
