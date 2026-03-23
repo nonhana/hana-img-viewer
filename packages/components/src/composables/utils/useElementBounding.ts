@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import { readonly, ref, toValue, watch } from 'vue'
-import { isClient, tryOnScopeDispose } from '../../utils/helpers'
+import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 
 /**
  * useElementBounding 选项

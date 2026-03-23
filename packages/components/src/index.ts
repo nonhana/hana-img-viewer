@@ -1,5 +1,5 @@
 import type { App } from 'vue'
-import HanaImgViewer from './components/HanaImgViewer.vue'
+import HanaImgViewer from '@/components/HanaImgViewer.vue'
 
 // ===== 组件导出 =====
 export { HanaImgViewer }

@@ -1,8 +1,8 @@
 import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue'
-import type { Bounds, Point, Transform } from '../../types/utils'
+import type { Bounds, Point, Transform } from '@/types/utils'
 import { computed, readonly, ref, toValue } from 'vue'
-import { clamp } from '../../utils/helpers'
-import { getZoomAnchoredPosition } from '../../utils/math'
+import { clamp } from '@/utils/helpers'
+import { getZoomAnchoredPosition } from '@/utils/math'
 
 /**
  * useTransform 选项

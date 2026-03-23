@@ -1,4 +1,4 @@
-import type { Point, Size } from '../types/utils'
+import type { Point, Size } from '@/types/utils'
 
 /**
  * 计算两点之间的距离

@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import { readonly, ref, toValue } from 'vue'
-import { tryOnScopeDispose } from '../../utils/helpers'
+import { tryOnScopeDispose } from '@/utils/helpers'
 
 /**
  * FLIP 动画选项

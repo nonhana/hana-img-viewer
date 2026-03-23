@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { CSSProperties, HTMLAttributes, StyleValue } from 'vue'
-import type { ImagePreviewEmits, ImagePreviewProps } from '../types'
+import type { ImagePreviewEmits, ImagePreviewProps } from '@/types'
 import { computed, getCurrentInstance, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
-import { useFLIP, useGesture, useTransform, useZoom } from '../composables/core'
-import { useControllable, useEventListener, useScrollLock } from '../composables/utils'
-import { imagePreviewPropsDefaults } from '../types'
+import { useFLIP, useGesture, useTransform, useZoom } from '@/composables/core'
+import { useControllable, useEventListener, useScrollLock } from '@/composables/utils'
+import { imagePreviewPropsDefaults } from '@/types'
 
 defineOptions({ name: 'HanaImgViewer' })
 

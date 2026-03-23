@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import { readonly, ref, toValue } from 'vue'
-import { isClient, tryOnScopeDispose } from '../../utils/helpers'
+import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 
 /**
  * useScrollLock 返回值

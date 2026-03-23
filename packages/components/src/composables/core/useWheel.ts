@@ -1,7 +1,7 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
-import type { Point } from '../../types/utils'
+import type { Point } from '@/types/utils'
 import { readonly, ref, toValue } from 'vue'
-import { isClient, tryOnScopeDispose } from '../../utils/helpers'
+import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 import { useEventListener } from '../utils/useEventListener'
 
 /**
