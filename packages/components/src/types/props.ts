@@ -1,9 +1,9 @@
 import type { HTMLAttributes, StyleValue } from 'vue'
 
 /**
- * 图片预览组件 Props 类型
+ * 组件 Props 类型
  */
-export interface ImagePreviewProps {
+export interface PropsType {
   /**
    * 图片 URL（必需）
    */
@@ -13,7 +13,7 @@ export interface ImagePreviewProps {
    */
   alt?: string
   /**
-   * 高分辨率预览图 URL（可选，默认使用 `src`）
+   * 高分辨率图片 URL（可选，默认使用 `src`）
    */
   previewSrc?: string
   /**
@@ -112,7 +112,7 @@ export interface ImagePreviewProps {
   zoom?: number
 }
 
-type ImagePreviewDefaultProps = Required<Pick<ImagePreviewProps, | 'alt'
+type DefaultPropsType = Required<Pick<PropsType, | 'alt'
   | 'duration'
   | 'easing'
   | 'maskOpacity'
@@ -132,10 +132,9 @@ type ImagePreviewDefaultProps = Required<Pick<ImagePreviewProps, | 'alt'
   | 'closeOnMaskClick'>>
 
 /**
- * 图片预览组件 Props 默认值
- * 用于 `withDefaults()`
+ * 组件 Props 默认值
  */
-export const imagePreviewPropsDefaults = {
+export const defaultProps = {
   alt: '',
   duration: 300,
   easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -154,9 +153,4 @@ export const imagePreviewPropsDefaults = {
   enableDoubleClick: true,
   enableKeyboard: true,
   closeOnMaskClick: true,
-} as const satisfies ImagePreviewDefaultProps
-
-/**
- * 图片加载状态
- */
-export type ImageLoadState = 'idle' | 'loading' | 'loaded' | 'error'
+} as const satisfies DefaultPropsType

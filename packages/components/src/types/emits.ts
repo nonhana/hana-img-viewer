@@ -1,9 +1,9 @@
 /**
- * 图片预览组件 Emits 类型
+ * 组件 Emits 事件类型
  */
-export interface ImagePreviewEmits {
+export interface EmitsType {
   /**
-   * 打开/关闭状态变化
+   * 打开/关闭预览状态变化
    */
   (e: 'update:open', value: boolean): void
   /**
