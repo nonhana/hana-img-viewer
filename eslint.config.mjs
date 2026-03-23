@@ -7,4 +7,7 @@ export default antfu({
   markdown: true,
   yaml: true,
   pnpm: true,
+  rules: {
+    'ts/no-use-before-define': 'off',
+  },
 })

@@ -1,7 +1,7 @@
-import type { Ref } from 'vue'
-import type { MaybeRefOrGetter, Point } from '../../types/utils'
-import { readonly, ref } from 'vue'
-import { isClient, toValue, tryOnScopeDispose } from '../../utils/helpers'
+import type { MaybeRefOrGetter, Ref } from 'vue'
+import type { Point } from '../../types/utils'
+import { readonly, ref, toValue } from 'vue'
+import { isClient, tryOnScopeDispose } from '../../utils/helpers'
 import { getDistance, getMidpoint } from '../../utils/math'
 import { useEventListener } from '../utils/useEventListener'
 
@@ -140,16 +140,6 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
       distance: getDistance(p1, p2),
       center: getMidpoint(p1, p2),
     }
-  }
-
-  /**
-   * 是否需要阻止默认行为
-   *
-   * 在某些移动端浏览器中，仅拦截元素级 touch 事件不足以阻止页面级双指缩放，
-   * 因此这里统一收敛判断，供文档级兜底监听复用。
-   */
-  const shouldPreventDefault = (): boolean => {
-    return preventDefault && toValue(enabled)
   }
 
   /**
@@ -316,55 +306,6 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
       evt => handleTouchEnd(evt as TouchEvent),
     )
     cleanupFns.push(stopTouchCancel)
-
-    /**
-     * 文档级兜底：阻止浏览器视口缩放
-     *
-     * - iOS Safari 可能通过 gesture* 触发页面缩放
-     * - 部分浏览器在触点落在目标外时不会稳定命中元素级 preventDefault
-     */
-    const preventViewportPinchByTouch = (event: Event): void => {
-      if (!shouldPreventDefault())
-        return
-
-      const touchEvent = event as TouchEvent
-      if (touchEvent.touches.length < 2)
-        return
-
-      touchEvent.preventDefault()
-    }
-
-    const preventViewportPinchByGesture = (event: Event): void => {
-      if (!shouldPreventDefault())
-        return
-      event.preventDefault()
-    }
-
-    const documentTarget = () => document
-
-    const { stop: stopDocumentTouchMove } = useEventListener(
-      documentTarget,
-      'touchmove',
-      preventViewportPinchByTouch,
-      { passive: false, capture: true },
-    )
-    cleanupFns.push(stopDocumentTouchMove)
-
-    const { stop: stopGestureStart } = useEventListener(
-      documentTarget,
-      'gesturestart',
-      preventViewportPinchByGesture,
-      { passive: false, capture: true },
-    )
-    cleanupFns.push(stopGestureStart)
-
-    const { stop: stopGestureChange } = useEventListener(
-      documentTarget,
-      'gesturechange',
-      preventViewportPinchByGesture,
-      { passive: false, capture: true },
-    )
-    cleanupFns.push(stopGestureChange)
   }
 
   /**

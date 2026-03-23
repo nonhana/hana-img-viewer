@@ -1,16 +1,3 @@
-import type { Ref } from 'vue'
-
-/**
- * VueUse 风格的类型工具
- * 支持 Ref、原始值或 Getter 函数
- */
-
-/** 可能是 Ref 或原始值 */
-export type MaybeRef<T> = T | Ref<T>
-
-/** 可能是 Ref、原始值或 Getter 函数 */
-export type MaybeRefOrGetter<T> = MaybeRef<T> | (() => T)
-
 /**
  * 二维坐标点
  */

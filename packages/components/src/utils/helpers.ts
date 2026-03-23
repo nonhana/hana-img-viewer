@@ -1,22 +1,4 @@
-import type { MaybeRefOrGetter } from '../types/utils'
-import { getCurrentScope, onScopeDispose, unref } from 'vue'
-
-/**
- * 解包 MaybeRefOrGetter 类型，获取实际值
- * 支持 Ref、原始值或 Getter 函数
- *
- * @example
- * ```ts
- * const value = toValue(ref(1)) // 1
- * const value = toValue(1) // 1
- * const value = toValue(() => 1) // 1
- * ```
- */
-export function toValue<T>(source: MaybeRefOrGetter<T>): T {
-  return typeof source === 'function'
-    ? (source as () => T)()
-    : unref(source)
-}
+import { getCurrentScope, onScopeDispose } from 'vue'
 
 /**
  * 检测是否在客户端环境（浏览器）

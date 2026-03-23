@@ -44,8 +44,6 @@ export type {
 export type {
   // 工具类型
   Bounds,
-  MaybeRef,
-  MaybeRefOrGetter,
   Point,
   Size,
   Transform,

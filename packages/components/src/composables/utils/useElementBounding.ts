@@ -1,7 +1,6 @@
-import type { Ref } from 'vue'
-import type { MaybeRefOrGetter } from '../../types/utils'
-import { readonly, ref, watch } from 'vue'
-import { isClient, toValue, tryOnScopeDispose } from '../../utils/helpers'
+import type { MaybeRefOrGetter, Ref } from 'vue'
+import { readonly, ref, toValue, watch } from 'vue'
+import { isClient, tryOnScopeDispose } from '../../utils/helpers'
 
 /**
  * useElementBounding 选项
