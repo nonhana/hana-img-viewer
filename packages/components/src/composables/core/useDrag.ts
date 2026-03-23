@@ -1,8 +1,8 @@
-import type { Ref } from 'vue'
-import type { MaybeRefOrGetter, Point } from '../../types/utils'
-import { readonly, ref } from 'vue'
-import { isClient, toValue, tryOnScopeDispose } from '../../utils/helpers'
-import { useEventListener } from '../utils/useEventListener'
+import type { MaybeRefOrGetter, Ref } from 'vue'
+import type { Point } from '@/types/utils'
+import { readonly, ref, toValue } from 'vue'
+import { useEventListener } from '@/composables/utils/useEventListener'
+import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 
 /**
  * 拖拽状态

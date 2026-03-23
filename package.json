@@ -4,6 +4,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "dev": "pnpm -F examples dev",
     "build": "pnpm -F hana-img-viewer build",
     "release": "pnpm build && changeset publish"
   },

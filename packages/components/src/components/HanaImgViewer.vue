@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { CSSProperties, HTMLAttributes, StyleValue } from 'vue'
-import type { ImagePreviewEmits, ImagePreviewProps } from '../types'
+import type { EmitsType, PropsType } from '@/types'
 import { computed, getCurrentInstance, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
-import { useFLIP, useGesture, useTransform, useZoom } from '../composables/core'
-import { useControllable, useEventListener, useScrollLock } from '../composables/utils'
-import { imagePreviewPropsDefaults } from '../types'
+import { useFLIP, useGesture, useTransform, useZoom } from '@/composables/core'
+import { useControllable, useEventListener, useScrollLock } from '@/composables/utils'
+import { defaultProps } from '@/types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
-const props = withDefaults(defineProps<ImagePreviewProps>(), imagePreviewPropsDefaults)
-const emit = defineEmits<ImagePreviewEmits>()
+const props = withDefaults(defineProps<PropsType>(), defaultProps)
+const emit = defineEmits<EmitsType>()
 const instance = getCurrentInstance()
 
 // ===== 模板引用 =====
@@ -125,6 +125,7 @@ const {
   enableDrag: () => props.enableDrag,
   enablePinch: () => props.enablePinch,
   enableWheel: () => props.enableZoom,
+  enableGlobalZoom: () => props.enableGlobalZoom,
   wheelZoomRatio: () => props.wheelZoomRatio,
   onDrag: (state) => {
     pan(state.delta)

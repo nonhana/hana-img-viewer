@@ -1,4 +1,4 @@
-import type { Point, Size } from '../types/utils'
+import type { Point } from '@/types/utils'
 
 /**
  * 计算两点之间的距离
@@ -34,72 +34,6 @@ export function getMidpoint(p1: Point, p2: Point): Point {
   return {
     x: (p1.x + p2.x) / 2,
     y: (p1.y + p2.y) / 2,
-  }
-}
-
-/**
- * 获取 DOMRect 的中心点
- *
- * @param rect - DOMRect 对象
- * @returns 矩形的中心点坐标
- *
- * @example
- * ```ts
- * const rect = element.getBoundingClientRect()
- * getRectCenter(rect) // { x: centerX, y: centerY }
- * ```
- */
-export function getRectCenter(rect: DOMRect): Point {
-  return {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2,
-  }
-}
-
-/**
- * 获取 DOMRect 的尺寸
- *
- * @param rect - DOMRect 对象
- * @returns 矩形的尺寸
- */
-export function getRectSize(rect: DOMRect): Size {
-  return {
-    width: rect.width,
-    height: rect.height,
-  }
-}
-
-/**
- * 计算保持宽高比的缩放尺寸
- * 使图片适应容器，同时保持原始宽高比
- *
- * @param originalSize - 原始尺寸
- * @param containerSize - 容器尺寸
- * @param contain - true: contain 模式（完整显示），false: cover 模式（填满容器）
- * @returns 缩放后的尺寸
- *
- * @example
- * ```ts
- * // 1000x500 的图片放入 400x400 的容器（contain 模式）
- * getScaledSize({ width: 1000, height: 500 }, { width: 400, height: 400 })
- * // { width: 400, height: 200 }
- * ```
- */
-export function getScaledSize(
-  originalSize: Size,
-  containerSize: Size,
-  contain: boolean = true,
-): Size {
-  const widthRatio = containerSize.width / originalSize.width
-  const heightRatio = containerSize.height / originalSize.height
-
-  const ratio = contain
-    ? Math.min(widthRatio, heightRatio)
-    : Math.max(widthRatio, heightRatio)
-
-  return {
-    width: originalSize.width * ratio,
-    height: originalSize.height * ratio,
   }
 }
 
@@ -163,32 +97,5 @@ export function getZoomAnchoredPosition(
   return {
     x: anchorOffset.x * (1 - ratio) + currentPos.x * ratio,
     y: anchorOffset.y * (1 - ratio) + currentPos.y * ratio,
-  }
-}
-
-/**
- * 线性插值
- *
- * @param start - 起始值
- * @param end - 结束值
- * @param t - 插值因子（0-1）
- * @returns 插值结果
- */
-export function lerp(start: number, end: number, t: number): number {
-  return start + (end - start) * t
-}
-
-/**
- * 二维点的线性插值
- *
- * @param p1 - 起始点
- * @param p2 - 结束点
- * @param t - 插值因子（0-1）
- * @returns 插值后的点
- */
-export function lerpPoint(p1: Point, p2: Point, t: number): Point {
-  return {
-    x: lerp(p1.x, p2.x, t),
-    y: lerp(p1.y, p2.y, t),
   }
 }

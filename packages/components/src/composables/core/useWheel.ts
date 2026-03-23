@@ -1,7 +1,7 @@
-import type { Ref } from 'vue'
-import type { MaybeRefOrGetter, Point } from '../../types/utils'
-import { readonly, ref } from 'vue'
-import { isClient, toValue, tryOnScopeDispose } from '../../utils/helpers'
+import type { MaybeRefOrGetter, Ref } from 'vue'
+import type { Point } from '@/types/utils'
+import { readonly, ref, toValue } from 'vue'
+import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 import { useEventListener } from '../utils/useEventListener'
 
 /**
@@ -23,9 +23,9 @@ export interface WheelState {
  */
 export interface UseWheelOptions {
   /**
-   * 监听目标元素
+   * 监听目标（元素 / window / document）
    */
-  target: MaybeRefOrGetter<HTMLElement | null | undefined>
+  target: MaybeRefOrGetter<EventTarget | null | undefined>
   /**
    * 是否启用滚轮缩放
    * @default true
@@ -246,7 +246,7 @@ export function useWheel(options: UseWheelOptions): UseWheelReturn {
     const { stop: stopWheel } = useEventListener(
       target,
       'wheel',
-      handleWheel,
+      evt => handleWheel(evt as WheelEvent),
       { passive: false },
     )
     cleanupFns.push(stopWheel)

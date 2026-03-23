@@ -1,7 +1,7 @@
-import type { ComputedRef, Ref } from 'vue'
-import type { MaybeRefOrGetter, Point } from '../../types/utils'
-import { computed, ref, watch } from 'vue'
-import { clamp, toValue } from '../../utils/helpers'
+import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue'
+import type { Point } from '@/types/utils'
+import { computed, ref, toValue, watch } from 'vue'
+import { clamp } from '@/utils/helpers'
 
 /**
  * useZoom 选项

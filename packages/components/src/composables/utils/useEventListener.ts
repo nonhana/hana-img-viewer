@@ -1,6 +1,6 @@
-import type { MaybeRefOrGetter } from '../../types/utils'
-import { watch } from 'vue'
-import { toValue, tryOnScopeDispose } from '../../utils/helpers'
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue, watch } from 'vue'
+import { tryOnScopeDispose } from '@/utils/helpers'
 
 /**
  * 事件监听选项
