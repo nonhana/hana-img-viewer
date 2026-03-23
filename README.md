@@ -6,25 +6,15 @@ A lightweight and elegant image previewer for Vue 3 with smooth FLIP animations 
 
 - **FLIP Animation**: Smooth transition from thumbnail to preview using the FLIP animation technique
 - **Touch Gestures**: Drag, pan, and pinch-to-zoom with natural physics
-- **Mouse Support**: Wheel zoom (anchored at cursor position), drag to pan, double-click to zoom
-- **Keyboard Support**: Press `ESC` to close preview
 - **TypeScript**: Full type safety with complete type definitions
 - **SSR Friendly**: Works seamlessly with server-side rendering
 - **Lightweight**: Only ~5KB gzipped
-- **Flexible Styling**: Style the thumbnail container and image separately
 - **Vue 3 Composition API**: Built with modern Vue 3 patterns
 
 ## Installation
 
 ```bash
-# pnpm (recommended)
 pnpm add hana-img-viewer
-
-# npm
-npm install hana-img-viewer
-
-# yarn
-yarn add hana-img-viewer
 ```
 
 ## Basic Usage
@@ -91,6 +81,7 @@ Then use in any component:
 | `enableZoom` | `boolean` | `true` | Enable zoom functionality. |
 | `enableDrag` | `boolean` | `true` | Enable drag to pan. |
 | `enablePinch` | `boolean` | `true` | Enable pinch-to-zoom on touch devices. |
+| `enableGlobalZoom` | `boolean` | `true` | Enable zooming outside of img element. |
 | `enableDoubleClick` | `boolean` | `true` | Enable double-click to zoom. |
 | `enableKeyboard` | `boolean` | `true` | Enable keyboard controls (ESC to close). |
 | `closeOnMaskClick` | `boolean` | `true` | Close preview when clicking the mask. |
@@ -123,31 +114,7 @@ Then use in any component:
 
 ### Exposed Methods & State
 
-Access via template ref:
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const viewerRef = ref()
-
-// Open programmatically
-viewerRef.value?.open()
-
-// Close programmatically
-viewerRef.value?.close()
-
-// Zoom controls
-viewerRef.value?.zoomIn()
-viewerRef.value?.zoomOut()
-viewerRef.value?.setZoom(2)
-viewerRef.value?.resetZoom()
-</script>
-
-<template>
-  <HanaImgViewer ref="viewerRef" src="/image.jpg" />
-</template>
-```
+Access via template ref.
 
 **Exposed State:**
 
@@ -170,135 +137,6 @@ viewerRef.value?.resetZoom()
 - `setZoom(level)` - Set zoom level
 - `resetZoom()` - Reset zoom to initial
 - `resetTransform()` - Reset all transforms
-
-## Advanced Usage
-
-### Controlled Mode
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const isOpen = ref(false)
-const zoom = ref(1)
-</script>
-
-<template>
-  <button @click="isOpen = true">
-    Open Preview
-  </button>
-  <p>Current zoom: {{ zoom.toFixed(2) }}</p>
-
-  <HanaImgViewer
-    v-model:open="isOpen"
-    v-model:zoom="zoom"
-    src="/image.jpg"
-  />
-</template>
-```
-
-### Custom Thumbnail
-
-```vue
-<template>
-  <HanaImgViewer src="/high-res.jpg">
-    <template #thumbnail="{ open }">
-      <div class="custom-thumbnail" @click="open">
-        <img src="/thumbnail.jpg" alt="Thumbnail">
-        <span>Click to preview</span>
-      </div>
-    </template>
-  </HanaImgViewer>
-</template>
-```
-
-### Thumbnail Styling
-
-```vue
-<template>
-  <HanaImgViewer
-    src="/image.jpg"
-    container-class="inline-block overflow-hidden rounded-2xl"
-    :container-style="{ width: '240px', aspectRatio: '4 / 3' }"
-    thumbnail-class="transition-transform duration-300"
-    :thumbnail-style="{ width: '100%', height: '100%', objectFit: 'cover' }"
-  />
-</template>
-```
-
-### Custom Toolbar
-
-```vue
-<template>
-  <HanaImgViewer src="/image.jpg">
-    <template #toolbar="{ zoom, zoomIn, zoomOut, reset, close, canZoomIn, canZoomOut }">
-      <div class="toolbar">
-        <button :disabled="!canZoomOut" @click="zoomOut">
-          -
-        </button>
-        <span>{{ (zoom * 100).toFixed(0) }}%</span>
-        <button :disabled="!canZoomIn" @click="zoomIn">
-          +
-        </button>
-        <button @click="reset">
-          Reset
-        </button>
-        <button @click="close">
-          Close
-        </button>
-      </div>
-    </template>
-  </HanaImgViewer>
-</template>
-```
-
-### Using Composables Directly
-
-For advanced use cases, you can use the composables directly:
-
-```ts
-import {
-  useControllable,
-  useFLIP,
-  useGesture,
-  useScrollLock,
-  useTransform,
-  useZoom,
-} from 'hana-img-viewer'
-
-// Example: Create custom preview logic
-const { zoom, zoomIn, zoomOut, setZoom } = useZoom({
-  minZoom: 0.5,
-  maxZoom: 5,
-  step: 0.25,
-})
-
-const { transform, zoomAt, pan, reset } = useTransform()
-
-const { lock, unlock } = useScrollLock()
-```
-
-## TypeScript
-
-Full TypeScript support is included:
-
-```ts
-import type {
-  ImagePreviewEmits,
-  ImagePreviewProps,
-  Point,
-  Transform,
-} from 'hana-img-viewer'
-```
-
-## Browser Support
-
-- Chrome >= 84
-- Firefox >= 75
-- Safari >= 13.1
-- Edge >= 84
-
-Requires Web Animations API support.
 
 ## License
 
