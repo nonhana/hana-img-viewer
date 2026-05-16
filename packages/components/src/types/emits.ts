@@ -23,6 +23,3 @@ export interface HanaImgViewerEmits {
    */
   (e: 'error', event: Event): void
 }
-
-// Backward-compatible internal alias used during the refactor.
-export type EmitsType = HanaImgViewerEmits

@@ -108,6 +108,3 @@ export const defaultProps = {
   closeOnMaskClick: true,
   enableKeyboard: true,
 } as const satisfies DefaultPropsShape
-
-// Backward-compatible internal aliases used during the refactor.
-export type PropsType = HanaImgViewerProps

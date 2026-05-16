@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { CSSProperties, HTMLAttributes, StyleValue } from 'vue'
 import type {
-  EmitsType,
+  HanaImgViewerEmits,
   HanaImgViewerExposed,
-  PropsType,
+  HanaImgViewerProps,
 } from '@/types'
 import { useEventListener } from '@vueuse/core'
 import { computed, getCurrentInstance, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
@@ -21,8 +21,8 @@ import { defaultProps } from '@/types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
-const props = withDefaults(defineProps<PropsType>(), defaultProps)
-const emit = defineEmits<EmitsType>()
+const props = withDefaults(defineProps<HanaImgViewerProps>(), defaultProps)
+const emit = defineEmits<HanaImgViewerEmits>()
 const instance = getCurrentInstance()
 
 const thumbnailContainerRef = useTemplateRef('thumbnailContainerRef')
