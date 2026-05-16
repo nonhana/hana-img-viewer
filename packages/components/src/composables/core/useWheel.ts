@@ -26,43 +26,43 @@ export interface UseWheelReturn {
   stop: () => void
 }
 
-class TrackpadDetector {
-  private lastWheelTime = 0
-  private consecutiveSmallDeltas = 0
+function createTrackpadDetector() {
+  let lastWheelTime = 0
+  let consecutiveSmallDeltas = 0
 
-  detect(event: WheelEvent): boolean {
+  function detect(event: WheelEvent): boolean {
     const now = Date.now()
-    const timeDelta = now - this.lastWheelTime
-    this.lastWheelTime = now
+    const timeDelta = now - lastWheelTime
+    lastWheelTime = now
 
     const absY = Math.abs(event.deltaY)
 
     if (absY % 1 !== 0) {
-      this.consecutiveSmallDeltas++
+      consecutiveSmallDeltas++
       return true
     }
 
     if (timeDelta < 50 && absY < 50) {
-      this.consecutiveSmallDeltas++
-      if (this.consecutiveSmallDeltas > 2) {
+      consecutiveSmallDeltas++
+      if (consecutiveSmallDeltas > 2)
         return true
-      }
     }
     else {
-      this.consecutiveSmallDeltas = 0
+      consecutiveSmallDeltas = 0
     }
 
-    if (event.deltaMode === 0 && absY < 100) {
+    if (event.deltaMode === 0 && absY < 100)
       return true
-    }
 
     return false
   }
 
-  reset(): void {
-    this.lastWheelTime = 0
-    this.consecutiveSmallDeltas = 0
+  function reset(): void {
+    lastWheelTime = 0
+    consecutiveSmallDeltas = 0
   }
+
+  return { detect, reset }
 }
 
 export function useWheel(options: UseWheelOptions): UseWheelReturn {
@@ -78,7 +78,7 @@ export function useWheel(options: UseWheelOptions): UseWheelReturn {
 
   const isWheeling = ref(false)
 
-  const detector = new TrackpadDetector()
+  const detector = createTrackpadDetector()
   let rafId: number | null = null
   let wheelEndTimer: ReturnType<typeof setTimeout> | null = null
 
