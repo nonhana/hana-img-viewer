@@ -35,11 +35,15 @@ const transitionRunId = shallowRef(0)
 const closingTransform = shallowRef<{ x: number, y: number, scale: number } | null>(null)
 const enhancementEmitted = shallowRef(false)
 const sourceErrorEmitted = shallowRef(false)
-const isControlled = computed(() => Object.hasOwn(instance?.vnode.props ?? {}, 'open'))
+// Controlled-mode is a static contract decided at mount time, not toggled at
+// runtime. We read vnode.props (rather than props.open !== undefined) so that
+// `v-model:open` with a transiently-undefined ref still counts as controlled.
+const isControlled = Object.hasOwn(instance?.vnode.props ?? {}, 'open')
+  || Object.hasOwn(instance?.vnode.props ?? {}, 'onUpdate:open')
 
 const { phase, isOpen, requestOpen, requestClose, markOpened, markClosed } = useViewerPhase({
   open: () => props.open,
-  isControlled: () => isControlled.value,
+  isControlled: () => isControlled, // directly returning boolean; preserves the getter type contract
   onOpenChange: value => emit('update:open', value),
 })
 
