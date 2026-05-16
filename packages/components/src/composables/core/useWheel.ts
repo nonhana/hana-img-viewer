@@ -2,7 +2,7 @@ import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { Point } from '@/types/utils'
 import { readonly, ref, toValue } from 'vue'
 import { isClient, tryOnScopeDispose } from '@/utils/helpers'
-import { useEventListener } from '../utils/useEventListener'
+import { useEventListener } from '@vueuse/core'
 
 export interface WheelState {
   delta: number
@@ -129,17 +129,13 @@ export function useWheel(options: UseWheelOptions): UseWheelReturn {
     })
   }
 
-  const setup = (): void => {
+  function setup(): void {
     if (!isClient)
       return
 
-    const { stop: stopWheel } = useEventListener(
-      target,
-      'wheel',
-      evt => handleWheel(evt as WheelEvent),
-      { passive: false },
+    cleanupFns.push(
+      useEventListener(target, 'wheel', evt => handleWheel(evt as WheelEvent), { passive: false }),
     )
-    cleanupFns.push(stopWheel)
   }
 
   const cleanup = (): void => {

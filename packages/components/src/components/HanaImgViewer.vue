@@ -8,7 +8,7 @@ import type {
 } from '@/types'
 import { computed, getCurrentInstance, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { DEFAULT_FLIP_DURATION, DEFAULT_FLIP_EASING, useFLIP } from '@/composables/core'
-import { useEventListener } from '@/composables/utils'
+import { useEventListener } from '@vueuse/core'
 import {
   useBodyLock,
   usePortalTarget,

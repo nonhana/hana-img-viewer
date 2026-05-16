@@ -2,7 +2,7 @@ import type { MaybeRefOrGetter } from 'vue'
 import type { Point, ViewerTransformAnchor } from '@/types'
 import { computed, toValue } from 'vue'
 import { useDrag, usePinch, useWheel } from '@/composables/core'
-import { useEventListener } from '@/composables/utils'
+import { useEventListener } from '@vueuse/core'
 
 export interface UseViewerInteractionsOptions {
   target: MaybeRefOrGetter<HTMLElement | null | undefined>

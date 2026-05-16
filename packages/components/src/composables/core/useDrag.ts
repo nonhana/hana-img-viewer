@@ -1,7 +1,7 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { Point } from '@/types/utils'
 import { readonly, ref, toValue } from 'vue'
-import { useEventListener } from '@/composables/utils/useEventListener'
+import { useEventListener } from '@vueuse/core'
 import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 
 export interface DragState {
@@ -173,37 +173,16 @@ export function useDrag(options: UseDragOptions): UseDragReturn {
     handlePointerUp(event)
   }
 
-  const setup = (): void => {
+  function setup(): void {
     if (!isClient)
       return
 
-    const { stop: stopPointerDown } = useEventListener(
-      target,
-      'pointerdown',
-      handlePointerDown,
+    cleanupFns.push(
+      useEventListener(target, 'pointerdown', handlePointerDown),
+      useEventListener(target, 'pointermove', handlePointerMove),
+      useEventListener(target, 'pointerup', handlePointerUp),
+      useEventListener(target, 'pointercancel', handlePointerCancel),
     )
-    cleanupFns.push(stopPointerDown)
-
-    const { stop: stopPointerMove } = useEventListener(
-      target,
-      'pointermove',
-      handlePointerMove,
-    )
-    cleanupFns.push(stopPointerMove)
-
-    const { stop: stopPointerUp } = useEventListener(
-      target,
-      'pointerup',
-      handlePointerUp,
-    )
-    cleanupFns.push(stopPointerUp)
-
-    const { stop: stopPointerCancel } = useEventListener(
-      target,
-      'pointercancel',
-      handlePointerCancel,
-    )
-    cleanupFns.push(stopPointerCancel)
   }
 
   const cleanup = (): void => {

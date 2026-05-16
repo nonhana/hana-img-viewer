@@ -3,7 +3,7 @@ import type { Point } from '@/types/utils'
 import { readonly, ref, toValue } from 'vue'
 import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 import { getDistance, getMidpoint } from '@/utils/math'
-import { useEventListener } from '../utils/useEventListener'
+import { useEventListener } from '@vueuse/core'
 
 export interface PinchState {
   scale: number
@@ -164,39 +164,16 @@ export function usePinch(options: UsePinchOptions): UsePinchReturn {
     })
   }
 
-  const setup = (): void => {
+  function setup(): void {
     if (!isClient)
       return
 
-    const { stop: stopTouchStart } = useEventListener(
-      target,
-      'touchstart',
-      evt => handleTouchStart(evt as TouchEvent),
-      { passive: false },
+    cleanupFns.push(
+      useEventListener(target, 'touchstart', evt => handleTouchStart(evt as TouchEvent), { passive: false }),
+      useEventListener(target, 'touchmove', evt => handleTouchMove(evt as TouchEvent), { passive: false }),
+      useEventListener(target, 'touchend', evt => handleTouchEnd(evt as TouchEvent)),
+      useEventListener(target, 'touchcancel', evt => handleTouchEnd(evt as TouchEvent)),
     )
-    cleanupFns.push(stopTouchStart)
-
-    const { stop: stopTouchMove } = useEventListener(
-      target,
-      'touchmove',
-      evt => handleTouchMove(evt as TouchEvent),
-      { passive: false },
-    )
-    cleanupFns.push(stopTouchMove)
-
-    const { stop: stopTouchEnd } = useEventListener(
-      target,
-      'touchend',
-      evt => handleTouchEnd(evt as TouchEvent),
-    )
-    cleanupFns.push(stopTouchEnd)
-
-    const { stop: stopTouchCancel } = useEventListener(
-      target,
-      'touchcancel',
-      evt => handleTouchEnd(evt as TouchEvent),
-    )
-    cleanupFns.push(stopTouchCancel)
   }
 
   const cleanup = (): void => {
