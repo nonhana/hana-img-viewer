@@ -1,6 +1,6 @@
 # hana-img-viewer
 
-A lightweight Vue 3 image viewer that keeps the thumbnail-to-center FLIP interaction while staying SSR-friendly and simple to drop in.
+A lightweight Vue 3 image viewer that simple to drop in.
 
 ## Features
 
@@ -142,17 +142,6 @@ const isOpen = ref(false)
   />
 </template>
 ```
-
-## Migration notes for v4
-
-Version 4 finalizes the simplified public surface introduced by the refactor.
-
-- The package now exposes the component plus its public types from the root entry.
-- Legacy composable and utility exports are no longer part of the public contract.
-- Legacy visual-tuning props and zoom-model events from the pre-refactor API are removed.
-- `src` remains the first visible source, while `previewSrc` stays a silent enhancement path.
-
-If you were depending on the old helper exports or legacy zoom-related props/events, migrate to the component-first API documented in this README before adopting the v4 release.
 
 ## Custom thumbnail
 
