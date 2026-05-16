@@ -1,6 +1,6 @@
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { effectScope, ref } from 'vue'
 import { useViewerSource } from '@/composables/viewer/useViewerSource'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/utils/helpers', async () => {
   const actual = await vi.importActual<typeof import('@/utils/helpers')>('@/utils/helpers')
@@ -41,8 +41,12 @@ afterEach(() => {
 
 function withScope<T>(fn: () => T): T {
   const scope = effectScope()
-  try { return scope.run(fn) as T }
-  finally { scope.stop() }
+  try {
+    return scope.run(fn) as T
+  }
+  finally {
+    scope.stop()
+  }
 }
 
 describe('useViewerSource', () => {

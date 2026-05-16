@@ -1,7 +1,7 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { Point } from '@/types/utils'
-import { readonly, ref, toValue } from 'vue'
 import { useEventListener } from '@vueuse/core'
+import { readonly, ref, toValue } from 'vue'
 import { isClient, tryOnScopeDispose } from '@/utils/helpers'
 
 export interface DragState {
