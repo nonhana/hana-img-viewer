@@ -278,7 +278,7 @@ function finalizeClosedState(): void {
   emit('close')
 }
 
-async function runEnhancement(sessionToken: number): Promise<void> {
+async function runEnhancement(sessionToken?: number): Promise<void> {
   await startEnhancement(sessionToken)
   emitSourceEvents()
 }
@@ -287,7 +287,7 @@ async function enterOpenFlow(skipFlip: boolean): Promise<void> {
   if (!canMountOverlay.value)
     return
 
-  const sessionToken = beginSession()
+  beginSession() // bump sessionId + activate session; return value not needed
   transitionRunId.value += 1
   const runId = transitionRunId.value
 
@@ -325,7 +325,7 @@ async function enterOpenFlow(skipFlip: boolean): Promise<void> {
   markOpened()
   emit('open')
 
-  void runEnhancement(sessionToken)
+  void runEnhancement() // no token: startEnhancement defaults to latest sessionId
 }
 
 function openPreview(): void {
@@ -417,19 +417,18 @@ watch(() => props.src, () => {
 
   enhancementEmitted.value = false
   sourceErrorEmitted.value = false
-
-  const sessionToken = beginSession()
+  beginSession()
 
   if (phase.value === 'open')
-    void runEnhancement(sessionToken)
+    void runEnhancement()
 })
 
 watch(() => props.previewSrc, () => {
   if (phase.value === 'open') {
     enhancementEmitted.value = false
     sourceErrorEmitted.value = false
-    const sessionToken = beginSession({ resetToBase: false })
-    void runEnhancement(sessionToken)
+    beginSession({ resetToBase: false })
+    void runEnhancement()
   }
 })
 
