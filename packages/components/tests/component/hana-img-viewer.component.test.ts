@@ -597,3 +597,38 @@ describe('resolvePortalTarget', () => {
     expect(resolvePortalTarget(el)).toBe(el)
   })
 })
+
+describe('PRD: box-stability proof', () => {
+  it('keeps the flip shell dimensions stable when previewSrc upgrades with different aspect ratio', async () => {
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: {
+        alt: 'thumb',
+        src: '/thumb-square.jpg', // 1:1 (mock createRect returns 160x120 → 4:3)
+        previewSrc: '/preview-wide.jpg',
+      },
+    })
+
+    try {
+      await wrapper.get('img').trigger('click')
+      await nextTick()
+      await flushPromises()
+      await flushPromises()
+
+      const shell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
+      const initialWidth = shell.style.width
+      const initialHeight = shell.style.height
+
+      // Verify previewSrc is now the visible bitmap
+      const preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
+      expect(preview.getAttribute('src')).toBe('/preview-wide.jpg')
+
+      // Verify shell dimensions did not change (box-stability)
+      expect(shell.style.width).toBe(initialWidth)
+      expect(shell.style.height).toBe(initialHeight)
+    }
+    finally {
+      wrapper.unmount()
+    }
+  })
+})
