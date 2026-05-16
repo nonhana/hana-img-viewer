@@ -7,52 +7,28 @@ export interface UseViewerSourceOptions {
   previewSrc: () => string | undefined
 }
 
-const resolvedCache = new Set<string>()
-const pendingCache = new Map<string, Promise<boolean>>()
-
 function loadImage(url: string): Promise<boolean> {
   if (!isClient)
     return Promise.resolve(false)
 
-  if (resolvedCache.has(url))
-    return Promise.resolve(true)
-
-  const existing = pendingCache.get(url)
-  if (existing)
-    return existing
-
-  const task = new Promise<boolean>((resolve) => {
+  return new Promise<boolean>((resolve) => {
     const image = new Image()
-
-    const finish = (ready: boolean) => {
-      pendingCache.delete(url)
-
-      if (ready)
-        resolvedCache.add(url)
-
-      resolve(ready)
-    }
 
     image.onload = async () => {
       try {
-        if (typeof image.decode === 'function') {
+        if (typeof image.decode === 'function')
           await image.decode()
-        }
       }
       catch {
         // Decoding is best-effort. A decoded failure after onload should not
         // hide a usable bitmap from the current session.
       }
-
-      finish(true)
+      resolve(true)
     }
 
-    image.onerror = () => finish(false)
+    image.onerror = () => resolve(false)
     image.src = url
   })
-
-  pendingCache.set(url, task)
-  return task
 }
 
 export interface BeginViewerSourceSessionOptions {
