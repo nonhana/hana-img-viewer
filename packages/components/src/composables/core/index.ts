@@ -1,7 +1,4 @@
 export * from './useDrag'
 export * from './useFLIP'
-export * from './useGesture'
 export * from './usePinch'
-export * from './useTransform'
 export * from './useWheel'
-export * from './useZoom'

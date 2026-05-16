@@ -17,11 +17,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@': resolve(__dirname, '../packages/components/src'),
       'hana-img-viewer': resolve(__dirname, '../packages/components/src/index.ts'),
     },
   },
   optimizeDeps: {
-    include: ['hana-img-viewer'],
+    exclude: ['hana-img-viewer'],
     force: true,
   },
   server: {

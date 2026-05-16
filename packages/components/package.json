@@ -18,12 +18,15 @@
     "ssr",
     "nuxt"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -33,10 +36,14 @@
   ],
   "scripts": {
     "build": "vite build",
+    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
+    "test:unit": "node ./scripts/run-vitest.mjs run --config vitest.unit.config.ts",
+    "test:component": "node ./scripts/run-vitest.mjs run --config vitest.component.config.ts",
+    "test:ssr": "node ./scripts/run-vitest.mjs run --config vitest.ssr.config.ts",
+    "test:dist": "pnpm run build && node ./scripts/run-vitest.mjs run --config vitest.dist.config.ts",
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
-    "vite-plugin-css-injected-by-js": "catalog:",
     "vite-plugin-dts": "catalog:"
   }
 }

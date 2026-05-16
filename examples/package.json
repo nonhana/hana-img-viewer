@@ -13,6 +13,7 @@
     "hana-img-viewer": "workspace:*"
   },
   "devDependencies": {
+    "@vue/shared": "catalog:",
     "unplugin-auto-import": "catalog:",
     "unplugin-vue-components": "catalog:"
   }

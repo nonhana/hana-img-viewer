@@ -1,156 +1,113 @@
 import type { HTMLAttributes, StyleValue } from 'vue'
 
+export type PortalTarget = string | HTMLElement | null
+
 /**
- * 组件 Props 类型
+ * Public component props.
+ *
+ * Keep the surface intentionally small:
+ * - `src` is the canonical thumbnail + first-preview source
+ * - `previewSrc` is a silent enhancement path
+ * - `open` controls visibility
+ * - `portalTarget` controls where the overlay mounts on the client
  */
-export interface PropsType {
+export interface HanaImgViewerProps {
   /**
-   * 图片 URL（必需）
+   * Thumbnail and initial preview source.
    */
   src: string
   /**
-   * 替代文本
+   * Accessible alternative text for the image.
    */
   alt?: string
   /**
-   * 高分辨率图片 URL（可选，默认使用 `src`）
+   * Optional higher-quality source that upgrades the preview in-place
+   * after it is ready.
    */
   previewSrc?: string
   /**
-   * 缩略图容器额外类名
-   */
-  containerClass?: HTMLAttributes['class']
-  /**
-   * 缩略图容器额外样式
-   */
-  containerStyle?: StyleValue
-  /**
-   * 缩略图额外类名
-   */
-  thumbnailClass?: HTMLAttributes['class']
-  /**
-   * 缩略图额外样式
-   */
-  thumbnailStyle?: StyleValue
-  /**
-   * 动画时长（ms）
-   */
-  duration?: number
-  /**
-   * 动画缓动函数
-   */
-  easing?: string
-  /**
-   * 遮罩透明度
-   */
-  maskOpacity?: number
-  /**
-   * 遮罩颜色
-   */
-  maskColor?: string
-  /**
-   * 预览层 z-index
-   */
-  zIndex?: number
-  /**
-   * 最小缩放
-   */
-  minZoom?: number
-  /**
-   * 最大缩放
-   */
-  maxZoom?: number
-  /**
-   * 缩放步长
-   */
-  zoomStep?: number
-  /**
-   * 双击缩放目标值
-   */
-  doubleClickZoom?: number
-  /**
-   * 滚轮缩放灵敏度
-   */
-  wheelZoomRatio?: number
-  /**
-   * 启用缩放
-   */
-  enableZoom?: boolean
-  /**
-   * 启用拖拽
-   */
-  enableDrag?: boolean
-  /**
-   * 启用双指缩放
-   */
-  enablePinch?: boolean
-  /**
-   * 启用全局缩放监听
-   *
-   * 开启后，预览打开时支持在图片元素外使用滚轮或双指继续缩放。
-   */
-  enableGlobalZoom?: boolean
-  /**
-   * 启用双击缩放
-   */
-  enableDoubleClick?: boolean
-  /**
-   * 启用键盘控制
-   */
-  enableKeyboard?: boolean
-  /**
-   * 点击遮罩关闭
-   */
-  closeOnMaskClick?: boolean
-  /**
-   * 是否打开（`v-model:open`）
+   * Controlled open state.
    */
   open?: boolean
   /**
-   * 当前缩放（`v-model:zoom`）
+   * Client-side overlay mount target.
+   *
+   * - Omitted or `'body'` mounts into `document.body`
+   * - `null` keeps the open request pending until a custom target is ready
+   * - Other string values are treated as CSS selectors
+   * - `HTMLElement` values are used directly
    */
-  zoom?: number
+  portalTarget?: PortalTarget
+  /**
+   * Enable wheel / double-click / pinch zoom interactions.
+   * @default true
+   */
+  enableZoom?: boolean
+  /**
+   * Enable dragging while the viewer is open.
+   * @default true
+   */
+  enableDrag?: boolean
+  /**
+   * Minimum zoom ratio.
+   * @default 0.5
+   */
+  minZoom?: number
+  /**
+   * Maximum zoom ratio.
+   * @default 10
+   */
+  maxZoom?: number
+  /**
+   * Close when clicking the backdrop.
+   * @default true
+   */
+  closeOnMaskClick?: boolean
+  /**
+   * Allow closing the viewer with the Escape key when the viewer owns the
+   * active body portal. Custom portal targets keep the host as the final ESC
+   * authority unless explicitly delegated.
+   * @default true
+   */
+  enableKeyboard?: boolean
+  /**
+   * Extra class for the thumbnail container.
+   */
+  containerClass?: HTMLAttributes['class']
+  /**
+   * Extra inline styles for the thumbnail container.
+   */
+  containerStyle?: StyleValue
+  /**
+   * Extra class for the thumbnail image.
+   */
+  thumbnailClass?: HTMLAttributes['class']
+  /**
+   * Extra inline styles for the thumbnail image.
+   */
+  thumbnailStyle?: StyleValue
 }
 
-type DefaultPropsType = Required<Pick<PropsType, | 'alt'
-  | 'duration'
-  | 'easing'
-  | 'maskOpacity'
-  | 'maskColor'
-  | 'zIndex'
-  | 'minZoom'
-  | 'maxZoom'
-  | 'zoomStep'
-  | 'doubleClickZoom'
-  | 'wheelZoomRatio'
+type DefaultPropsShape = Required<Pick<
+  HanaImgViewerProps,
+  | 'alt'
   | 'enableZoom'
   | 'enableDrag'
-  | 'enablePinch'
-  | 'enableGlobalZoom'
-  | 'enableDoubleClick'
+  | 'minZoom'
+  | 'maxZoom'
+  | 'closeOnMaskClick'
   | 'enableKeyboard'
-  | 'closeOnMaskClick'>>
+>>
 
-/**
- * 组件 Props 默认值
- */
 export const defaultProps = {
   alt: '',
-  duration: 300,
-  easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  maskOpacity: 0.3,
-  maskColor: '#000',
-  zIndex: 9999,
-  minZoom: 0.5,
-  maxZoom: 10,
-  zoomStep: 0.5,
-  doubleClickZoom: 2,
-  wheelZoomRatio: 1,
   enableZoom: true,
   enableDrag: true,
-  enablePinch: true,
-  enableGlobalZoom: true,
-  enableDoubleClick: true,
-  enableKeyboard: true,
+  minZoom: 0.5,
+  maxZoom: 10,
   closeOnMaskClick: true,
-} as const satisfies DefaultPropsType
+  enableKeyboard: true,
+} as const satisfies DefaultPropsShape
+
+// Backward-compatible internal aliases used during the refactor.
+export type PropsType = HanaImgViewerProps

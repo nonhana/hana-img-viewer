@@ -1,45 +1,21 @@
 import type { App } from 'vue'
+import type { HanaImgViewerEmits, HanaImgViewerExposed, HanaImgViewerProps } from '@/types'
 import HanaImgViewer from '@/components/HanaImgViewer.vue'
+import '@/style.css'
 
 export { HanaImgViewer }
-
-export {
-  useDrag,
-  useFLIP,
-  useGesture,
-  usePinch,
-  useTransform,
-  useWheel,
-  useZoom,
-} from './composables/core'
-
-export {
-  useControllable,
-  useElementBounding,
-  useEventListener,
-  useScrollLock,
-} from './composables/utils'
-
-export { defaultProps } from './types'
-
-export type { EmitsType } from './types/emits'
-
-export type { PropsType } from './types/props'
-
 export type {
-  Bounds,
-  Point,
-  Size,
-  Transform,
-} from './types/utils'
+  HanaImgViewerEmits,
+  HanaImgViewerExposed,
+  HanaImgViewerProps,
+}
 
-// Register as a Vue global component
 const components = [HanaImgViewer]
 
 function install(app: App): void {
-  components.forEach((component) => {
+  for (const component of components) {
     app.component(component.name || 'HanaImgViewer', component)
-  })
+  }
 }
 
 export default { install }

@@ -1,0 +1,97 @@
+import type { MaybeRefOrGetter } from 'vue'
+import type { Point, ViewerTransformAnchor } from '@/types'
+import { computed, toValue } from 'vue'
+import { useDrag, usePinch, useWheel } from '@/composables/core'
+import { useEventListener } from '@/composables/utils'
+
+export interface UseViewerInteractionsOptions {
+  target: MaybeRefOrGetter<HTMLElement | null | undefined>
+  zoomTarget?: MaybeRefOrGetter<HTMLElement | null | undefined>
+  enabled: MaybeRefOrGetter<boolean>
+  enableDrag: MaybeRefOrGetter<boolean>
+  enableZoom: MaybeRefOrGetter<boolean>
+  enableKeyboard: MaybeRefOrGetter<boolean>
+  enablePinch?: MaybeRefOrGetter<boolean>
+  onPan: (delta: Point) => void
+  onWheelZoom: (delta: number, anchor: ViewerTransformAnchor) => void
+  onPinchZoom?: (scaleDelta: number, anchor: ViewerTransformAnchor) => void
+  onDoubleClick: (anchor: ViewerTransformAnchor) => void
+  onEscape: () => void
+  getViewportCenter?: () => Point | null
+}
+
+function createAnchor(point: Point, getViewportCenter?: () => Point | null): ViewerTransformAnchor | null {
+  const viewportCenter = getViewportCenter?.()
+
+  if (!viewportCenter)
+    return null
+
+  return {
+    point,
+    viewportCenter,
+  }
+}
+
+export function useViewerInteractions(options: UseViewerInteractionsOptions) {
+  const active = computed(() => toValue(options.enabled))
+  const zoomTarget = options.zoomTarget ?? options.target
+  const enablePinch = options.enablePinch ?? options.enableZoom
+
+  const drag = useDrag({
+    target: options.target,
+    enabled: () => active.value && toValue(options.enableDrag),
+    onDrag: state => options.onPan(state.delta),
+    filter: (event) => {
+      if (event.detail !== 2)
+        return true
+
+      const anchor = createAnchor({ x: event.clientX, y: event.clientY }, options.getViewportCenter)
+
+      if (anchor) {
+        options.onDoubleClick(anchor)
+      }
+
+      return false
+    },
+  })
+
+  const wheel = useWheel({
+    target: zoomTarget,
+    enabled: () => active.value && toValue(options.enableZoom),
+    onWheel: (state) => {
+      const anchor = createAnchor(state.center, options.getViewportCenter)
+
+      if (anchor) {
+        options.onWheelZoom(state.delta, anchor)
+      }
+    },
+  })
+
+  const pinch = usePinch({
+    target: zoomTarget,
+    enabled: () => active.value && toValue(enablePinch),
+    onPinch: (state) => {
+      const anchor = createAnchor(state.center, options.getViewportCenter)
+
+      if (anchor) {
+        options.onPinchZoom?.(state.deltaScale, anchor)
+      }
+    },
+  })
+
+  useEventListener(
+    () => active.value && toValue(options.enableKeyboard) ? window : null,
+    'keydown',
+    (event) => {
+      if (event.key === 'Escape') {
+        options.onEscape()
+      }
+    },
+  )
+
+  return {
+    isDragging: drag.isDragging,
+    isPinching: pinch.isPinching,
+    isWheeling: wheel.isWheeling,
+  }
+}
