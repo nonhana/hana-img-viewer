@@ -515,6 +515,9 @@ defineExpose<HanaImgViewerExposed>({
     <div
       v-if="isOverlayMounted"
       class="hana-img-viewer-overlay"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="props.alt || 'Image preview'"
       :style="overlayStyle"
     >
       <div
