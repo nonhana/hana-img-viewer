@@ -428,23 +428,34 @@ watch(() => props.previewSrc, () => {
   }
 })
 
-// Transitional bridge during Phase 3 → Phase 4 migration.
-// This will be replaced entirely by the desiredPhase effect in Phase 4.
+type ResolvedPhase = 'closed' | 'pending' | 'opening' | 'open' | 'closing'
+
+/**
+ * Mirrors `phase` except: when phase='opening' but overlay can't mount
+ * yet (SSR pre-hydration, missing portal target, or controlled open=true
+ * before isMounted), we report 'pending' instead. The effect treats
+ * pending → opening as a hydration-style transition (skipFlip=true).
+ */
+const desiredPhase = computed<ResolvedPhase>(() => {
+  if (phase.value === 'opening' && (!isMounted.value || !canMountOverlay.value))
+    return 'pending'
+  return phase.value as ResolvedPhase
+})
+
 watch(
-  [() => isMounted.value, () => canMountOverlay.value, phase],
-  async ([mounted, mountable, currentPhase]) => {
-    if (!mounted)
+  desiredPhase,
+  async (next, prev) => {
+    if (next === prev)
       return
 
-    if (currentPhase === 'opening' && mountable) {
-      // Either initial controlled open=true + just mounted, or pending → mountable resumed.
-      await enterOpenFlow(false)
-      return
+    if (next === 'opening') {
+      const skipFlip = prev === 'pending' // resumed after mount/portal became ready
+      await enterOpenFlow(skipFlip)
     }
-
-    if (currentPhase === 'closing') {
+    else if (next === 'closing') {
       await closePreviewInternal()
     }
+    // 'closed', 'open', 'pending' are stable — no action needed
   },
   { immediate: true },
 )
