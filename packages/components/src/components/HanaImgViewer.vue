@@ -5,7 +5,7 @@ import type {
   HanaImgViewerExposed,
   HanaImgViewerProps,
 } from '@/types'
-import { useEventListener } from '@vueuse/core'
+import { useDebounceFn, useEventListener } from '@vueuse/core'
 import { computed, getCurrentInstance, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { DEFAULT_FLIP_DURATION, DEFAULT_FLIP_EASING, useFLIP } from '@/composables/core'
 import {
@@ -474,12 +474,12 @@ watch(isBodyTarget, (nextValue, previousValue) => {
     unlockBody()
 })
 
+const debouncedPrepareDestinationRect = useDebounceFn(prepareDestinationRect, 50)
+
 useEventListener(
   () => phase.value === 'open' ? window : null,
   'resize',
-  () => {
-    prepareDestinationRect()
-  },
+  debouncedPrepareDestinationRect,
 )
 
 defineExpose<HanaImgViewerExposed>({

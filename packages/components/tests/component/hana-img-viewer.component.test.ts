@@ -551,7 +551,7 @@ describe('HanaImgViewer component harness', () => {
       Object.defineProperty(window, 'innerHeight', { configurable: true, value: 300 })
       window.dispatchEvent(new Event('resize'))
 
-      await nextTick()
+      await new Promise(resolve => setTimeout(resolve, 60)) // wait debounce window
       await flushPromises()
 
       const resizedShell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
