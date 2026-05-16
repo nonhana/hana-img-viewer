@@ -63,10 +63,11 @@ const {
 const {
   transform,
   style: transformStyle,
-  setScale,
   pan,
   toggleDoubleClickZoom,
   reset: resetTransform,
+  addScale,
+  multiplyScale,
 } = useViewerTransform({
   minScale: () => props.minZoom,
   maxScale: () => props.maxZoom,
@@ -116,8 +117,8 @@ const {
   enableZoom: () => props.enableZoom,
   enableKeyboard: () => props.enableKeyboard && isBodyTarget.value,
   onPan: delta => pan(delta),
-  onWheelZoom: (delta, anchor) => setScale(transform.value.scale + delta, anchor),
-  onPinchZoom: (deltaScale, anchor) => setScale(transform.value.scale * deltaScale, anchor),
+  onWheelZoom: (delta, anchor) => addScale(delta, anchor),
+  onPinchZoom: (factor, anchor) => multiplyScale(factor, anchor),
   onDoubleClick: (anchor) => {
     toggleDoubleClickZoom(anchor)
   },

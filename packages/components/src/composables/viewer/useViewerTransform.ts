@@ -143,6 +143,14 @@ export function useViewerTransform(options: UseViewerTransformOptions) {
     return `translate3d(${x}px, ${y}px, 0) scale(${scale})`
   })
 
+  function addScale(delta: number, anchor?: Point | ViewerTransformAnchor): void {
+    setScale(transform.value.scale + delta, anchor)
+  }
+
+  function multiplyScale(factor: number, anchor?: Point | ViewerTransformAnchor): void {
+    setScale(transform.value.scale * factor, anchor)
+  }
+
   return {
     transform: readonly(transform),
     scale,
@@ -157,5 +165,7 @@ export function useViewerTransform(options: UseViewerTransformOptions) {
     zoomOut,
     toggleDoubleClickZoom,
     reset,
+    addScale,
+    multiplyScale,
   }
 }
