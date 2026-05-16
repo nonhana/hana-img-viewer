@@ -4,17 +4,16 @@ import type {
   EmitsType,
   HanaImgViewerExposed,
   PropsType,
-  ViewerInteractionPhase,
 } from '@/types'
+import { useEventListener } from '@vueuse/core'
 import { computed, getCurrentInstance, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { DEFAULT_FLIP_DURATION, DEFAULT_FLIP_EASING, useFLIP } from '@/composables/core'
-import { useEventListener } from '@vueuse/core'
 import {
   useBodyLock,
   usePortalTarget,
   useViewerGeometry,
   useViewerInteractions,
-  useViewerOpenState,
+  useViewerPhase,
   useViewerSource,
   useViewerTransform,
 } from '@/composables/viewer'
@@ -32,16 +31,13 @@ const backdropRef = useTemplateRef('backdropRef')
 const flipRef = useTemplateRef('flipRef')
 const previewRef = useTemplateRef('previewRef')
 
-const phase = shallowRef<ViewerInteractionPhase>('closed')
 const transitionRunId = shallowRef(0)
 const closingTransform = shallowRef<{ x: number, y: number, scale: number } | null>(null)
-const pendingImmediateOpen = shallowRef(false)
-const suppressNextOpenEmit = shallowRef(false)
 const enhancementEmitted = shallowRef(false)
 const sourceErrorEmitted = shallowRef(false)
 const isControlled = computed(() => Object.hasOwn(instance?.vnode.props ?? {}, 'open'))
 
-const { isOpen } = useViewerOpenState({
+const { phase, isOpen, requestOpen, requestClose, markOpened, markClosed } = useViewerPhase({
   open: () => props.open,
   isControlled: () => isControlled.value,
   onOpenChange: value => emit('update:open', value),
@@ -86,7 +82,6 @@ const {
 
 const {
   isMounted,
-  mode: portalMode,
   resolvedTarget,
   canMountOverlay,
   isBodyTarget,
@@ -272,21 +267,10 @@ function resetOverlaySessionState(): void {
 }
 
 function finalizeClosedState(): void {
-  phase.value = 'closed'
-  if (!isControlled.value) {
-    isOpen.value = false
-  }
+  markClosed()
   resetOverlaySessionState()
   unlockBody()
   emit('close')
-}
-
-function cancelPendingOpen(): void {
-  pendingImmediateOpen.value = false
-  suppressNextOpenEmit.value = false
-  isOpen.value = false
-  resetOverlaySessionState()
-  unlockBody()
 }
 
 async function runEnhancement(sessionToken: number): Promise<void> {
@@ -302,23 +286,19 @@ async function enterOpenFlow(skipFlip: boolean): Promise<void> {
   transitionRunId.value += 1
   const runId = transitionRunId.value
 
-  phase.value = skipFlip ? 'open' : 'opening'
-  isOpen.value = true
   closingTransform.value = null
   enhancementEmitted.value = false
   sourceErrorEmitted.value = false
   resetTransform()
   prepareDestinationRect()
 
-  if (isBodyTarget.value) {
+  if (isBodyTarget.value)
     lockBody()
-  }
 
   await nextTick()
 
-  if (runId !== transitionRunId.value || !isOpen.value) {
+  if (runId !== transitionRunId.value || !isOpen.value)
     return
-  }
 
   const motionTasks: Array<Promise<void>> = [animateBackdropOpacity(1)]
 
@@ -334,69 +314,39 @@ async function enterOpenFlow(skipFlip: boolean): Promise<void> {
 
   await Promise.all(motionTasks)
 
-  if (runId !== transitionRunId.value || !isOpen.value) {
+  if (runId !== transitionRunId.value || !isOpen.value)
     return
-  }
 
-  phase.value = 'open'
-
-  if (suppressNextOpenEmit.value) {
-    suppressNextOpenEmit.value = false
-  }
-  else {
-    emit('open')
-  }
+  markOpened()
+  emit('open')
 
   void runEnhancement(sessionToken)
 }
 
-async function openPreview(): Promise<void> {
+function openPreview(): void {
   if (phase.value !== 'closed')
     return
-
-  if (!isMounted.value) {
-    pendingImmediateOpen.value = true
-    isOpen.value = true
-    return
-  }
-
-  if (!canMountOverlay.value) {
-    isOpen.value = true
-    return
-  }
-
-  const skipFlip = pendingImmediateOpen.value
-  pendingImmediateOpen.value = false
-  await enterOpenFlow(skipFlip)
+  requestOpen()
+  // The bridge watcher in Step 9 (and the desiredPhase effect in Phase 4)
+  // observes phase='opening' and runs enterOpenFlow when mountable.
 }
 
-async function closePreview(): Promise<void> {
-  if (phase.value === 'closing')
+function closePreview(): void {
+  if (phase.value === 'closed' || phase.value === 'closing')
     return
-
-  if (phase.value === 'closed') {
-    if (isOpen.value || pendingImmediateOpen.value) {
-      cancelPendingOpen()
-    }
-
-    return
-  }
-
-  if (isControlled.value) {
-    isOpen.value = false
-    return
-  }
-
-  await closePreviewInternal()
+  requestClose()
+  // In uncontrolled mode, requestClose sets phase='closing' which triggers
+  // the bridge watcher to run closePreviewInternal.
+  // In controlled mode, requestClose only emits update:open(false); the
+  // parent must set props.open=false to advance phase to 'closing'.
 }
 
 async function closePreviewInternal(): Promise<void> {
-  if (phase.value === 'closed' || phase.value === 'closing')
+  if (phase.value === 'closed')
     return
 
   transitionRunId.value += 1
   const runId = transitionRunId.value
-  phase.value = 'closing'
   endSession()
 
   const flipEl = flipRef.value
@@ -478,46 +428,23 @@ watch(() => props.previewSrc, () => {
   }
 })
 
+// Transitional bridge during Phase 3 → Phase 4 migration.
+// This will be replaced entirely by the desiredPhase effect in Phase 4.
 watch(
-  [() => isMounted.value, () => canMountOverlay.value, () => portalMode.value, () => props.open],
-  async ([mounted, mountable, mode]) => {
-    if (!isControlled.value)
+  [() => isMounted.value, () => canMountOverlay.value, phase],
+  async ([mounted, mountable, currentPhase]) => {
+    if (!mounted)
       return
 
-    if (!mounted) {
-      if (props.open) {
-        pendingImmediateOpen.value = true
-        suppressNextOpenEmit.value = true
-        isOpen.value = true
-      }
-
+    if (currentPhase === 'opening' && mountable) {
+      // Either initial controlled open=true + just mounted, or pending → mountable resumed.
+      await enterOpenFlow(false)
       return
     }
 
-    if (props.open) {
-      if (phase.value === 'closed') {
-        if (mode === 'pending' || !mountable) {
-          pendingImmediateOpen.value = true
-          isOpen.value = true
-          return
-        }
-
-        await openPreview()
-      }
-
-      return
-    }
-
-    pendingImmediateOpen.value = false
-    suppressNextOpenEmit.value = false
-
-    if (phase.value !== 'closed') {
+    if (currentPhase === 'closing') {
       await closePreviewInternal()
-      return
     }
-
-    resetOverlaySessionState()
-    unlockBody()
   },
   { immediate: true },
 )
@@ -531,18 +458,6 @@ watch(isBodyTarget, (nextValue, previousValue) => {
   else
     unlockBody()
 })
-
-watch(
-  () => canMountOverlay.value,
-  async (mountable) => {
-    if (!mountable || !isOpen.value || phase.value !== 'closed')
-      return
-
-    const skipFlip = pendingImmediateOpen.value
-    pendingImmediateOpen.value = false
-    await enterOpenFlow(skipFlip)
-  },
-)
 
 useEventListener(
   () => phase.value === 'open' ? window : null,
