@@ -138,7 +138,7 @@ export function useViewerTransform(options: UseViewerTransformOptions) {
     notifyScaleChange(transform.value.scale, previousScale)
   }
 
-  const style = computed(() => {
+  const transformCss = computed(() => {
     const { x, y, scale } = transform.value
     return `translate3d(${x}px, ${y}px, 0) scale(${scale})`
   })
@@ -154,7 +154,7 @@ export function useViewerTransform(options: UseViewerTransformOptions) {
   return {
     transform: readonly(transform),
     scale,
-    style,
+    transformCss,
     canZoomIn,
     canZoomOut,
     isInitialZoom,

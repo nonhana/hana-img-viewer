@@ -62,7 +62,7 @@ const {
 
 const {
   transform,
-  style: transformStyle,
+  transformCss,
   pan,
   toggleDoubleClickZoom,
   reset: resetTransform,
@@ -184,7 +184,7 @@ const flipShellStyle = computed<StyleValue>(() => {
 })
 
 const previewStyle = computed<CSSProperties>(() => ({
-  transform: closingTransform.value ? 'none' : transformStyle.value,
+  transform: closingTransform.value ? 'none' : transformCss.value,
   transformOrigin: 'center center',
   willChange: isInteractive.value ? 'transform' : 'auto',
   cursor: previewCursor.value,
