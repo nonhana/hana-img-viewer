@@ -43,7 +43,12 @@
     "test:dist": "pnpm run build && node ./scripts/run-vitest.mjs run --config vitest.dist.config.ts",
     "prepublishOnly": "pnpm build"
   },
+  "peerDependencies": {
+    "@vueuse/core": "^14.0.0",
+    "vue": "^3.5.0"
+  },
   "devDependencies": {
+    "@vueuse/core": "catalog:",
     "vite-plugin-dts": "catalog:"
   }
 }

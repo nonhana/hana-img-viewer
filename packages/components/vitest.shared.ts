@@ -18,6 +18,8 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
       '@vue/server-renderer': resolvePnpmPackageRoot('@vue/server-renderer'),
       '@vue/test-utils': resolvePnpmPackageRoot('@vue/test-utils'),
+      '@vueuse/core': resolvePnpmPackageRoot('@vueuse/core'),
+      '@vueuse/shared': resolvePnpmPackageRoot('@vueuse/shared'),
     },
   },
   test: {
