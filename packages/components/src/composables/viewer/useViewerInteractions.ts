@@ -41,18 +41,6 @@ export function useViewerInteractions(options: UseViewerInteractionsOptions) {
     target: options.target,
     enabled: () => active.value && toValue(options.enableDrag),
     onDrag: state => options.onPan(state.delta),
-    filter: (event) => {
-      if (event.detail !== 2)
-        return true
-
-      const anchor = createAnchor({ x: event.clientX, y: event.clientY }, options.getViewportCenter)
-
-      if (anchor) {
-        options.onDoubleClick(anchor)
-      }
-
-      return false
-    },
   })
 
   const wheel = useWheel({
@@ -60,10 +48,8 @@ export function useViewerInteractions(options: UseViewerInteractionsOptions) {
     enabled: () => active.value && toValue(options.enableZoom),
     onWheel: (state) => {
       const anchor = createAnchor(state.center, options.getViewportCenter)
-
-      if (anchor) {
+      if (anchor)
         options.onWheelZoom(state.delta, anchor)
-      }
     },
   })
 
@@ -72,20 +58,33 @@ export function useViewerInteractions(options: UseViewerInteractionsOptions) {
     enabled: () => active.value && toValue(enablePinch),
     onPinch: (state) => {
       const anchor = createAnchor(state.center, options.getViewportCenter)
-
-      if (anchor) {
+      if (anchor)
         options.onPinchZoom?.(state.deltaScale, anchor)
-      }
     },
   })
+
+  // Dedicated double-click handler instead of piggy-backing on useDrag.filter
+  useEventListener(
+    zoomTarget,
+    'dblclick',
+    (event: MouseEvent) => {
+      if (!active.value)
+        return
+      const anchor = createAnchor(
+        { x: event.clientX, y: event.clientY },
+        options.getViewportCenter,
+      )
+      if (anchor)
+        options.onDoubleClick(anchor)
+    },
+  )
 
   useEventListener(
     () => active.value && toValue(options.enableKeyboard) ? window : null,
     'keydown',
     (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape')
         options.onEscape()
-      }
     },
   )
 
