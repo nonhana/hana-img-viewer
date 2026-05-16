@@ -4,10 +4,10 @@ import { ref } from 'vue'
 import GithubSVG from './GithubSVG.vue'
 
 const demoImg1 = 'https://pixiv-r2.caelum.moe/121909597.png'
+const demoImg1Preview = 'https://pixiv-r2.caelum.moe/121909597.png?preview=1'
 const demoImg2 = 'https://pixiv-r2.caelum.moe/129115891.png'
 
 const demoImg1Open = ref(false)
-const demoImg1Zoom = ref(1)
 </script>
 
 <template>
@@ -18,13 +18,13 @@ const demoImg1Zoom = ref(1)
     <div class="image">
       <HanaImgViewer
         v-model:open="demoImg1Open"
-        v-model:zoom="demoImg1Zoom"
         :src="demoImg1"
+        :preview-src="demoImg1Preview"
         :alt="demoImg1"
       />
       <div class="status">
-        <div>是否打开：{{ demoImg1Open }}</div>
-        <div>当前缩放：{{ demoImg1Zoom.toFixed(2) }}</div>
+        <div>Open state: {{ demoImg1Open }}</div>
+        <div>`previewSrc` replaces the visible image silently after opening</div>
       </div>
     </div>
     <div class="image" style="margin-top: 100px;">

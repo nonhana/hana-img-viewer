@@ -1,7 +1,6 @@
 import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
-import cssInjectedByJs from 'vite-plugin-css-injected-by-js'
 import dts from 'vite-plugin-dts'
 
 // https://vite.dev/config/
@@ -21,7 +20,6 @@ export default defineConfig({
       staticImport: true,
       insertTypesEntry: true,
     }),
-    cssInjectedByJs(),
   ],
   build: {
     target: 'esnext',
@@ -39,6 +37,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'HanaImgViewer',
       fileName: 'index',
+      cssFileName: 'style',
       formats: ['es'],
     },
     rollupOptions: {
@@ -47,7 +46,6 @@ export default defineConfig({
         globals: {
           vue: 'Vue',
         },
-        assetFileNames: 'index.[ext]',
       },
     },
   },

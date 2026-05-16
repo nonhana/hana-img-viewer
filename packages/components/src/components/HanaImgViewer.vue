@@ -1,450 +1,545 @@
 <script setup lang="ts">
 import type { CSSProperties, HTMLAttributes, StyleValue } from 'vue'
-import type { EmitsType, PropsType } from '@/types'
-import { computed, getCurrentInstance, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
-import { useFLIP, useGesture, useTransform, useZoom } from '@/composables/core'
-import { useControllable, useEventListener, useScrollLock } from '@/composables/utils'
+import type {
+  HanaImgViewerEmits,
+  HanaImgViewerExposed,
+  HanaImgViewerProps,
+} from '@/types'
+import { useDebounceFn, useEventListener } from '@vueuse/core'
+import { computed, getCurrentInstance, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import { DEFAULT_FLIP_DURATION, DEFAULT_FLIP_EASING, useFLIP } from '@/composables/core'
+import {
+  useBodyLock,
+  usePortalTarget,
+  useViewerGeometry,
+  useViewerInteractions,
+  useViewerPhase,
+  useViewerSource,
+  useViewerTransform,
+} from '@/composables/viewer'
 import { defaultProps } from '@/types'
 
 defineOptions({ name: 'HanaImgViewer' })
 
-const props = withDefaults(defineProps<PropsType>(), defaultProps)
-const emit = defineEmits<EmitsType>()
+const props = withDefaults(defineProps<HanaImgViewerProps>(), defaultProps)
+const emit = defineEmits<HanaImgViewerEmits>()
 const instance = getCurrentInstance()
 
-// ===== 模板引用 =====
+const thumbnailContainerRef = useTemplateRef('thumbnailContainerRef')
 const thumbnailRef = useTemplateRef('thumbnailRef')
+const backdropRef = useTemplateRef('backdropRef')
+const flipRef = useTemplateRef('flipRef')
 const previewRef = useTemplateRef('previewRef')
 
-// ===== 图片加载状态 =====
-type LoadState = 'idle' | 'loading' | 'loaded' | 'error'
-const loadState = ref<LoadState>('idle')
+const transitionRunId = shallowRef(0)
+const closingTransform = shallowRef<{ x: number, y: number, scale: number } | null>(null)
+const enhancementEmitted = shallowRef(false)
+const sourceErrorEmitted = shallowRef(false)
+// Controlled-mode is a static contract decided at mount time, not toggled at
+// runtime. We read vnode.props (rather than props.open !== undefined) so that
+// `v-model:open` with a transiently-undefined ref still counts as controlled.
+const isControlled = Object.hasOwn(instance?.vnode.props ?? {}, 'open')
+  || Object.hasOwn(instance?.vnode.props ?? {}, 'onUpdate:open')
 
-// ===== 客户端挂载检测 =====
-const isMounted = ref(false)
-onMounted(() => {
-  isMounted.value = true
+const { phase, isOpen, requestOpen, requestClose, markOpened, markClosed } = useViewerPhase({
+  open: () => props.open,
+  isControlled: () => isControlled, // directly returning boolean; preserves the getter type contract
+  onOpenChange: value => emit('update:open', value),
 })
 
-// ===== 受控状态管理 =====
-const isOpen = useControllable({
-  prop: () => props.open,
-  isControlled: () => {
-    const vnodeProps = instance?.vnode.props ?? {}
-    return Object.hasOwn(vnodeProps, 'open')
-      || Object.hasOwn(vnodeProps, 'onUpdate:open')
-  },
-  defaultValue: false,
-  onChange: (value) => {
-    emit('update:open', value)
-    if (value) {
-      emit('open')
-    }
-    else {
-      emit('close')
-    }
-  },
-})
+const thumbnailGeometryTarget = computed(() => thumbnailRef.value ?? thumbnailContainerRef.value ?? null)
 
-// 遮罩层单独管理
-const isMaskOpen = ref(false)
-
-// ===== 缩放管理 =====
 const {
-  zoom,
-  zoomIn,
-  zoomOut,
-  setZoom,
-  toggleDoubleClickZoom,
-  reset: resetZoom,
-  canZoomIn,
-  canZoomOut,
-  isInitialZoom,
-} = useZoom({
-  initialZoom: 1,
-  minZoom: () => props.minZoom,
-  maxZoom: () => props.maxZoom,
-  step: () => props.zoomStep,
-  doubleClickZoom: () => props.doubleClickZoom,
-  onZoomChange: (z) => {
-    emit('update:zoom', z)
-    emit('zoomChange', z)
-  },
+  destinationRect,
+  captureThumbnailRect,
+  prepareDestinationRect,
+  resetDestinationRect,
+  getViewportCenter,
+} = useViewerGeometry({
+  thumbnailTarget: thumbnailGeometryTarget,
+  thumbnailImage: thumbnailRef,
 })
 
-// 同步外部 zoom prop
-watch(() => props.zoom, (newZoom) => {
-  if (newZoom !== undefined && newZoom !== zoom.value) {
-    setZoom(newZoom)
-  }
-})
-
-// ===== 变换管理 =====
 const {
   transform,
-  style: transformStyle,
-  set: setTransform,
-  zoomAt,
+  transformCss,
   pan,
+  toggleDoubleClickZoom,
   reset: resetTransform,
-} = useTransform({
-  initial: { x: 0, y: 0, scale: 1, rotate: 0 },
-  scaleRange: () => ({ min: props.minZoom, max: props.maxZoom }),
+  addScale,
+  multiplyScale,
+} = useViewerTransform({
+  minScale: () => props.minZoom,
+  maxScale: () => props.maxZoom,
 })
 
-// 同步 zoom 和 transform.scale
-watch(zoom, (newZoom) => {
-  if (Math.abs(newZoom - transform.value.scale) > 0.001) {
-    setTransform({ scale: newZoom })
-  }
-})
-
-// ===== FLIP 动画 =====
 const {
-  isAnimating,
+  displaySrc,
+  sourcePhase,
+  beginSession,
+  endSession,
+  reset: resetSource,
+  startEnhancement,
+} = useViewerSource({
+  src: () => props.src,
+  previewSrc: () => props.previewSrc,
+})
+
+const {
+  isMounted,
+  resolvedTarget,
+  canMountOverlay,
+  isBodyTarget,
+} = usePortalTarget(() => props.portalTarget)
+
+const { lock: lockBody, unlock: unlockBody } = useBodyLock()
+
+const {
   flip,
   flipReverse,
   cancel: cancelAnimation,
 } = useFLIP({
-  duration: () => props.duration,
-  easing: () => props.easing,
+  duration: DEFAULT_FLIP_DURATION,
+  easing: DEFAULT_FLIP_EASING,
 })
 
-// ===== 滚动锁定 =====
-const { lock: lockScroll, unlock: unlockScroll } = useScrollLock()
+let backdropAnimation: Animation | null = null
 
-// ===== 手势管理 =====
 const {
   isDragging,
   isPinching,
   isWheeling,
-  isInteracting,
-} = useGesture({
+} = useViewerInteractions({
   target: previewRef,
-  enabled: () => isOpen.value && !isAnimating.value,
+  zoomTarget: flipRef,
+  enabled: () => phase.value === 'open',
   enableDrag: () => props.enableDrag,
-  enablePinch: () => props.enablePinch,
-  enableWheel: () => props.enableZoom,
-  enableGlobalZoom: () => props.enableGlobalZoom,
-  wheelZoomRatio: () => props.wheelZoomRatio,
-  onDrag: (state) => {
-    pan(state.delta)
+  enableZoom: () => props.enableZoom,
+  enableKeyboard: () => props.enableKeyboard && isBodyTarget.value,
+  onPan: delta => pan(delta),
+  onWheelZoom: (delta, anchor) => addScale(delta, anchor),
+  onPinchZoom: (factor, anchor) => multiplyScale(factor, anchor),
+  onDoubleClick: (anchor) => {
+    toggleDoubleClickZoom(anchor)
   },
-  onPinch: (state) => {
-    // 双指缩放：以双指中心点为锚点
-    const newScale = transform.value.scale * state.deltaScale
-    zoomAt(newScale, state.center)
-    zoom.value = newScale
+  onEscape: () => {
+    void closePreview()
   },
-  onWheel: (state) => {
-    // 滚轮缩放：以光标位置为锚点
-    const newScale = transform.value.scale + state.delta
-    zoomAt(newScale, state.center)
-    zoom.value = newScale
-  },
-  onDoubleClick: (position) => {
-    if (!props.enableDoubleClick)
-      return
-    toggleDoubleClickZoom()
-    // 以双击位置为锚点
-    zoomAt(zoom.value, position)
-  },
+  getViewportCenter,
 })
 
-// ===== 键盘事件 =====
-useEventListener(
-  () => (isOpen.value && props.enableKeyboard) ? window : null,
-  'keydown',
-  (event) => {
-    if (event.key === 'Escape') {
-      closePreview()
-    }
-  },
-)
+const isOverlayMounted = computed(() => phase.value !== 'closed')
+const isInteractive = computed(() => phase.value === 'open')
+const isInteracting = computed(() => isDragging.value || isPinching.value || isWheeling.value)
+const previewCursor = computed<CSSProperties['cursor']>(() => {
+  if (!isInteractive.value || !props.enableDrag)
+    return 'default'
 
-// ===== 缩略图样式 =====
-const thumbnailContainerBaseStyle = computed<CSSProperties>(() => ({
-  display: 'inline-block',
-}))
+  return isInteracting.value ? 'grabbing' : 'grab'
+})
 
-const mergedThumbnailContainerStyle = computed<StyleValue>(() => [
-  thumbnailContainerBaseStyle.value,
+const thumbnailContainerStyle = computed<StyleValue>(() => [
+  {
+    display: 'inline-block',
+    visibility: isOverlayMounted.value ? 'hidden' : 'visible',
+  } satisfies CSSProperties,
   props.containerStyle,
 ])
 
-const thumbnailBaseStyle = computed<CSSProperties>(() => ({
-  display: 'block',
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-  cursor: 'pointer',
-  visibility: isOpen.value ? 'hidden' : 'visible',
-}))
-
-const thumbnailContainerClass = computed<HTMLAttributes['class']>(() => props.containerClass)
-
-const thumbnailClass = computed<HTMLAttributes['class']>(() => props.thumbnailClass)
-
-const mergedThumbnailStyle = computed<StyleValue>(() => [
-  thumbnailBaseStyle.value,
+const thumbnailStyle = computed<StyleValue>(() => [
+  {
+    display: 'block',
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    cursor: 'pointer',
+  } satisfies CSSProperties,
   props.thumbnailStyle,
 ])
 
-// ===== 遮罩样式 =====
-const maskStyle = computed<CSSProperties>(() => ({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: props.maskColor,
-  zIndex: props.zIndex - 1,
-  opacity: props.maskOpacity,
-} as CSSProperties))
+const overlayStyle = computed<StyleValue>(() => [
+  {
+    pointerEvents: isOverlayMounted.value ? 'auto' : 'none',
+  } satisfies CSSProperties,
+])
 
-const maskDuration = computed(() => `${props.duration}ms`)
-
-// ===== 预览图样式 =====
-const previewContainerStyle = computed<CSSProperties>(() => ({
-  position: 'fixed',
-  inset: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: props.zIndex,
-  pointerEvents: 'none',
+const backdropStyle = computed<CSSProperties>(() => ({
+  opacity: phase.value === 'opening' ? 0 : 1,
 }))
 
-const previewImageStyle = computed<CSSProperties>(() => ({
-  maxWidth: '90vw',
-  maxHeight: '90vh',
-  objectFit: 'contain',
-  cursor: isAnimating.value ? 'default' : isInteracting.value ? 'grabbing' : 'grab',
-  transform: transformStyle.value,
-  transformOrigin: 'center',
-  willChange: isInteracting.value ? 'transform' : 'auto',
-  pointerEvents: 'auto',
-  userSelect: 'none',
-  touchAction: 'none',
+const flipShellStyle = computed<StyleValue>(() => {
+  const rect = destinationRect.value
+  const shellTransform = closingTransform.value
+    ? `translate3d(${closingTransform.value.x}px, ${closingTransform.value.y}px, 0) scale(${closingTransform.value.scale})`
+    : 'none'
+
+  return [
+    {
+      width: rect ? `${rect.width}px` : undefined,
+      height: rect ? `${rect.height}px` : undefined,
+      transform: shellTransform,
+      transformOrigin: 'center center',
+    } satisfies CSSProperties,
+  ]
+})
+
+const previewStyle = computed<CSSProperties>(() => ({
+  transform: closingTransform.value ? 'none' : transformCss.value,
+  transformOrigin: 'center center',
+  willChange: isInteractive.value ? 'transform' : 'auto',
+  cursor: previewCursor.value,
 }))
 
-// ===== 打开预览 =====
-async function openPreview(): Promise<void> {
-  if (isOpen.value || isAnimating.value)
+function cancelBackdropAnimation(): void {
+  if (!backdropAnimation)
     return
 
-  // 重置状态
-  resetTransform()
-  resetZoom()
-  loadState.value = 'loading'
-
-  // 锁定滚动
-  lockScroll()
-
-  // 显示预览
-  isMaskOpen.value = true
-  isOpen.value = true
-
-  // 等待 DOM 更新
-  await nextTick()
-
-  if (!thumbnailRef.value || !previewRef.value)
-    return
-
-  // 获取缩略图位置
-  const thumbnailRect = thumbnailRef.value.getBoundingClientRect()
-  // 获取预览图最终位置
-  const previewRect = previewRef.value.getBoundingClientRect()
-
-  // 执行 FLIP 动画
-  await flip(thumbnailRect, previewRect, previewRef.value)
+  backdropAnimation.cancel()
+  backdropAnimation = null
 }
 
-// ===== 关闭预览 =====
-async function closePreview(): Promise<void> {
-  if (!isOpen.value || isAnimating.value)
+async function animateBackdropOpacity(targetOpacity: number): Promise<void> {
+  const backdropEl = backdropRef.value
+
+  if (!backdropEl)
     return
 
-  // 取消正在进行的动画
-  cancelAnimation()
+  const currentOpacity = Number.parseFloat(window.getComputedStyle(backdropEl).opacity)
+  const fromOpacity = Number.isFinite(currentOpacity)
+    ? currentOpacity
+    : targetOpacity === 0 ? 1 : 0
 
-  isMaskOpen.value = false
-  if (!thumbnailRef.value || !previewRef.value) {
-    isOpen.value = false
-    unlockScroll()
+  if (Math.abs(fromOpacity - targetOpacity) < 0.001)
     return
+
+  cancelBackdropAnimation()
+
+  try {
+    backdropAnimation = backdropEl.animate(
+      [
+        { opacity: fromOpacity },
+        { opacity: targetOpacity },
+      ],
+      {
+        duration: DEFAULT_FLIP_DURATION,
+        easing: DEFAULT_FLIP_EASING,
+        fill: 'forwards',
+      },
+    )
+
+    await backdropAnimation.finished
+
+    if (backdropAnimation) {
+      backdropAnimation.commitStyles()
+      backdropAnimation.cancel()
+    }
+  }
+  catch (error) {
+    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      throw error
+    }
+  }
+  finally {
+    backdropAnimation = null
+  }
+}
+
+function buildRect(rect: { left: number, top: number, width: number, height: number }): DOMRect {
+  return new DOMRect(rect.left, rect.top, rect.width, rect.height)
+}
+
+function emitSourceEvents(): void {
+  if (sourcePhase.value === 'enhanced' && !enhancementEmitted.value) {
+    enhancementEmitted.value = true
+    emit('load', new Event('load'))
   }
 
-  // 1. 先保存当前的 transform 状态（在重置之前）
-  const currentTransformSnapshot = {
+  if (sourcePhase.value === 'enhance-error' && !sourceErrorEmitted.value) {
+    sourceErrorEmitted.value = true
+    emit('error', new Event('error'))
+  }
+}
+
+function resetOverlaySessionState(): void {
+  cancelAnimation()
+  cancelBackdropAnimation()
+  closingTransform.value = null
+  enhancementEmitted.value = false
+  sourceErrorEmitted.value = false
+  resetTransform()
+  resetSource()
+  resetDestinationRect()
+}
+
+function finalizeClosedState(): void {
+  markClosed()
+  resetOverlaySessionState()
+  unlockBody()
+  emit('close')
+}
+
+async function runEnhancement(sessionToken?: number): Promise<void> {
+  await startEnhancement(sessionToken)
+  emitSourceEvents()
+}
+
+async function enterOpenFlow(skipFlip: boolean): Promise<void> {
+  if (!canMountOverlay.value)
+    return
+
+  beginSession() // bump sessionId + activate session; return value not needed
+  transitionRunId.value += 1
+  const runId = transitionRunId.value
+
+  closingTransform.value = null
+  enhancementEmitted.value = false
+  sourceErrorEmitted.value = false
+  resetTransform()
+  prepareDestinationRect()
+
+  if (isBodyTarget.value)
+    lockBody()
+
+  await nextTick()
+
+  if (runId !== transitionRunId.value || !isOpen.value)
+    return
+
+  const motionTasks: Array<Promise<void>> = [animateBackdropOpacity(1)]
+
+  if (!skipFlip) {
+    const thumbnailEl = captureThumbnailRect()
+    const flipEl = flipRef.value
+
+    if (thumbnailEl && flipEl) {
+      const to = flipEl.getBoundingClientRect()
+      motionTasks.push(flip(thumbnailEl, to, flipEl))
+    }
+  }
+
+  await Promise.all(motionTasks)
+
+  if (runId !== transitionRunId.value || !isOpen.value)
+    return
+
+  markOpened()
+  emit('open')
+
+  void runEnhancement() // no token: startEnhancement defaults to latest sessionId
+}
+
+function openPreview(): void {
+  if (phase.value !== 'closed')
+    return
+  requestOpen()
+  // The bridge watcher in Step 9 (and the desiredPhase effect in Phase 4)
+  // observes phase='opening' and runs enterOpenFlow when mountable.
+}
+
+function closePreview(): void {
+  if (phase.value === 'closed' || phase.value === 'closing')
+    return
+  requestClose()
+  // In uncontrolled mode, requestClose sets phase='closing' which triggers
+  // the bridge watcher to run closePreviewInternal.
+  // In controlled mode, requestClose only emits update:open(false); the
+  // parent must set props.open=false to advance phase to 'closing'.
+}
+
+async function closePreviewInternal(): Promise<void> {
+  if (phase.value === 'closed')
+    return
+
+  transitionRunId.value += 1
+  const runId = transitionRunId.value
+  endSession()
+
+  const flipEl = flipRef.value
+  const thumbnailRect = captureThumbnailRect()
+  const rect = destinationRect.value
+
+  closingTransform.value = {
     x: transform.value.x,
     y: transform.value.y,
     scale: transform.value.scale,
   }
 
-  // 2. 重置变换状态（这样 Vue 的响应式样式会变为 translate(0,0)）
   resetTransform()
 
-  // 3. 等待 DOM 更新，获取重置后的基准位置
   await nextTick()
 
-  // 4. 获取重置后的预览图基准位置（没有拖拽偏移的居中位置）
-  const previewRect = previewRef.value.getBoundingClientRect()
-  // 获取缩略图位置
-  const thumbnailRect = thumbnailRef.value.getBoundingClientRect()
-
-  // 5. 执行反向 FLIP 动画，从当前实际位置（包含拖拽偏移）到缩略图位置
-  await flipReverse(previewRect, thumbnailRect, previewRef.value, currentTransformSnapshot)
-
-  // 关闭预览
-  isOpen.value = false
-
-  // 解锁滚动
-  unlockScroll()
-}
-
-// ===== 处理遮罩点击 =====
-function handleMaskClick(): void {
-  if (props.closeOnMaskClick && !isAnimating.value) {
-    closePreview()
+  if (runId !== transitionRunId.value) {
+    return
   }
+
+  const motionTasks: Array<Promise<void>> = [animateBackdropOpacity(0)]
+
+  if (flipEl && thumbnailRect && rect) {
+    motionTasks.push(
+      flipReverse(
+        buildRect(rect),
+        thumbnailRect,
+        flipEl,
+        closingTransform.value ?? undefined,
+      ),
+    )
+  }
+
+  await Promise.all(motionTasks)
+
+  if (runId !== transitionRunId.value) {
+    return
+  }
+
+  finalizeClosedState()
 }
 
-// ===== 处理图片加载 =====
-function handleImageLoad(event: Event): void {
-  loadState.value = 'loaded'
-  emit('load', event)
+function reset(): void {
+  resetTransform()
 }
 
-function handleImageError(event: Event): void {
-  loadState.value = 'error'
-  emit('error', event)
+function handleBackdropClick(): void {
+  if (!props.closeOnMaskClick)
+    return
+
+  void closePreview()
 }
 
-// ===== 暴露方法和状态 =====
-defineExpose({
-  // 状态
-  isOpen,
-  isAnimating,
-  zoom,
-  transform,
-  loadState,
-  canZoomIn,
-  canZoomOut,
-  isInitialZoom,
-  isDragging,
-  isPinching,
-  isWheeling,
-  isInteracting,
-  // 方法
+watch(sourcePhase, () => {
+  emitSourceEvents()
+})
+
+watch(() => props.src, () => {
+  if (phase.value === 'closed') {
+    resetSource()
+    return
+  }
+
+  enhancementEmitted.value = false
+  sourceErrorEmitted.value = false
+  beginSession()
+
+  if (phase.value === 'open')
+    void runEnhancement()
+})
+
+watch(() => props.previewSrc, () => {
+  if (phase.value === 'open') {
+    enhancementEmitted.value = false
+    sourceErrorEmitted.value = false
+    beginSession({ resetToBase: false })
+    void runEnhancement()
+  }
+})
+
+type ResolvedPhase = 'closed' | 'pending' | 'opening' | 'open' | 'closing'
+
+/**
+ * Mirrors `phase` except: when phase='opening' but overlay can't mount
+ * yet (SSR pre-hydration, missing portal target, or controlled open=true
+ * before isMounted), we report 'pending' instead. The effect treats
+ * pending → opening as a hydration-style transition (skipFlip=true).
+ */
+const desiredPhase = computed<ResolvedPhase>(() => {
+  if (phase.value === 'opening' && (!isMounted.value || !canMountOverlay.value))
+    return 'pending'
+  return phase.value as ResolvedPhase
+})
+
+watch(
+  desiredPhase,
+  async (next, prev) => {
+    if (next === prev)
+      return
+
+    if (next === 'opening') {
+      const skipFlip = prev === 'pending' // resumed after mount/portal became ready
+      await enterOpenFlow(skipFlip)
+    }
+    else if (next === 'closing') {
+      await closePreviewInternal()
+    }
+    // 'closed', 'open', 'pending' are stable — no action needed
+  },
+  { immediate: true },
+)
+
+watch(isBodyTarget, (nextValue, previousValue) => {
+  if (!isOverlayMounted.value || nextValue === previousValue)
+    return
+
+  if (nextValue)
+    lockBody()
+  else
+    unlockBody()
+})
+
+const debouncedPrepareDestinationRect = useDebounceFn(prepareDestinationRect, 50)
+
+useEventListener(
+  () => phase.value === 'open' ? window : null,
+  'resize',
+  debouncedPrepareDestinationRect,
+)
+
+defineExpose<HanaImgViewerExposed>({
   open: openPreview,
   close: closePreview,
-  zoomIn,
-  zoomOut,
-  setZoom,
-  resetZoom,
-  resetTransform,
+  reset,
 })
 </script>
 
 <template>
-  <div :class="thumbnailContainerClass" :style="mergedThumbnailContainerStyle">
-    <!-- 缩略图插槽 -->
+  <div
+    ref="thumbnailContainerRef"
+    :class="props.containerClass"
+    :style="thumbnailContainerStyle"
+  >
     <slot name="thumbnail" :open="openPreview">
       <img
         ref="thumbnailRef"
         :src="src"
         :alt="alt"
-        :class="thumbnailClass"
-        :style="mergedThumbnailStyle"
+        :class="props.thumbnailClass as HTMLAttributes['class']"
+        :style="thumbnailStyle"
+        role="button"
+        tabindex="0"
         @click="openPreview"
+        @keydown.enter.prevent="openPreview"
+        @keydown.space.prevent="openPreview"
       >
     </slot>
   </div>
 
-  <!-- 遮罩层 -->
-  <Teleport v-if="isMounted" to="body">
-    <Transition name="hana-mask-fade">
-      <div
-        v-if="isMaskOpen"
-        :style="maskStyle"
-        @click="handleMaskClick"
-      />
-    </Transition>
-  </Teleport>
-
-  <!-- 预览图容器 -->
-  <Teleport v-if="isMounted" to="body">
+  <Teleport v-if="isMounted && resolvedTarget" :to="resolvedTarget">
     <div
-      v-if="isOpen"
-      :style="previewContainerStyle"
+      v-if="isOverlayMounted"
+      class="hana-img-viewer-overlay"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="props.alt || 'Image preview'"
+      :style="overlayStyle"
     >
-      <!-- 加载状态插槽 -->
-      <slot v-if="loadState === 'loading'" name="loading">
-        <div
-          :style="{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            color: 'white',
-            fontSize: '14px',
-          }"
-        >
-          加载中...
-        </div>
-      </slot>
-
-      <!-- 错误状态插槽 -->
-      <slot v-else-if="loadState === 'error'" name="error">
-        <div
-          :style="{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            color: 'white',
-            fontSize: '14px',
-          }"
-        >
-          加载失败
-        </div>
-      </slot>
-
-      <!-- 预览图片 -->
-      <img
-        ref="previewRef"
-        :src="previewSrc || src"
-        :alt="alt"
-        :style="previewImageStyle"
-        draggable="false"
-        @load="handleImageLoad"
-        @error="handleImageError"
-      >
-
-      <!-- 工具栏插槽 -->
-      <slot
-        name="toolbar"
-        :zoom="zoom"
-        :zoom-in="zoomIn"
-        :zoom-out="zoomOut"
-        :reset="resetZoom"
-        :close="closePreview"
-        :can-zoom-in="canZoomIn"
-        :can-zoom-out="canZoomOut"
+      <div
+        ref="backdropRef"
+        class="hana-img-viewer-backdrop"
+        :style="backdropStyle"
+        @click="handleBackdropClick"
       />
+      <div
+        ref="flipRef"
+        class="hana-img-viewer-flip-shell"
+        :style="flipShellStyle"
+      >
+        <img
+          ref="previewRef"
+          :src="displaySrc"
+          :alt="alt"
+          class="hana-img-viewer-preview"
+          :style="previewStyle"
+          draggable="false"
+        >
+      </div>
     </div>
   </Teleport>
 </template>
-
-<style>
-.hana-mask-fade-enter-active,
-.hana-mask-fade-leave-active {
-  transition: opacity v-bind('maskDuration') v-bind('props.easing');
-}
-.hana-mask-fade-enter-from,
-.hana-mask-fade-leave-to {
-  opacity: 0 !important;
-}
-.hana-mask-fade-enter-to,
-.hana-mask-fade-leave-from {
-  opacity: v-bind('props.maskOpacity') !important;
-}
-</style>

@@ -6,6 +6,11 @@
     "lint:fix": "eslint . --fix",
     "dev": "pnpm -F examples dev",
     "build": "pnpm -F hana-img-viewer build",
+    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
+    "test:unit": "pnpm -F hana-img-viewer test:unit",
+    "test:component": "pnpm -F hana-img-viewer test:component",
+    "test:ssr": "pnpm -F hana-img-viewer test:ssr",
+    "test:dist": "pnpm -F hana-img-viewer test:dist",
     "release": "pnpm build && changeset publish"
   },
   "dependencies": {
@@ -18,13 +23,17 @@
     "@types/node": "catalog:",
     "@types/throttle-debounce": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
+    "@vue/server-renderer": "catalog:",
+    "@vue/test-utils": "catalog:",
     "cpy": "catalog:",
     "eslint": "catalog:",
     "fast-glob": "catalog:",
+    "jsdom": "catalog:",
     "sass": "catalog:",
     "throttle-debounce": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vitest": "catalog:",
     "vue": "catalog:",
     "vue-tsc": "catalog:"
   }

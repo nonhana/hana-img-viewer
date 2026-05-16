@@ -1,37 +1,22 @@
 # hana-img-viewer
 
-A lightweight and elegant image previewer for Vue 3 with smooth FLIP animations and touch gesture support.
+A lightweight Vue 3 image viewer that is simple to drop in.
 
 ## Features
 
-- **FLIP Animation**: Smooth transition from thumbnail to preview using the FLIP animation technique
-- **Touch Gestures**: Drag, pan, and pinch-to-zoom with natural physics
-- **Mouse Support**: Wheel zoom (anchored at cursor position), drag to pan, double-click to zoom
-- **Keyboard Support**: Press `ESC` to close preview
-- **TypeScript**: Full type safety with complete type definitions
-- **SSR Friendly**: Works seamlessly with server-side rendering
-- **Lightweight**: Only ~5KB gzipped
-- **Flexible Styling**: Style the thumbnail container and image separately
-- **Vue 3 Composition API**: Built with modern Vue 3 patterns
+- Thumbnail-origin FLIP open and close
+- `src`-first preview path with optional silent `previewSrc` enhancement
+- Wheel, double-click, drag, and pinch interactions
+- SSR-safe thumbnail-only server render
+- Extracted CSS output with a standard bundler-friendly entry
 
 ## Installation
 
 ```bash
-# pnpm (recommended)
 pnpm add hana-img-viewer
-
-# npm
-npm install hana-img-viewer
-
-# yarn
-yarn add hana-img-viewer
 ```
 
-## Basic Usage
-
-### Partial Import
-
-Import the component where you need it:
+## Basic usage
 
 ```vue
 <script setup lang="ts">
@@ -39,267 +24,159 @@ import { HanaImgViewer } from 'hana-img-viewer'
 </script>
 
 <template>
-  <HanaImgViewer src="/path/to/image.jpg" alt="Image description" />
+  <HanaImgViewer
+    src="/images/post-thumb.jpg"
+    alt="Article cover"
+  />
 </template>
 ```
 
-### Global Registration
-
-Register globally in your `main.ts`:
+Import `style.css` in `main.ts`:
 
 ```ts
-import HanaImgViewer from 'hana-img-viewer'
-import { createApp } from 'vue'
-import App from './App.vue'
-
-const app = createApp(App)
-app.use(HanaImgViewer)
-app.mount('#app')
+import 'hana-img-viewer/style.css'
 ```
 
-Then use in any component:
+## `src` and `previewSrc`
+
+`src` is required and always drives:
+
+- the thumbnail
+- the first visible preview frame
+- the FLIP transition source
+
+If `previewSrc` is provided, the viewer opens from `src` immediately and upgrades the visible bitmap in place after `previewSrc` is ready. There is no explicit loading UI and no second transition.
 
 ```vue
-<template>
-  <hana-img-viewer src="/path/to/image.jpg" alt="Image description" />
-</template>
+<HanaImgViewer
+  src="/images/post-thumb.jpg"
+  preview-src="/images/post-full.jpg"
+  alt="Article cover"
+/>
 ```
 
-## API Reference
+## API
 
 ### Props
 
 | Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `src` | `string` | - | **Required**. Image URL. |
-| `alt` | `string` | `''` | Alternative text for the image. |
-| `previewSrc` | `string` | - | High-resolution image URL for preview (defaults to `src`). |
-| `containerClass` | `HTMLAttributes['class']` | - | Extra class for the thumbnail container. |
-| `containerStyle` | `StyleValue` | - | Extra style for the thumbnail container. |
-| `thumbnailClass` | `HTMLAttributes['class']` | - | Extra class for the thumbnail image. |
-| `thumbnailStyle` | `StyleValue` | - | Extra style for the thumbnail image. |
-| `duration` | `number` | `300` | Animation duration in milliseconds. |
-| `easing` | `string` | `'cubic-bezier(0.4, 0, 0.2, 1)'` | Animation easing function. |
-| `maskColor` | `string` | `'#000'` | Mask background color. |
-| `maskOpacity` | `number` | `0.3` | Mask opacity (0-1). |
-| `zIndex` | `number` | `9999` | Preview layer z-index. |
-| `minZoom` | `number` | `0.5` | Minimum zoom level. |
-| `maxZoom` | `number` | `10` | Maximum zoom level. |
-| `zoomStep` | `number` | `0.5` | Zoom increment per step. |
-| `doubleClickZoom` | `number` | `2` | Target zoom level on double-click. |
-| `wheelZoomRatio` | `number` | `1` | Wheel zoom sensitivity multiplier. |
-| `enableZoom` | `boolean` | `true` | Enable zoom functionality. |
-| `enableDrag` | `boolean` | `true` | Enable drag to pan. |
-| `enablePinch` | `boolean` | `true` | Enable pinch-to-zoom on touch devices. |
-| `enableDoubleClick` | `boolean` | `true` | Enable double-click to zoom. |
-| `enableKeyboard` | `boolean` | `true` | Enable keyboard controls (ESC to close). |
-| `closeOnMaskClick` | `boolean` | `true` | Close preview when clicking the mask. |
+| --- | --- | --- | --- |
+| `src` | `string` | - | Required thumbnail and first-preview source. |
+| `alt` | `string` | `''` | Accessible alt text. |
+| `previewSrc` | `string` | - | Optional silent enhancement source. |
+| `open` | `boolean` | - | Controlled open state. |
+| `portalTarget` | `string \| HTMLElement \| null` | `'body'` | Overlay mount target. `null` keeps the open request pending until a custom target exists. |
+| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, and pinch zoom. |
+| `enableDrag` | `boolean` | `true` | Enable drag while open. |
+| `minZoom` | `number` | `0.5` | Minimum zoom ratio. |
+| `maxZoom` | `number` | `10` | Maximum zoom ratio. |
+| `closeOnMaskClick` | `boolean` | `true` | Close when clicking the backdrop. |
+| `enableKeyboard` | `boolean` | `true` | Allow ESC close when the viewer owns the active body portal. |
+| `containerClass` | `HTMLAttributes['class']` | - | Thumbnail container class hook. |
+| `containerStyle` | `StyleValue` | - | Thumbnail container style hook. |
+| `thumbnailClass` | `HTMLAttributes['class']` | - | Thumbnail image class hook. |
+| `thumbnailStyle` | `StyleValue` | - | Thumbnail image style hook. |
 
-### v-model Bindings
-
-| Binding | Type | Description |
-| ------- | ---- | ----------- |
-| `v-model:open` | `boolean` | Controls preview open/close state. |
-| `v-model:zoom` | `number` | Controls current zoom level. |
-
-### Events
+### Emits
 
 | Event | Payload | Description |
-| ----- | ------- | ----------- |
-| `open` | - | Emitted when preview opens. |
-| `close` | - | Emitted when preview closes. |
-| `zoomChange` | `number` | Emitted when zoom level changes. |
-| `load` | `Event` | Emitted when image loads successfully. |
-| `error` | `Event` | Emitted when image fails to load. |
+| --- | --- | --- |
+| `update:open` | `boolean` | Controlled open-state intent. |
+| `open` | - | Fired when the viewer becomes visibly open on the client. |
+| `close` | - | Fired when the viewer finishes closing. |
+| `load` | `Event` | Fired when the enhancement source becomes active. |
+| `error` | `Event` | Fired when the enhancement source fails. |
 
 ### Slots
 
 | Slot | Props | Description |
-| ---- | ----- | ----------- |
-| `thumbnail` | `{ open: () => void }` | Custom thumbnail content. |
-| `loading` | - | Custom loading state. |
-| `error` | - | Custom error state. |
-| `toolbar` | `{ zoom, zoomIn, zoomOut, reset, close, canZoomIn, canZoomOut }` | Custom toolbar. |
+| --- | --- | --- |
+| `thumbnail` | `{ open: () => void }` | Custom thumbnail trigger. |
 
-### Exposed Methods & State
+### Exposed methods
 
-Access via template ref:
+```ts
+interface HanaImgViewerExposed {
+  open: () => void | Promise<void>
+  close: () => void | Promise<void>
+  reset: () => void
+}
+```
+
+Example:
 
 ```vue
 <script setup lang="ts">
+import type { HanaImgViewerExposed } from 'hana-img-viewer'
 import { ref } from 'vue'
 
-const viewerRef = ref()
-
-// Open programmatically
-viewerRef.value?.open()
-
-// Close programmatically
-viewerRef.value?.close()
-
-// Zoom controls
-viewerRef.value?.zoomIn()
-viewerRef.value?.zoomOut()
-viewerRef.value?.setZoom(2)
-viewerRef.value?.resetZoom()
+const viewerRef = ref<HanaImgViewerExposed | null>(null)
 </script>
 
 <template>
-  <HanaImgViewer ref="viewerRef" src="/image.jpg" />
+  <button @click="viewerRef?.open()">
+    Open
+  </button>
+  <HanaImgViewer ref="viewerRef" src="/images/post-thumb.jpg" />
 </template>
 ```
 
-**Exposed State:**
-
-- `isOpen` - Preview open state
-- `isAnimating` - Animation state
-- `zoom` - Current zoom level
-- `transform` - Current transform state
-- `loadState` - Image load state (`'idle' | 'loading' | 'loaded' | 'error'`)
-- `canZoomIn` - Whether can zoom in
-- `canZoomOut` - Whether can zoom out
-- `isDragging` - Drag state
-- `isPinching` - Pinch state
-
-**Exposed Methods:**
-
-- `open()` - Open preview
-- `close()` - Close preview
-- `zoomIn()` - Zoom in
-- `zoomOut()` - Zoom out
-- `setZoom(level)` - Set zoom level
-- `resetZoom()` - Reset zoom to initial
-- `resetTransform()` - Reset all transforms
-
-## Advanced Usage
-
-### Controlled Mode
+## Controlled mode
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
 
 const isOpen = ref(false)
-const zoom = ref(1)
 </script>
 
 <template>
   <button @click="isOpen = true">
-    Open Preview
+    Open preview
   </button>
-  <p>Current zoom: {{ zoom.toFixed(2) }}</p>
 
   <HanaImgViewer
     v-model:open="isOpen"
-    v-model:zoom="zoom"
-    src="/image.jpg"
+    src="/images/post-thumb.jpg"
+    alt="Controlled preview"
   />
 </template>
 ```
 
-### Custom Thumbnail
+## Custom thumbnail
 
 ```vue
-<template>
-  <HanaImgViewer src="/high-res.jpg">
-    <template #thumbnail="{ open }">
-      <div class="custom-thumbnail" @click="open">
-        <img src="/thumbnail.jpg" alt="Thumbnail">
-        <span>Click to preview</span>
-      </div>
-    </template>
-  </HanaImgViewer>
-</template>
+<HanaImgViewer src="/images/post-full.jpg" alt="Custom trigger preview">
+  <template #thumbnail="{ open }">
+    <button class="thumb-button" type="button" @click="open">
+      Open preview
+    </button>
+  </template>
+</HanaImgViewer>
 ```
 
-### Thumbnail Styling
+## Custom portal target
+
+Use `portalTarget` when the preview should stay inside a host layer, such as a dialog.
 
 ```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const portalTarget = ref<HTMLElement | null>(null)
+</script>
+
 <template>
+  <div ref="portalTarget" />
+
   <HanaImgViewer
-    src="/image.jpg"
-    container-class="inline-block overflow-hidden rounded-2xl"
-    :container-style="{ width: '240px', aspectRatio: '4 / 3' }"
-    thumbnail-class="transition-transform duration-300"
-    :thumbnail-style="{ width: '100%', height: '100%', objectFit: 'cover' }"
+    :portal-target="portalTarget"
+    src="/images/post-thumb.jpg"
+    alt="Dialog scoped preview"
   />
 </template>
 ```
 
-### Custom Toolbar
+`portalTarget="body"` and `:portal-target="document.body"` both use the default body portal behavior.
 
-```vue
-<template>
-  <HanaImgViewer src="/image.jpg">
-    <template #toolbar="{ zoom, zoomIn, zoomOut, reset, close, canZoomIn, canZoomOut }">
-      <div class="toolbar">
-        <button :disabled="!canZoomOut" @click="zoomOut">
-          -
-        </button>
-        <span>{{ (zoom * 100).toFixed(0) }}%</span>
-        <button :disabled="!canZoomIn" @click="zoomIn">
-          +
-        </button>
-        <button @click="reset">
-          Reset
-        </button>
-        <button @click="close">
-          Close
-        </button>
-      </div>
-    </template>
-  </HanaImgViewer>
-</template>
-```
-
-### Using Composables Directly
-
-For advanced use cases, you can use the composables directly:
-
-```ts
-import {
-  useControllable,
-  useFLIP,
-  useGesture,
-  useScrollLock,
-  useTransform,
-  useZoom,
-} from 'hana-img-viewer'
-
-// Example: Create custom preview logic
-const { zoom, zoomIn, zoomOut, setZoom } = useZoom({
-  minZoom: 0.5,
-  maxZoom: 5,
-  step: 0.25,
-})
-
-const { transform, zoomAt, pan, reset } = useTransform()
-
-const { lock, unlock } = useScrollLock()
-```
-
-## TypeScript
-
-Full TypeScript support is included:
-
-```ts
-import type {
-  ImagePreviewEmits,
-  ImagePreviewProps,
-  Point,
-  Transform,
-} from 'hana-img-viewer'
-```
-
-## Browser Support
-
-- Chrome >= 84
-- Firefox >= 75
-- Safari >= 13.1
-- Edge >= 84
-
-Requires Web Animations API support.
-
-## License
-
-MIT
+When `portalTarget` is a custom element, the host remains the final ESC authority by default.

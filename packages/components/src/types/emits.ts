@@ -1,33 +1,25 @@
 /**
- * 组件 Emits 事件类型
+ * Public component emits.
  */
-export interface EmitsType {
+export interface HanaImgViewerEmits {
   /**
-   * 打开/关闭预览状态变化
+   * Controlled open-state sync.
    */
   (e: 'update:open', value: boolean): void
   /**
-   * 缩放变化
-   */
-  (e: 'update:zoom', value: number): void
-  /**
-   * 打开预览
+   * Fired when the viewer becomes visibly open on the client.
    */
   (e: 'open'): void
   /**
-   * 关闭预览
+   * Fired when the viewer finishes closing.
    */
   (e: 'close'): void
   /**
-   * 缩放变化
-   */
-  (e: 'zoomChange', zoom: number): void
-  /**
-   * 图片加载成功
+   * Fired when the enhancement source is ready and active.
    */
   (e: 'load', event: Event): void
   /**
-   * 图片加载失败
+   * Fired when the enhancement source fails.
    */
   (e: 'error', event: Event): void
 }

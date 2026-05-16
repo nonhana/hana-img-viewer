@@ -145,3 +145,7 @@ dist
 
 # Cursor
 .cursor/
+
+# generated example type helpers
+examples/auto-imports.d.ts
+examples/components.d.ts
