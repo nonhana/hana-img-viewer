@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
+import { resolvePortalTarget } from '@/composables/viewer/usePortalTarget'
 import { HanaImgViewer } from '@/index'
 import {
   addEventListenerSpy,
@@ -565,5 +566,34 @@ describe('HanaImgViewer component harness', () => {
       Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight })
       wrapper.unmount()
     }
+  })
+})
+
+describe('resolvePortalTarget', () => {
+  it('resolves undefined to document.body', () => {
+    expect(resolvePortalTarget(undefined)).toBe(document.body)
+  })
+  it('resolves "body" string to document.body', () => {
+    expect(resolvePortalTarget('body')).toBe(document.body)
+  })
+  it('resolves document.body to document.body', () => {
+    expect(resolvePortalTarget(document.body)).toBe(document.body)
+  })
+  it('resolves null to null', () => {
+    expect(resolvePortalTarget(null)).toBeNull()
+  })
+  it('resolves a CSS selector to the matched element', () => {
+    const el = document.createElement('div')
+    el.id = 'portal-target-test'
+    document.body.appendChild(el)
+    expect(resolvePortalTarget('#portal-target-test')).toBe(el)
+    el.remove()
+  })
+  it('resolves a missing selector to null', () => {
+    expect(resolvePortalTarget('#does-not-exist')).toBeNull()
+  })
+  it('resolves an HTMLElement to itself', () => {
+    const el = document.createElement('section')
+    expect(resolvePortalTarget(el)).toBe(el)
   })
 })
