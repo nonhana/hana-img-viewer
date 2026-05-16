@@ -1,6 +1,6 @@
 # hana-img-viewer
 
-A lightweight Vue 3 image viewer that simple to drop in.
+A lightweight Vue 3 image viewer that is simple to drop in.
 
 ## Features
 
@@ -31,7 +31,7 @@ import { HanaImgViewer } from 'hana-img-viewer'
 </template>
 ```
 
-For standard bundlers, styles are pulled in by the package entry. If your integration needs an explicit stylesheet import, use:
+Import `style.css` in `main.ts`:
 
 ```ts
 import 'hana-img-viewer/style.css'
