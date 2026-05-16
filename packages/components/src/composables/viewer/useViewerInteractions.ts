@@ -34,7 +34,7 @@ function createAnchor(point: Point, getViewportCenter?: () => Point | null): Vie
 
 export function useViewerInteractions(options: UseViewerInteractionsOptions) {
   const active = computed(() => toValue(options.enabled))
-  const zoomTarget = options.zoomTarget ?? options.target
+  const zoomTarget = computed(() => toValue(options.zoomTarget ?? options.target))
   const enablePinch = options.enablePinch ?? options.enableZoom
 
   const drag = useDrag({
