@@ -1,5 +1,38 @@
 # hana-img-viewer
 
+## 4.0.0
+
+### Major Changes
+
+- [#9](https://github.com/nonhana/hana-img-viewer/pull/9) [`994886c`](https://github.com/nonhana/hana-img-viewer/commit/994886c1773940eeb2be4d6e3d5f942012abade4) Thanks [@nonhana](https://github.com/nonhana)! - Finalize the refactored v4 public contract for `hana-img-viewer`.
+
+  - keep the component-first package surface and remove the legacy public composable and utility exports from the supported API
+  - remove the legacy zoom-model events and deprecated visual-tuning props from the supported API
+  - stabilize `src` / `previewSrc` behavior during open sessions, including replacement updates and failed-enhancement retries
+  - normalize body-portal semantics for `portalTarget="body"` and `:portal-target="document.body"`, and keep custom portal hosts in charge of their own ESC behavior
+  - make the default thumbnail trigger keyboard-accessible and refresh open-session geometry on viewport resize
+  - align docs/examples with the final API and migrate the touched source/docs/examples surface to English-only copy and comments
+
+### Patch Changes
+
+- [#9](https://github.com/nonhana/hana-img-viewer/pull/9) [`760bb8c`](https://github.com/nonhana/hana-img-viewer/commit/760bb8c57650a42100e210281924dd2915d40e35) Thanks [@nonhana](https://github.com/nonhana)! - Internal architecture cleanup for v4 (no public API changes).
+
+  - introduce `useViewerPhase` as the single source of truth for the open/opening/open/closing state machine, replacing the removed `useViewerOpenState`; `isOpen` is now a derived read-only computed
+  - collapse the four-input god watcher into a single `desiredPhase` effect, so every phase → animation transition flows through one path; `openPreview` / `closePreview` become pure intent declarations
+  - promote `isControlled` from a `computed` to a setup-time `const boolean` decided once from `vnode.props`, eliminating the runtime-tracking edge case
+  - adopt `@vueuse/core` for `useEventListener`, `useDebounceFn`, `isClient`, and `tryOnScopeDispose`; remove the handwritten `composables/utils/` directory; add `@vueuse/core ^14.0.0` as a peer dependency
+  - add `role="dialog"`, `aria-modal="true"`, and `aria-label` on the overlay for screen-reader accessibility
+  - debounce resize-driven geometry recompute (50 ms) to avoid flurries during viewport changes
+  - fix a stale-`sessionToken` bug in `runEnhancement` so high-res preview swaps survive `src`/`previewSrc` changes during an open session
+  - drop the module-level image cache in `useViewerSource`, deferring dedup to the browser HTTP cache (removes a memory-leak vector)
+  - expose `addScale` / `multiplyScale` on `useViewerTransform`; rename its return key `style` → `transformCss` for clarity
+  - separate `dblclick` handling from `useDrag.filter` into its own listener; make `useViewerInteractions.zoomTarget` reactive so runtime ref swaps rebind correctly
+  - convert the `TrackpadDetector` class in `useWheel` to a factory closure
+  - remove the internal `PropsType` / `EmitsType` compat aliases (canonical `HanaImgViewerProps` / `HanaImgViewerEmits` already exported)
+  - add unit coverage for `useViewerPhase`, `useViewerTransform`, `useViewerSource`; add component coverage for `useBodyLock`, `resolvePortalTarget`, and a PRD-level box-stability proof for `previewSrc` upgrades — total tests grew from 26 to 52
+
+  Consumers must now also install `@vueuse/core ^14.0.0` alongside `hana-img-viewer` and `vue ^3.5.0`.
+
 ## 3.1.0
 
 ### Minor Changes
