@@ -82,7 +82,7 @@ export function useViewerInteractions(options: UseViewerInteractionsOptions) {
   useEventListener(
     () => active.value && toValue(options.enableKeyboard) ? window : null,
     'keydown',
-    (event) => {
+    (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         options.onEscape()
       }
