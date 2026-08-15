@@ -50,6 +50,6 @@
   },
   "devDependencies": {
     "@vueuse/core": "catalog:",
-    "vite-plugin-dts": "catalog:"
+    "unplugin-dts": "catalog:"
   }
 }
