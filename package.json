@@ -1,40 +1,43 @@
 {
-  "private": "true",
+  "name": "hana-img-viewer-monorepo",
+  "version": "0.0.0",
+  "private": true,
   "packageManager": "pnpm@11.21.0",
   "scripts": {
+    "dev:vue": "pnpm -F hana-img-viewer-demo-vue dev",
+    "dev:react": "pnpm -F hana-img-viewer-demo-react dev",
+    "build": "pnpm -r --workspace-concurrency=1 run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "dev": "pnpm -F examples dev",
-    "build": "pnpm -F hana-img-viewer build",
-    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
-    "test:unit": "pnpm -F hana-img-viewer test:unit",
-    "test:component": "pnpm -F hana-img-viewer test:component",
-    "test:ssr": "pnpm -F hana-img-viewer test:ssr",
-    "test:dist": "pnpm -F hana-img-viewer test:dist",
-    "release": "pnpm build && changeset publish"
-  },
-  "dependencies": {
-    "hana-img-viewer": "link:packages/components"
+    "typecheck": "pnpm -F hana-img-viewer typecheck && pnpm -F hana-img-viewer-react typecheck",
+    "test": "pnpm -r --workspace-concurrency=1 run test",
+    "test:dist": "pnpm -F hana-img-viewer test:dist && pnpm -F hana-img-viewer-react test:dist",
+    "release": "pnpm build && changeset publish",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
+    "@eslint-react/eslint-plugin": "catalog:",
+    "@microsoft/api-extractor": "catalog:",
     "@types/node": "catalog:",
     "@types/throttle-debounce": "catalog:",
-    "@vitejs/plugin-vue": "catalog:",
-    "@vue/server-renderer": "catalog:",
-    "@vue/test-utils": "catalog:",
+    "@vitejs/plugin-vue": "catalog:ui-vue",
+    "@vue/server-renderer": "catalog:ui-vue",
+    "@vue/test-utils": "catalog:ui-vue",
     "cpy": "catalog:",
     "eslint": "catalog:",
+    "eslint-plugin-jsx-a11y": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
     "fast-glob": "catalog:",
     "jsdom": "catalog:",
-    "sass": "catalog:",
+    "sass": "catalog:ui-vue",
     "throttle-debounce": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "vue": "catalog:",
-    "vue-tsc": "catalog:"
+    "vue": "catalog:ui-vue",
+    "vue-tsc": "catalog:ui-vue"
   }
 }

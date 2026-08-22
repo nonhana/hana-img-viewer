@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "hana-img-viewer-react": [
+        "../../packages/react/src/index.ts"
+      ],
+      "@/*": [
+        "../../packages/react/src/*"
+      ]
+    },
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "*.ts",
+    "*.mts"
+  ]
+}

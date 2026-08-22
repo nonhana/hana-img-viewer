@@ -1,0 +1,24 @@
+{
+  "name": "hana-img-viewer-demo-react",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "hana-img-viewer-react": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:ui-react",
+    "@types/react-dom": "catalog:ui-react",
+    "@vitejs/plugin-react": "catalog:ui-react",
+    "react": "catalog:ui-react",
+    "react-dom": "catalog:ui-react",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

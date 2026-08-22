@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main ]
+    branches: [main, dev]
 
 jobs:
   lint-and-build:
@@ -25,5 +25,17 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
       - name: Build
         run: pnpm build
+
+      - name: Changeset status
+        run: pnpm changeset status
+
+      - name: Dist contract
+        run: pnpm test:dist

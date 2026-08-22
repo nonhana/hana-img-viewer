@@ -1,0 +1,36 @@
+{
+  "name": "hana-img-viewer-core",
+  "type": "module",
+  "version": "4.0.0",
+  "description": "Shared pure logic and types for hana-img-viewer (Vue) and hana-img-viewer-react",
+  "author": "nonhana",
+  "license": "MIT",
+  "homepage": "https://github.com/nonhana/hana-img-viewer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonhana/hana-img-viewer.git"
+  },
+  "keywords": [
+    "image",
+    "previewer",
+    "shared",
+    "core"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

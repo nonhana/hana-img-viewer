@@ -1,5 +1,36 @@
 # hana-img-viewer
 
+A lightweight image previewer in two framework flavors, in one monorepo.
+
+| 包 | 框架 | 发布名 |
+| --- | --- | --- |
+| `packages/vue` | Vue 3 | [`hana-img-viewer`](https://www.npmjs.com/package/hana-img-viewer) |
+| `packages/react` | React 19 | [`hana-img-viewer-react`](https://www.npmjs.com/package/hana-img-viewer-react) |
+| `packages/core` | — | `hana-img-viewer-core`（共享纯逻辑/类型，双包 dependency） |
+
+两库共享同一行为契约（[docs/behavior-spec.md](./docs/behavior-spec.md)），版本经 changesets `fixed` 全同步发布（任一方变更 → 双包+core 同版本）。双框架 API 形态一致，仅框架适配层不同。
+
+## Installation
+
+```bash
+# Vue
+pnpm add hana-img-viewer
+# React
+pnpm add hana-img-viewer-react
+```
+
+## Demo
+
+```bash
+pnpm install
+pnpm dev:vue    # apps/vue-demo
+pnpm dev:react  # apps/react-demo
+```
+
+验证：`pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:dist`。
+
+## Vue
+
 A lightweight Vue 3 image viewer that is simple to drop in.
 
 ## Features

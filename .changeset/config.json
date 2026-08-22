@@ -5,10 +5,12 @@
     { "repo": "nonhana/hana-img-viewer" }
   ],
   "commit": false,
-  "fixed": [],
+  "fixed": [
+    ["hana-img-viewer", "hana-img-viewer-react", "hana-img-viewer-core"]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": ["hana-img-viewer-demo-vue", "hana-img-viewer-demo-react"]
 }
