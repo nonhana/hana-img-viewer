@@ -1,47 +1,110 @@
-# hana-img-viewer 行为规格（Behavior Spec）
+# Hana Img Viewer Behavior Specification
 
-本文只定义 Vue 与 React 图像预览器共同追求的、框架无关的可观察结果。公开 prop/event 名称、源码布局、effect/composable 组织与版本可独立演进。
+This document is the source of truth for observable behavior shared by the Vue and React implementations of Hana Img Viewer. A feature that changes a shared result MUST update this specification and the affected implementation's conformance evidence in the same change.
 
-修改共享结果前先更新对应条目和最低断言。框架专属接口或实现可以独立变更、独立发布，但必须同步更新该端测试与下表 conformance；一端完成不能自动标记另一端完成。
+The root [`README.md`](../README.md) remains the source of truth for framework-specific public API names, defaults, and examples. The files under [`agent-docs/`](../agent-docs/) define code ownership and repository boundaries. Those documents may describe different interfaces or internal designs, but they MUST NOT redefine a shared result in this specification.
 
-## 用例与 conformance
+## Scope and Conformance
 
-| ID | 行为 | 框架无关结果 | 最低断言 | Vue | React |
+The contract is behavioral, not structural:
+
+- Vue and React MUST produce the shared observable results below.
+- They MAY use different props, events, state models, lifecycle primitives, module layouts, and release schedules.
+- Conformance is established independently for each implementation. Evidence from one implementation never changes the status of the other.
+- Shared behavior tests SHOULD use the `[behavior/Bx]` prefix. Framework-only interface tests SHOULD use an implementation-specific prefix.
+- A shared behavior change MUST define its minimum evidence before the implementation is treated as conformant.
+
+The normative terms **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are used as defined by RFC 2119.
+
+### Terms
+
+| Term | Meaning |
+| --- | --- |
+| Origin | The visible thumbnail root and its trigger content. |
+| Overlay | The mounted dialog, backdrop, preview shell, and preview image. |
+| Desired visibility | The open or closed state requested by the local component or its external owner. |
+| Session | The period from mounting an overlay in a resolved container until that overlay is unmounted. |
+| Baseline transform | `translate3d(0px, 0px, 0) scale(1)`. Scale `1` remains the reset target even when it falls outside the configured zoom range. |
+| Pending container | An explicit `null` container. Desired visibility may be open, but no overlay session exists until an element is provided. |
+
+## Shared Behavior Contract
+
+Normative results include the cross-framework alignment decisions confirmed on 2026-08-23. Conformance status reflects the current implementation on `dev` at `845a129`.
+
+| ID | Behavior | Normative result | Minimum conformance evidence | Vue | React |
 | --- | --- | --- | --- | --- | --- |
-| B1 | 基础打开/关闭 | 关闭时只有 thumbnail；打开时挂载 overlay；允许的 backdrop/Escape 意图完成关闭后卸载 overlay。 | closed/open/closed 三态 DOM 可观察。 | ✅ | ✅ |
-| B2 | 可见性 ownership 与反转 | 受控模式等待 owner 确认；非受控模式自行更新；opening/closing 中相反 desired visibility 到达时立即反转。 | 受控关闭等待确认；opening→closing 与 closing→opening 均有 active-animation 用例。 | ⚠️ | ✅ |
-| B3 | 滚轮缩放 | 滚轮/触控板围绕事件锚点缩放并钳制边界。 | 真实 wheel 事件更新 scale/position 且不越界。 | ✅ | ✅ |
-| B4 | 双指捏合 | 双指距离变化缩放；pinch 与 drag 只有一个 owner。 | 真实 touch 事件更新 scale，pinch 会终止 drag。 | ✅ | ✅ |
-| B5 | 拖拽平移 | open 时 pointer drag 平移，不受当前 scale 或 zoom 边界变化限制；非交互期无残留监听/RAF。 | scale 为 1 和小于 1 时，真实 pointer 事件都更新 translate；动态 zoom 边界变化保留 translate；cleanup 后无继续写入。 | ✅ | ✅ |
-| B6 | 双击还原 | 双击在 1 与允许的 2× scale 之间切换。 | 两轮双击回到 1。 | ✅ | ✅ |
-| B7 | FLIP 开合动画 | thumbnail 与 preview 的不同几何间 FLIP；backdrop 同期过渡；重叠 transition 只由当前 owner 完成。 | distinct rect keyframes；反转/卸载取消旧 Animation。 | ✅ | ✅ |
-| B8 | 会话中 source 替换 | `src` 更新立即回到新 base；并发 enhancement 只有最新 generation 可生效。 | base 立即变化；旧 pending completion 被忽略。 | ✅ | ✅ |
-| B9 | 静默 enhancement | 可选高质量源成功后静默替换；失败保留当前源并在下一会话重试；transform 不重置。 | success/failure/retry/in-flight replacement。 | ✅ | ✅ |
-| B10 | 键盘与焦点 | 默认 trigger 可由 Enter/Space 打开；焦点进入 overlay；只有收到事件的 focused overlay 处理 Escape；关闭恢复 origin focus。 | 双实例 focused Escape 只关闭一个并恢复对应 trigger。 | ✅ | ✅ |
-| B11 | 自定义 mount container | container 未就绪时不挂 overlay/不隐藏 thumbnail/不锁 body；就绪后恢复；关闭 flags 为 false 时可把自定义 container 的 dismiss ownership 交给 host。 | pending→custom、body→custom→pending 与 side-effect cleanup。 | ⚠️ | ✅ |
-| B12 | body lock | 只有真实挂到 body 的 overlay 持锁；多实例引用安全；host 在锁期间的新样式不被 cleanup 覆盖。 | 两实例顺序关闭与 host-write preservation。 | ✅ | ✅ |
-| B13 | SSR/hydration | server 和 first hydration snapshot 都只有 thumbnail；client commit 后才解析 container/portal。 | open/closed SSR 无 overlay；StrictMode hydrate 无 mismatch/leak。 | ✅ | ✅ |
-| B14 | 样式与 dist | stylesheet 单独提取，JS 无 runtime CSS 注入，公开 exports 与声明面受契约测试保护。 | dist-contract 检查 CSS、metadata、runtime/type exports。 | ✅ | ✅ |
+| B1 | Open and close lifecycle | Without a mounted overlay, only the origin is rendered. An open request with a resolved container mounts the overlay and hides the origin. After an accepted close request finishes, the overlay is unmounted and the origin is visible again. | A public trigger produces an origin-only → overlay-mounted → origin-only DOM sequence through real open and dismiss events. | ✅ | ✅ |
+| B2 | Visibility ownership and reversal | Externally owned visibility MUST wait for owner confirmation. Locally owned visibility MUST update itself. Synchronizing external state MUST NOT echo a new change request. An opposite desired visibility received during `opening` or `closing` MUST reverse the active transition, and stale completions MUST be ignored. | Controlled close remains open before confirmation and does not echo on synchronization; active `opening → closing` and `closing → opening` paths are exercised. | ⚠️ | ✅ |
+| B3 | Wheel and trackpad zoom | While zoom is enabled and the session is open, wheel or trackpad input MUST zoom around the event point, use the actual overlay viewport as its coordinate space, and clamp scale to `minZoom` and `maxZoom`. Remeasurement MUST NOT reset the current transform. | Real wheel events prove anchored scale and translation, both bounds, transform preservation after remeasurement, and custom-container coordinates. | ⚠️ | ✅ |
+| B4 | Pinch zoom and gesture ownership | While zoom is enabled and the session is open, the distance between two touches MUST control scale around their midpoint. Starting a pinch MUST terminate an active pointer drag and give pinch sole gesture ownership until fewer than two touches remain. | Real pointer and two-touch events show pinch taking ownership from drag and changing scale. | ✅ | ✅ |
+| B5 | Pointer drag | Pointer drag MUST be available only while `enableZoom` is true and the session is open. Dragging MUST pan independently of scale, including at and below scale `1`. Zoom-bound changes MAY clamp scale but MUST preserve translation. Remeasurement while the phase remains open MUST preserve active pointer ownership and allow the current drag to continue. Leaving the open phase or disabling `enableZoom` MUST release pointer ownership and cancel gesture listeners and pending frame writes. | Real pointer events pan at scale `1` and below `1`; a dynamic zoom-bound clamp preserves `x` and `y`; `pointerdown → remeasure → pointermove` continues the same drag; `enableZoom=false` prevents dragging. | ✅ | ✅ |
+| B6 | Double-click zoom reset | While zoom is enabled, double-click MUST toggle between baseline scale `1` and `clamp(2, minZoom, maxZoom)`. Returning to baseline MUST reset translation. Baseline `1` MUST remain reachable even when the configured range excludes it. | Two double-clicks return to the baseline with default bounds and with valid ranges entirely above or below `1`. | ⚠️ | ✅ |
+| B7 | FLIP transition ownership | Opening and closing MUST animate between distinct origin and preview geometry while the backdrop transitions in parallel. Remeasurement during `opening` or a reversed reopening MUST replace the obsolete animation, continue from the current computed visual state, target the latest geometry, and use only that opening run's remaining duration. Reopening after an interrupted close MUST preserve the session's zoom and pan as its visual target. Only the current transition owner may complete the phase; replaced or unmounted animations MUST be cancelled. | Public-seam tests inspect distinct FLIP keyframes; remeasurement continues from the current matrix for only the remaining duration; reversed reopening preserves zoom and pan across another remeasurement; obsolete animations cannot complete the phase. | ✅ | ✅ |
+| B8 | Source replacement within a session | Changing `src`, changing `previewSrc`, or removing `previewSrc` MUST synchronously return the preview to the current base `src` before a new enhancement may apply. Any source-tuple change MUST invalidate older pending enhancement results so that only the latest source generation may apply. A replacement thumbnail load MUST trigger geometry remeasurement. | Each source-tuple change immediately displays the base; an older pending completion is ignored; only the latest completion applies; thumbnail load remeasures the shell. | ✅ | ✅ |
+| B9 | Silent source enhancement | A session MUST begin with `src`. A distinct `previewSrc` MAY silently replace it only after a successful image load; decoding is best-effort. Failure MUST retain the current base source, including after a previous enhancement was displayed or the enhancement source changed. A later session MUST retry. Enhancement success or failure MUST NOT reset the current transform. | Success replaces the base without exposing loading state; failure after initial load and after a source replacement retains the base; reopening retries. | ✅ | ✅ |
+| B10 | Keyboard, focus, and dismissal | The default trigger MUST open with Enter and Space. Opening MUST move focus into the overlay. When opening originates from a focused element inside custom trigger content, the viewer MUST capture that exact element. An enabled Escape or backdrop path MUST request close and contain the handled event; a disabled path MUST remain available to the host. Closing MUST restore the captured element when it still exists, otherwise it SHOULD fall back to the default trigger. | With two instances open, Escape closes only the focused overlay; custom trigger content with multiple focusable elements restores the exact opener; disabled dismissal paths remain open. | ✅ | ✅ |
+| B11 | Mount container lifecycle | An omitted container MUST resolve to `document.body` after hydration; explicit `null` MUST remain pending; an element MUST receive the overlay. Pending state MUST NOT hide the origin, lock the body, or mount overlay markup. When the requested container changes during a session, the viewer MUST complete the closing transition in the old container before unmounting it and releasing its side effects. If visibility is still desired and a new element is available, a new opening transition MUST then begin in that element. Geometry and zoom anchoring MUST use the active container viewport. | `pending → custom` and `body → custom → pending` transitions prove that the old portal remains through closing, side effects release only after completion, the new portal opens afterward, and geometry follows the active container. | ✅ | ✅ |
+| B12 | Body scroll lock | Only an overlay actually mounted to `document.body` may own the body lock. Multiple owners MUST be reference-safe. Final cleanup MUST restore only the styles still owned by the viewer and MUST NOT overwrite host changes made while the lock was active. | Two body-mounted instances close in sequence; the lock survives the first close and final cleanup preserves a host style write. | ✅ | ✅ |
+| B13 | SSR and hydration | Server output and the first hydration snapshot MUST contain only the origin, even when desired visibility is open. Container resolution and portal creation MUST begin only after the client commit. Hydration and lifecycle replay MUST NOT produce mismatch warnings, leaked overlays, locks, listeners, or animations. | Closed and open SSR output contain no overlay; hydration first preserves origin-only markup and then mounts exactly one client overlay without leaked effects. | ✅ | ✅ |
+| B14 | Distribution and styles | Each UI package MUST publish ESM output with an extracted stylesheet. JavaScript MUST NOT inject CSS at runtime. Package metadata, runtime exports, and reachable public declarations MUST match the framework's documented public surface. | A fresh build and distribution-contract suite verify artifacts, CSS extraction, metadata, runtime identity, and declaration exports. | ✅ | ✅ |
 
-`✅` 表示该端已有与最低断言相符的公开 seam 测试；`⚠️` 表示行为实现存在，但 conformance 证据或已知 edge case 未完成。
+Legend:
 
-## 框架接口映射
+- ✅ — The implementation has public-seam or distribution evidence that satisfies the minimum evidence above.
+- ⚠️ — The implementation path exists, but at least one minimum evidence item or known edge case is not yet covered by equivalent public regression evidence.
+- ❌ — Current observable behavior conflicts with the normative result.
 
-- React：`open/defaultOpen/onOpenChange` 表达 ownership；`container?: HTMLElement | null` 表达 body/custom/pending；overlay 自己处理 focused Escape，可由 dismissal flags 交回 host。完整接口见 `docs/react-api.md`。
-- Vue：使用 `v-model:open`、`container?: HTMLElement | null`、`enableZoom`、`minZoom` / `maxZoom`、关闭 flags 与 `thumbnail` slot；省略 container 在 hydration 后使用 body，关闭 flags 可把 custom container 的 dismiss authority 交给 host。该接口与 React 独立演进。
+## Framework Interface Mapping
 
-## Deferred / conformance notes
+The same behavioral concept may be expressed differently by each framework. The complete public surfaces remain documented in the root [`README.md`](../README.md).
 
-- Vue B2 尚缺 active closing→opening reversal 的等价证明与已知修复。
-- Vue B11 已删除 selector contract；仍需补充 body/custom/null runtime transition 的公开回归证据。
-- 完整 focus trap、nested dismissable-layer stack 与 `prefers-reduced-motion` 不属于当前共享结果。
+| Concept | Vue | React |
+| --- | --- | --- |
+| Visibility ownership | `v-model:open` and the `update:open` event. An omitted model uses local state; a provided model is owned by the host. | `open` selects controlled ownership when defined on the first render. `defaultOpen` initializes local ownership, and `onOpenChange` reports requests. Ownership MUST NOT switch during a mount. |
+| Custom trigger | The `thumbnail` slot receives an `open` function. | Function children receive an `open` function. |
+| Container | `container?: HTMLElement \| null`; omission means body after mount and `null` means pending. | `container?: HTMLElement \| null`; omission means body after hydration and `null` means pending. |
+| Interaction switch | `enableZoom=false` disables wheel, pinch, double-click, and pointer-drag transform interactions. | `enableZoom=false` disables wheel, pinch, double-click, and pointer-drag transform interactions. |
+| Dismissal | `closeOnBackdropClick` and `closeOnEscape` decide whether the viewer consumes and handles those paths. | `closeOnBackdropClick` and `closeOnEscape` decide whether the viewer consumes and handles those paths. |
 
-## 共享实现边界
+Selector strings are not supported by either UI package, even though `hana-img-viewer-core` still exposes selector-aware portal utilities for its own independent API compatibility.
 
-`packages/core` 只承载已被实际复用的纯逻辑，例如 clamp、缩放锚点、触摸距离/中心、trackpad 判断、scrollbar/aspect ratio 与图片 preload。框架 lifecycle reducer、gesture owner、Animation ownership、portal orchestration 与 effects/composables 不要求共享，也没有物理对称或共享状态机里程碑。
+## Current Conformance Status
 
-## Demo 与测试入口
+### Observable Deviations
 
-- React：`packages/react/tests/component/hana-img-viewer.component.test.tsx`、SSR、dist-contract 与 `apps/react-demo`。
-- Vue：`packages/vue/tests/**` 与 `apps/vue-demo`。
-- B13 由 SSR/hydration 测试守护；B14 由 dist-contract 守护；浏览器 demo 只做交互冒烟。
+No confirmed cross-framework behavior deviation remains in B1–B14 at this snapshot.
+
+### Evidence Gaps
+
+Each `⚠️` below has an implementation path compatible with the target but lacks complete public regression evidence.
+
+- **Vue B2:** The pure phase transition supports reversal, but the public component suite does not exercise `opening → closing → opening` while animations are pending.
+- **Vue B3:** Public tests cover wheel scaling and zoom bounds, but do not assert anchored translation, remeasurement preservation, or custom-container coordinates as one complete behavior chain.
+- **Vue B6:** Public tests prove the default `1 ↔ 2` toggle, but not baseline restoration when valid zoom bounds exclude `1`.
+
+## Deliberately Excluded Behavior
+
+The current shared contract does not include:
+
+- a complete focus trap or a nested dismissable-layer stack;
+- `prefers-reduced-motion` behavior;
+- galleries, slide navigation, captions, toolbars, downloads, or sharing;
+- selector-based mount targets;
+- identical framework APIs, internal module shapes, lifecycle abstractions, or package versions.
+
+Adding any of these as a cross-framework requirement requires a new behavior ID or an explicit revision to an existing one before implementation.
+
+## Shared Implementation Boundary
+
+[`packages/core`](../packages/core/) contains only framework-independent logic that is genuinely reused, such as clamping, anchored zoom math, touch metrics, trackpad detection, scrollbar and aspect-ratio calculations, and image preloading.
+
+Framework lifecycle state, gesture ownership, animation ownership, portal orchestration, focus handling, and effects remain inside their respective UI packages. Physical symmetry and a shared lifecycle state machine are not conformance requirements.
+
+## Evidence Locations
+
+| Implementation | Public behavior evidence | SSR and hydration | Distribution contract |
+| --- | --- | --- | --- |
+| React | `packages/react/tests/component/hana-img-viewer.component.test.tsx` | `packages/react/tests/ssr/` plus the StrictMode hydration case in the component suite | `packages/react/tests/dist-contract/` |
+| Vue | `packages/vue/tests/component/hana-img-viewer.component.test.ts` | `packages/vue/tests/ssr/` plus the client-mount case in the component suite | `packages/vue/tests/dist-contract/` |
+
+The demos under `apps/` are manual interaction smoke tests. They consume source aliases and do not establish distribution conformance.

@@ -46,6 +46,7 @@ export const HanaImgViewer = ({
   )
   const [viewerState, dispatch] = useReducer(viewerReducer, initialViewerState)
   const originRef = useRef<HTMLDivElement>(null)
+  const originFocusRef = useRef<HTMLElement | null>(null)
   const restoreFocusRef = useRef(false)
   const desiredOpen = isControlled ? open === true : uncontrolledOpen
   const phase = viewerState.phase
@@ -98,7 +99,24 @@ export const HanaImgViewer = ({
 
   useLayoutEffect(() => {
     if (phase === 'closed') {
+      if (restoreFocusRef.current) {
+        restoreFocusRef.current = false
+        const capturedFocus = originFocusRef.current
+        originFocusRef.current = null
+        const focusTarget
+          = capturedFocus?.isConnected
+            ? capturedFocus
+            : originRef.current?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
+        focusTarget?.focus({ preventScroll: true })
+      }
+
       if (desiredOpen && requestedContainer) {
+        const origin = originRef.current
+        const activeElement = document.activeElement
+        originFocusRef.current
+          = origin?.contains(activeElement) && activeElement instanceof HTMLElement
+            ? activeElement
+            : origin?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail') ?? null
         // Portal ownership can only be committed after the client container exists.
         // eslint-disable-next-line react/set-state-in-effect
         setActiveContainer(requestedContainer)
@@ -115,7 +133,6 @@ export const HanaImgViewer = ({
     if (!requestedContainer || requestedContainer !== activeContainer) {
       restoreFocusRef.current = true
       dispatch({ type: 'HIDE' })
-      dispatch({ type: 'CLOSE_FINISHED' })
       return
     }
 
@@ -126,17 +143,6 @@ export const HanaImgViewer = ({
 
     dispatch({ type: 'SHOW' })
   }, [activeContainer, desiredOpen, phase, requestedContainer])
-
-  useLayoutEffect(() => {
-    if (phase !== 'closed' || !restoreFocusRef.current)
-      return
-
-    restoreFocusRef.current = false
-    const focusTarget = originRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    )
-    focusTarget?.focus({ preventScroll: true })
-  }, [phase])
 
   const handleThumbnailKeyDown = (
     event: ReactKeyboardEvent<HTMLImageElement>,

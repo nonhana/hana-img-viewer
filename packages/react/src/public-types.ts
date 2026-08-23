@@ -33,6 +33,6 @@ export interface HanaImgViewerProps {
   className?: string
   /** Style applied to the visible thumbnail root. */
   style?: CSSProperties
-  /** Custom trigger. The consumer owns its semantics, focus, and styling. */
+  /** Custom trigger. The consumer owns its semantics and styling. */
   children?: (controls: { open: () => void }) => ReactNode
 }

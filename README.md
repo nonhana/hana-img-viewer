@@ -173,4 +173,4 @@ Vue provides one `thumbnail` slot. The slot receives an `open` function:
 
 `open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.
 
-Custom triggers own their semantics, focus, and styles. The default image trigger already supports click, Enter, and Space.
+Custom triggers own their semantics and styles. When a focused custom trigger opens the viewer, focus returns to that exact element after closing. The default image trigger already supports click, Enter, and Space.

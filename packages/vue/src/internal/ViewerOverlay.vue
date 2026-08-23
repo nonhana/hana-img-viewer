@@ -37,6 +37,12 @@ const DOUBLE_CLICK_ZOOM = 2
 const FLIP_DURATION = 300
 const FLIP_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
+interface TransitionRun {
+  phase: 'opening' | 'closing'
+  startedAt: number
+  openingTargetTransform?: string
+}
+
 const overlayRef = useTemplateRef('overlayRef')
 const backdropRef = useTemplateRef('backdropRef')
 const shellRef = useTemplateRef('shellRef')
@@ -54,6 +60,7 @@ let resizeFrame: number | null = null
 let transformFrame: number | null = null
 let animationGeneration = 0
 let previousPhase: ViewerPhase = 'closed'
+let transitionRun: TransitionRun | null = null
 let ownedAnimations: Animation[] = []
 let cleanupGestures = () => {}
 let resizeObserver: ResizeObserver | null = null
@@ -98,7 +105,13 @@ const measure = () => {
     width = height * aspectRatio
   }
 
+  const current = destinationRect.value
+  if (current?.width === width && current.height === height)
+    return
+
   destinationRect.value = { width, height }
+  if (props.phase === 'opening' || props.phase === 'closing')
+    void animatePhase()
 }
 
 const scheduleMeasure = () => {
@@ -123,10 +136,17 @@ const cancelAnimations = () => {
 }
 
 const animatePhase = async () => {
-  if (props.phase !== 'opening' && props.phase !== 'closing')
+  const phase = props.phase
+  if (phase !== 'opening' && phase !== 'closing') {
+    previousPhase = phase
+    transitionRun = null
     return
+  }
 
   await nextTick()
+  if (props.phase !== phase)
+    return
+
   const overlay = overlayRef.value
   const backdrop = backdropRef.value
   const shell = shellRef.value
@@ -138,6 +158,26 @@ const animatePhase = async () => {
 
   const generation = ++animationGeneration
   cancelAnimations()
+  const now = performance.now()
+  const continuingRun = transitionRun?.phase === phase && previousPhase === phase
+
+  const currentTransition
+    = continuingRun && transitionRun
+      ? transitionRun
+      : {
+          phase,
+          startedAt: now,
+          openingTargetTransform:
+            phase === 'opening' && previousPhase === 'closing'
+              ? transformToCss(transform)
+              : undefined,
+        }
+  transitionRun = currentTransition
+
+  const transitionDuration = Math.max(
+    0,
+    FLIP_DURATION - (now - currentTransition.startedAt),
+  )
   const animations: Animation[] = []
   ownedAnimations = animations
   const originRect = origin.getBoundingClientRect()
@@ -151,21 +191,21 @@ const animatePhase = async () => {
   const fromTransform = continuing && computedTransform && computedTransform !== 'none' ? computedTransform : transformToCss(transform)
   const fromOpacity = continuing && Number.isFinite(computedOpacity) ? computedOpacity : props.phase === 'opening' ? 0 : 1
 
-  previousPhase = props.phase
+  previousPhase = phase
   overlay.focus({ preventScroll: true })
 
   const animate = (element: HTMLElement, keyframes: Keyframe[]) => {
     animations.push(element.animate(keyframes, {
-      duration: FLIP_DURATION,
+      duration: transitionDuration,
       easing: FLIP_EASING,
       fill: 'forwards',
     }))
   }
 
-  if (props.phase === 'opening') {
+  if (phase === 'opening') {
     animate(shell, [
       { transform: continuing ? fromTransform : originTransform },
-      { transform: 'translate(0, 0) scale(1)' },
+      { transform: currentTransition.openingTargetTransform ?? 'translate(0, 0) scale(1)' },
     ])
     animate(backdrop, [{ opacity: fromOpacity }, { opacity: 1 }])
   }
@@ -189,7 +229,7 @@ const animatePhase = async () => {
     return
   }
 
-  if (generation !== animationGeneration || ownedAnimations !== animations)
+  if (generation !== animationGeneration || ownedAnimations !== animations || props.phase !== phase)
     return
 
   for (const animation of animations) {
@@ -201,7 +241,7 @@ const animatePhase = async () => {
   }
   ownedAnimations = []
 
-  if (props.phase === 'opening') {
+  if (phase === 'opening') {
     if (shellRef.value)
       shellRef.value.style.transform = ''
     if (previewRef.value)
@@ -388,14 +428,11 @@ const onBackdropClick = (event: MouseEvent) => {
   emit('requestClose')
 }
 
-watch(() => props.src, (src, previous) => {
-  if (src !== previous) {
-    displaySrc.value = src
-    sourceRequest = null
-  }
+watch(() => [props.src, props.previewSrc] as const, ([src]) => {
+  displaySrc.value = src
+  sourceRequest = null
   startEnhancement()
 })
-watch(() => props.previewSrc, startEnhancement)
 watch(() => [props.minZoom, props.maxZoom] as const, () => {
   if (props.phase !== 'open' || transform.scale === 1)
     return
@@ -442,7 +479,6 @@ onMounted(() => {
   if (overlayRef.value)
     resizeObserver?.observe(overlayRef.value)
   startEnhancement()
-  void animatePhase()
 })
 
 onBeforeUnmount(() => {
@@ -458,6 +494,7 @@ onBeforeUnmount(() => {
   cleanupGestures()
   cancelAnimations()
   animationGeneration++
+  transitionRun = null
   sourceGeneration++
   sourceRequest = null
   releaseBodyLock(owner)
@@ -485,7 +522,7 @@ onBeforeUnmount(() => {
         :src="displaySrc"
         :alt="alt"
         draggable="false"
-        :style="{ cursor: phase === 'open' ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
+        :style="{ cursor: phase === 'open' && zoomEnabled ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
       >
     </div>
   </div>

@@ -1,7 +1,19 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import { HanaImgViewer } from '@/index'
-import { getImageRequestCount, setImageSequence } from '../setup/component.setup'
+import {
+  getAnimationCalls,
+  getImageRequestCount,
+  getPendingAnimationCount,
+  resolvePendingAnimation,
+  resolvePendingImage,
+  setAnimationSequence,
+  setElementRect,
+  setImageSequence,
+  setSelectorClientSize,
+  setSelectorRect,
+  triggerResizeObservers,
+} from '../setup/component.setup'
 import { describe, expect, it, vi } from '../support/vitest'
 
 const settle = async (): Promise<void> => {
@@ -121,6 +133,29 @@ describe('HanaImgViewer public behavior', () => {
     wrapper.unmount()
   })
 
+  it('[behavior/B5] preserves an active drag across open-state remeasurement', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+
+    dispatchPointer(preview, 'pointerdown', 1, 0, 0)
+    dispatchPointer(preview, 'pointermove', 1, 10, 10)
+    await nextFrame()
+    expect(preview.style.transform).toContain('translate3d(10px, 10px')
+
+    const overlay = document.body.querySelector('.hana-img-viewer-overlay') as HTMLElement
+    setElementRect(overlay, { width: 800, height: 600 })
+    window.dispatchEvent(new Event('resize'))
+    await nextFrame()
+    await settle()
+
+    dispatchPointer(preview, 'pointermove', 1, 20, 20)
+    await nextFrame()
+    expect(preview.style.transform).toContain('translate3d(20px, 20px')
+    wrapper.unmount()
+  })
+
   it('[behavior/B6] toggles double-click zoom between baseline and 2x', async () => {
     const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
     await wrapper.get('img').trigger('click')
@@ -132,6 +167,73 @@ describe('HanaImgViewer public behavior', () => {
     preview.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 20, clientY: 20 }))
     await nextFrame()
     expect(preview.style.transform).toContain('scale(1)')
+    wrapper.unmount()
+  })
+
+  it('[behavior/B7] continues an opening animation from its current visual state after remeasurement', async () => {
+    let now = 100
+    vi.spyOn(performance, 'now').mockImplementation(() => now)
+    setSelectorRect('.hana-img-viewer-thumbnail-root', { x: 10, y: 20, width: 100, height: 80 })
+    setSelectorRect('.hana-img-viewer-flip-shell', { x: 100, y: 120, width: 800, height: 600 })
+    setSelectorClientSize('.hana-img-viewer-overlay', { width: 640, height: 480 })
+    setAnimationSequence(['pending', 'pending', 'pending', 'pending'])
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg', open: true },
+    })
+    await settle()
+    expect(getPendingAnimationCount()).toBe(2)
+
+    const shell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
+    shell.style.transform = 'matrix(1, 0, 0, 1, 10, 20)'
+    now = 350
+    setSelectorClientSize('.hana-img-viewer-overlay', { width: 800, height: 600 })
+    triggerResizeObservers()
+    await nextFrame()
+    await nextTick()
+
+    const shellCalls = getAnimationCalls().filter(call =>
+      call.element.classList.contains('hana-img-viewer-flip-shell'),
+    )
+    expect(shellCalls).toHaveLength(2)
+    expect(shellCalls[0].keyframes[0]?.transform).toContain('scale(0.125')
+    expect(shellCalls[1].keyframes[0]?.transform).toBe('matrix(1, 0, 0, 1, 10, 20)')
+    expect(shellCalls[1].options.duration).toBe(50)
+    wrapper.unmount()
+  })
+
+  it('[behavior/B2/B7] preserves zoom and pan when a reversed opening remeasures', async () => {
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg', open: true },
+    })
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    preview.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 20, clientY: 20 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(2)')
+
+    setAnimationSequence(['pending', 'pending', 'pending', 'pending', 'pending', 'pending'])
+    await wrapper.setProps({ open: false })
+    await nextTick()
+    expect(getPendingAnimationCount()).toBe(2)
+    await wrapper.setProps({ open: true })
+    await nextTick()
+    expect(getPendingAnimationCount()).toBe(2)
+
+    const shell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
+    shell.style.transform = 'matrix(1, 0, 0, 1, 10, 20)'
+    setSelectorClientSize('.hana-img-viewer-overlay', { width: 800, height: 600 })
+    triggerResizeObservers()
+    await nextFrame()
+    await nextTick()
+
+    const shellCalls = getAnimationCalls().filter(call =>
+      call.element.classList.contains('hana-img-viewer-flip-shell'),
+    )
+    expect(shellCalls).toHaveLength(4)
+    expect(shellCalls[2].keyframes[1]?.transform).toContain('scale(2)')
+    expect(shellCalls[3].keyframes[1]?.transform).toContain('scale(2)')
     wrapper.unmount()
   })
 
@@ -162,6 +264,13 @@ describe('HanaImgViewer public behavior', () => {
     preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 10, clientY: 10, deltaY: 1000 }))
     await nextFrame()
     expect(preview.style.transform).toContain('scale(0.8)')
+
+    dispatchPointer(preview, 'pointerdown', 1, 10, 10)
+    dispatchPointer(preview, 'pointermove', 1, 30, 35)
+    dispatchPointer(preview, 'pointerup', 1, 30, 35)
+    await nextFrame()
+    expect(preview.style.transform).toContain('translate3d(')
+    expect(preview.style.transform).not.toContain('translate3d(0px, 0px')
 
     preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 10, clientY: 10, deltaY: -1000 }))
     await nextFrame()
@@ -214,6 +323,57 @@ describe('HanaImgViewer public behavior', () => {
     wrapper.unmount()
   })
 
+  it('[behavior/B8/B9] returns to the base when previewSrc is removed or its replacement fails', async () => {
+    setImageSequence('/first-preview.jpg', ['load'])
+    setImageSequence('/failed-preview.jpg', ['error'])
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg', previewSrc: '/first-preview.jpg', open: true },
+    })
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/first-preview.jpg')
+
+    await wrapper.setProps({ previewSrc: undefined })
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/thumb.jpg')
+
+    await wrapper.setProps({ previewSrc: '/failed-preview.jpg' })
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/thumb.jpg')
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/thumb.jpg')
+    wrapper.unmount()
+  })
+
+  it('[behavior/B8] ignores stale enhancement completion and remeasures a replacement thumbnail', async () => {
+    setImageSequence('/first-preview.jpg', ['pending'])
+    setImageSequence('/second-preview.jpg', ['pending'])
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/first.jpg', previewSrc: '/first-preview.jpg', open: true },
+    })
+    await settle()
+
+    await wrapper.setProps({ src: '/second.jpg', previewSrc: '/second-preview.jpg' })
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/second.jpg')
+
+    resolvePendingImage('/first-preview.jpg')
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/second.jpg')
+
+    resolvePendingImage('/second-preview.jpg')
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/second-preview.jpg')
+
+    const thumbnail = wrapper.get('.hana-img-viewer-thumbnail')
+    Object.defineProperties(thumbnail.element, {
+      naturalHeight: { configurable: true, value: 500 },
+      naturalWidth: { configurable: true, value: 1000 },
+    })
+    await thumbnail.trigger('load')
+    await nextFrame()
+    expect((document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement).style.height).toBe('460.8px')
+    wrapper.unmount()
+  })
+
   it('[behavior/B10] restores the focused trigger and scopes Escape to the focused body overlay', async () => {
     const first = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/one.jpg' } })
     const second = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/two.jpg' } })
@@ -230,12 +390,116 @@ describe('HanaImgViewer public behavior', () => {
     second.unmount()
   })
 
+  it('[behavior/B10] restores the exact focused element from custom trigger content', async () => {
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg' },
+      slots: {
+        thumbnail: ({ open }: { open: () => void }) => [
+          h('button', { type: 'button' }, 'Other action'),
+          h('button', { type: 'button', onClick: open }, 'Open preview'),
+        ],
+      },
+    })
+    const buttons = wrapper.findAll('button')
+    const opener = buttons[1]
+    ;(opener.element as HTMLButtonElement).focus()
+    await opener.trigger('click')
+    await settle()
+
+    document.body.querySelector('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+
+    expect(document.activeElement).toBe(opener.element)
+    wrapper.unmount()
+  })
+
   it('[behavior/B11] keeps thumbnail visible while a null container is pending', async () => {
+    const host = document.createElement('section')
+    document.body.append(host)
     const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg', container: null } })
     await wrapper.get('img').trigger('click')
     await settle()
     expect(wrapper.get('img').isVisible()).toBe(true)
     expect(document.body.querySelector('.hana-img-viewer-preview')).toBeNull()
+
+    await wrapper.setProps({ container: host })
+    await settle()
+    expect(host.querySelector('.hana-img-viewer-preview')).not.toBeNull()
+    wrapper.unmount()
+  })
+
+  it('[behavior/B11] closes the old container before moving through body, custom, and null targets', async () => {
+    const host = document.createElement('section')
+    document.body.append(host)
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg', open: true },
+    })
+    await settle()
+    expect((document.querySelector('[role="dialog"]') as HTMLElement).parentElement).toBe(document.body)
+    expect(document.body.style.overflow).toBe('hidden')
+
+    setAnimationSequence(['pending', 'pending'])
+    await wrapper.setProps({ container: host })
+    await nextTick()
+    expect(getPendingAnimationCount()).toBe(2)
+    expect((document.querySelector('[role="dialog"]') as HTMLElement).parentElement).toBe(document.body)
+    expect(host.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.body.style.overflow).toBe('hidden')
+
+    resolvePendingAnimation()
+    resolvePendingAnimation()
+    await settle()
+    expect((host.querySelector('[role="dialog"]') as HTMLElement).parentElement).toBe(host)
+    expect(document.body.style.overflow).toBe('')
+
+    setAnimationSequence(['pending', 'pending'])
+    await wrapper.setProps({ container: null })
+    await nextTick()
+    expect(getPendingAnimationCount()).toBe(2)
+    expect(host.querySelector('[role="dialog"]')).not.toBeNull()
+
+    resolvePendingAnimation()
+    resolvePendingAnimation()
+    await settle()
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(wrapper.get('img').isVisible()).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('[behavior/B3/B11] measures and anchors zoom in the active custom container', async () => {
+    const host = document.createElement('section')
+    document.body.append(host)
+    setSelectorClientSize('.hana-img-viewer-overlay', { width: 800, height: 600 })
+    setSelectorRect('.hana-img-viewer-flip-shell', { x: 120, y: 80, width: 360, height: 270 })
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: { src: '/thumb.jpg', container: host, open: true },
+    })
+    await settle()
+    const shell = host.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
+    expect(shell.style.width).toBe('720px')
+    expect(shell.style.height).toBe('540px')
+
+    setSelectorClientSize('.hana-img-viewer-overlay', { width: 600, height: 400 })
+    triggerResizeObservers()
+    await nextFrame()
+    await settle()
+    expect(shell.style.width).toBe('480px')
+    expect(shell.style.height).toBe('360px')
+
+    const preview = host.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    preview.dispatchEvent(new WheelEvent('wheel', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 300,
+      clientY: 215,
+      deltaMode: 1,
+      deltaY: -100,
+    }))
+    await nextFrame()
+    expect(preview.style.transform).toBe('translate3d(0px, 0px, 0) scale(1.2)')
     wrapper.unmount()
   })
 

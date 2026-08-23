@@ -454,7 +454,10 @@ export const ViewerOverlay = ({
     }
 
     preview.style.transform = transformToCss(transformRef.current)
-    preview.style.cursor = 'grab'
+    preview.style.cursor = zoom ? 'grab' : 'default'
+
+    if (!zoom)
+      return
 
     const applyTransform = () => {
       if (transformFrame !== null)
@@ -650,7 +653,7 @@ export const ViewerOverlay = ({
       if (transformFrame !== null)
         cancelAnimationFrame(transformFrame)
     }
-  }, [destinationRect, maxZoom, minZoom, phase, zoom])
+  }, [maxZoom, minZoom, phase, zoom])
 
   useLayoutEffect(() => {
     const overlay = overlayRef.current
@@ -718,7 +721,7 @@ export const ViewerOverlay = ({
           alt={alt}
           draggable={false}
           style={{
-            cursor: phase !== 'open'
+            cursor: phase !== 'open' || !zoom
               ? 'default'
               : gesture === 'idle'
                 ? 'grab'

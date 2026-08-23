@@ -27,7 +27,28 @@ const animationOutcomeQueue: MockAnimationOutcome[] = []
 const pendingAnimations: PendingAnimationRequest[] = []
 const animationCalls: MockAnimationCall[] = []
 const elementRects = new Map<HTMLElement, DOMRect>()
+const selectorRects = new Map<string, DOMRect>()
+const selectorClientSizes = new Map<string, { width: number, height: number }>()
+const resizeObservers = new Set<MockResizeObserver>()
 const pointerCaptures = new Map<HTMLElement, Set<number>>()
+
+class MockResizeObserver {
+  constructor(private readonly callback: ResizeObserverCallback) {
+    resizeObservers.add(this)
+  }
+
+  disconnect() {
+    resizeObservers.delete(this)
+  }
+
+  observe() {}
+
+  trigger() {
+    this.callback([], this as unknown as ResizeObserver)
+  }
+
+  unobserve() {}
+}
 
 function createRect(): DOMRect {
   return (
@@ -84,6 +105,9 @@ function resetAnimationMockState() {
   animationOutcomeQueue.length = 0
   pendingAnimations.length = 0
   animationCalls.length = 0
+  selectorClientSizes.clear()
+  selectorRects.clear()
+  resizeObservers.clear()
 }
 
 function setImageSequence(url: string, outcomes: MockImageOutcome[]) {
@@ -112,8 +136,25 @@ function getAnimationCalls(): MockAnimationCall[] {
   return [...animationCalls]
 }
 
+function getPendingAnimationCount(): number {
+  return pendingAnimations.length
+}
+
 function setElementRect(element: HTMLElement, rect: DOMRectInit) {
   elementRects.set(element, DOMRect.fromRect(rect))
+}
+
+function setSelectorRect(selector: string, rect: DOMRectInit) {
+  selectorRects.set(selector, DOMRect.fromRect(rect))
+}
+
+function setSelectorClientSize(selector: string, size: { width: number, height: number }) {
+  selectorClientSizes.set(selector, size)
+}
+
+function triggerResizeObservers() {
+  for (const observer of resizeObservers)
+    observer.trigger()
 }
 
 function resolvePendingImage(url: string, outcome: Exclude<MockImageOutcome, 'pending'> = 'load') {
@@ -196,7 +237,46 @@ if (!HTMLElement.prototype.animate) {
 Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
   configurable: true,
   value(this: HTMLElement) {
-    return elementRects.get(this) ?? createRect()
+    const elementRect = elementRects.get(this)
+    if (elementRect)
+      return elementRect
+
+    for (const [selector, rect] of selectorRects) {
+      if (this.matches(selector))
+        return rect
+    }
+
+    if (this.classList.contains('hana-img-viewer-overlay')) {
+      return DOMRect.fromRect({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    return createRect()
+  },
+})
+
+Object.defineProperties(HTMLElement.prototype, {
+  clientHeight: {
+    configurable: true,
+    get(this: HTMLElement) {
+      for (const [selector, size] of selectorClientSizes) {
+        if (this.matches(selector))
+          return size.height
+      }
+      return 0
+    },
+  },
+  clientWidth: {
+    configurable: true,
+    get(this: HTMLElement) {
+      for (const [selector, size] of selectorClientSizes) {
+        if (this.matches(selector))
+          return size.width
+      }
+      return 0
+    },
   },
 })
 
@@ -217,6 +297,13 @@ if (!HTMLElement.prototype.releasePointerCapture) {
     value(this: HTMLElement, pointerId: number) {
       pointerCaptures.get(this)?.delete(pointerId)
     },
+  })
+}
+
+if (!window.ResizeObserver) {
+  Object.defineProperty(window, 'ResizeObserver', {
+    configurable: true,
+    value: MockResizeObserver,
   })
 }
 
@@ -277,10 +364,14 @@ export {
   addEventListenerSpy,
   getAnimationCalls,
   getImageRequestCount,
+  getPendingAnimationCount,
   removeEventListenerSpy,
   resolvePendingAnimation,
   resolvePendingImage,
   setAnimationSequence,
   setElementRect,
   setImageSequence,
+  setSelectorClientSize,
+  setSelectorRect,
+  triggerResizeObservers,
 }
