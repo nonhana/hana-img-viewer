@@ -5,7 +5,7 @@
   "private": "true",
   "scripts": {
     "dev": "vite",
-    "postinstall": "pnpm --filter hana-img-viewer build",
+    "postinstall": "pnpm -F hana-img-viewer build",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"

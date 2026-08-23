@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "jsx": "preserve",
     "paths": {
       "hana-img-viewer-react": [
         "../../packages/react/src/index.ts"
