@@ -38,7 +38,7 @@ export const createTrackpadDetector = (): TrackpadDetector => {
     return false
   }
 
-  const reset = (): void => {
+  const reset = () => {
     lastWheelTime = 0
     consecutiveSmallDeltas = 0
   }

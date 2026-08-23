@@ -14,7 +14,7 @@ const nextFrame = async (): Promise<void> => {
   await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 }
 
-const dispatchPointer = (element: HTMLElement, type: string, pointerId: number, clientX: number, clientY: number): void => {
+const dispatchPointer = (element: HTMLElement, type: string, pointerId: number, clientX: number, clientY: number) => {
   const event = new Event(type, { bubbles: true, cancelable: true })
   Object.defineProperties(event, {
     pointerId: { value: pointerId },
@@ -24,7 +24,7 @@ const dispatchPointer = (element: HTMLElement, type: string, pointerId: number, 
   element.dispatchEvent(event)
 }
 
-const dispatchTouches = (element: HTMLElement, type: string, points: Array<{ clientX: number, clientY: number }>): void => {
+const dispatchTouches = (element: HTMLElement, type: string, points: Array<{ clientX: number, clientY: number }>) => {
   const event = new Event(type, { bubbles: true, cancelable: true })
   Object.defineProperty(event, 'touches', {
     value: Object.assign([...points], { length: points.length }),

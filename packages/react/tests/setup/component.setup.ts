@@ -42,17 +42,17 @@ class MockResizeObserver {
     resizeObservers.add(this)
   }
 
-  disconnect(): void {
+  disconnect() {
     resizeObservers.delete(this)
   }
 
-  observe(): void {}
+  observe() {}
 
-  trigger(): void {
+  trigger() {
     this.callback([], this as unknown as ResizeObserver)
   }
 
-  unobserve(): void {}
+  unobserve() {}
 }
 
 function createRect(): DOMRect {
@@ -78,7 +78,7 @@ function consumeImageOutcome(url: string): MockImageOutcome {
   return nextOutcome
 }
 
-function queueImageResult(callback: () => void): void {
+function queueImageResult(callback: () => void) {
   queueMicrotask(callback)
 }
 
@@ -88,23 +88,23 @@ function pushPendingImageRequest(
     error: () => void
     load: () => void
   },
-): void {
+) {
   const requests = pendingImageRequests.get(url) ?? []
   requests.push(request)
   pendingImageRequests.set(url, requests)
 }
 
-function incrementImageRequestCount(url: string): void {
+function incrementImageRequestCount(url: string) {
   imageRequestCounts.set(url, (imageRequestCounts.get(url) ?? 0) + 1)
 }
 
-function resetImageMockState(): void {
+function resetImageMockState() {
   imageOutcomeSequences.clear()
   pendingImageRequests.clear()
   imageRequestCounts.clear()
 }
 
-function resetAnimationMockState(): void {
+function resetAnimationMockState() {
   animationOutcomeQueue.length = 0
   pendingAnimations.length = 0
   animationCalls.length = 0
@@ -114,27 +114,27 @@ function resetAnimationMockState(): void {
   resizeObservers.clear()
 }
 
-function setElementRect(element: HTMLElement, rect: DOMRectInit): void {
+function setElementRect(element: HTMLElement, rect: DOMRectInit) {
   elementRects.set(element, DOMRect.fromRect(rect))
 }
 
-function setSelectorRect(selector: string, rect: DOMRectInit): void {
+function setSelectorRect(selector: string, rect: DOMRectInit) {
   selectorRects.set(selector, DOMRect.fromRect(rect))
 }
 
 function setSelectorClientSize(
   selector: string,
   size: { width: number, height: number },
-): void {
+) {
   selectorClientSizes.set(selector, size)
 }
 
-function triggerResizeObservers(): void {
+function triggerResizeObservers() {
   for (const observer of resizeObservers)
     observer.trigger()
 }
 
-function setImageSequence(url: string, outcomes: MockImageOutcome[]): void {
+function setImageSequence(url: string, outcomes: MockImageOutcome[]) {
   imageOutcomeSequences.set(url, [...outcomes])
 }
 
@@ -142,11 +142,11 @@ function consumeAnimationOutcome(): MockAnimationOutcome {
   return animationOutcomeQueue.shift() ?? 'finish'
 }
 
-function setAnimationSequence(outcomes: MockAnimationOutcome[]): void {
+function setAnimationSequence(outcomes: MockAnimationOutcome[]) {
   animationOutcomeQueue.splice(0, animationOutcomeQueue.length, ...outcomes)
 }
 
-function resolvePendingAnimation(): void {
+function resolvePendingAnimation() {
   const animation = pendingAnimations.shift()
 
   if (!animation) {
@@ -167,7 +167,7 @@ function getAnimationCalls(): MockAnimationCall[] {
 function resolvePendingImage(
   url: string,
   outcome: Exclude<MockImageOutcome, 'pending'> = 'load',
-): void {
+) {
   const requests = pendingImageRequests.get(url)
 
   if (!requests?.length) {

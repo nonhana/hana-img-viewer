@@ -50,7 +50,7 @@ let bodyLockSnapshot: BodyLockSnapshot | null = null
 let appliedBodyOverflow: string | null = null
 let appliedBodyPaddingRight: string | null = null
 
-const acquireBodyLock = (owner: object): void => {
+const acquireBodyLock = (owner: object) => {
   if (bodyLockOwners.has(owner))
     return
 
@@ -78,7 +78,7 @@ const acquireBodyLock = (owner: object): void => {
   bodyLockOwners.add(owner)
 }
 
-const releaseBodyLock = (owner: object): void => {
+const releaseBodyLock = (owner: object) => {
   if (!bodyLockOwners.delete(owner) || bodyLockOwners.size > 0)
     return
 
@@ -153,7 +153,7 @@ export const ViewerOverlay = ({
       : src
 
   useLayoutEffect(() => {
-    const measure = (): void => {
+    const measure = () => {
       const origin = originRef.current
       const originImage = origin?.querySelector('img')
       const originRect = origin?.getBoundingClientRect() ?? null
@@ -185,7 +185,7 @@ export const ViewerOverlay = ({
     }
 
     let resizeFrame: number | null = null
-    const handleResize = (): void => {
+    const handleResize = () => {
       if (resizeFrame !== null)
         cancelAnimationFrame(resizeFrame)
 
@@ -456,7 +456,7 @@ export const ViewerOverlay = ({
     preview.style.transform = transformToCss(transformRef.current)
     preview.style.cursor = 'grab'
 
-    const applyTransform = (): void => {
+    const applyTransform = () => {
       if (transformFrame !== null)
         return
 
@@ -472,7 +472,7 @@ export const ViewerOverlay = ({
       nextScale: number,
       anchor: Point,
       allowBaseline = false,
-    ): void => {
+    ) => {
       const current = transformRef.current
       if (allowBaseline && nextScale === 1) {
         transformRef.current = { x: 0, y: 0, scale: 1 }
@@ -504,7 +504,7 @@ export const ViewerOverlay = ({
       applyTransform()
     }
 
-    const finishDrag = (): void => {
+    const finishDrag = () => {
       if (activePointerId !== null) {
         try {
           preview.releasePointerCapture(activePointerId)
@@ -518,7 +518,7 @@ export const ViewerOverlay = ({
       }
     }
 
-    const handleWheel = (event: WheelEvent): void => {
+    const handleWheel = (event: WheelEvent) => {
       if (!zoom)
         return
 
@@ -530,7 +530,7 @@ export const ViewerOverlay = ({
       })
     }
 
-    const handleDoubleClick = (event: MouseEvent): void => {
+    const handleDoubleClick = (event: MouseEvent) => {
       if (!zoom)
         return
 
@@ -546,7 +546,7 @@ export const ViewerOverlay = ({
       )
     }
 
-    const handlePointerDown = (event: PointerEvent): void => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (owner !== 'idle')
         return
 
@@ -558,7 +558,7 @@ export const ViewerOverlay = ({
       setGesture('drag')
     }
 
-    const handlePointerMove = (event: PointerEvent): void => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (owner !== 'drag' || event.pointerId !== activePointerId)
         return
 
@@ -573,12 +573,12 @@ export const ViewerOverlay = ({
       applyTransform()
     }
 
-    const handlePointerEnd = (event: PointerEvent): void => {
+    const handlePointerEnd = (event: PointerEvent) => {
       if (event.pointerId === activePointerId)
         finishDrag()
     }
 
-    const handleTouchStart = (event: TouchEvent): void => {
+    const handleTouchStart = (event: TouchEvent) => {
       if (!zoom)
         return
 
@@ -594,7 +594,7 @@ export const ViewerOverlay = ({
       setGesture('pinch')
     }
 
-    const handleTouchMove = (event: TouchEvent): void => {
+    const handleTouchMove = (event: TouchEvent) => {
       if (owner !== 'pinch')
         return
 
@@ -611,7 +611,7 @@ export const ViewerOverlay = ({
       pinchDistance = metrics.distance
     }
 
-    const handleTouchEnd = (event: TouchEvent): void => {
+    const handleTouchEnd = (event: TouchEvent) => {
       if (owner !== 'pinch' || event.touches.length >= 2)
         return
 
@@ -657,7 +657,7 @@ export const ViewerOverlay = ({
     if (!overlay)
       return
 
-    const handleKeyDown = (event: KeyboardEvent): void => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || !closeOnEscape)
         return
 
@@ -675,7 +675,7 @@ export const ViewerOverlay = ({
     if (!backdrop)
       return
 
-    const handleClick = (event: MouseEvent): void => {
+    const handleClick = (event: MouseEvent) => {
       if (!closeOnBackdropClick)
         return
 

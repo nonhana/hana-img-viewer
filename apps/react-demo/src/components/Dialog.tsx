@@ -17,7 +17,7 @@ export default function Dialog() {
     const panel = panelRef.current
     if (visible) {
       panel?.focus()
-      const handleKeyDown = (event: KeyboardEvent): void => {
+      const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Escape')
           setVisible(false)
       }

@@ -10,7 +10,7 @@ let snapshot: BodyLockSnapshot | null = null
 let appliedOverflow: string | null = null
 let appliedPaddingRight: string | null = null
 
-export const acquireBodyLock = (owner: object): void => {
+export const acquireBodyLock = (owner: object) => {
   if (owners.has(owner))
     return
 
@@ -39,7 +39,7 @@ export const acquireBodyLock = (owner: object): void => {
   owners.add(owner)
 }
 
-export const releaseBodyLock = (owner: object): void => {
+export const releaseBodyLock = (owner: object) => {
   if (!owners.delete(owner) || owners.size > 0)
     return
 

@@ -19,7 +19,7 @@ const originalHTMLElement = globalThis.HTMLElement
 
 class FakeHTMLElement {}
 
-const installDom = (stub: DomStub): void => {
+const installDom = (stub: DomStub) => {
   globalThis.window = {} as Window & typeof globalThis
   globalThis.HTMLElement = FakeHTMLElement as typeof HTMLElement
   globalThis.document = {
@@ -28,7 +28,7 @@ const installDom = (stub: DomStub): void => {
   } as Document
 }
 
-const restoreDom = (): void => {
+const restoreDom = () => {
   if (originalWindow === undefined) {
     delete (globalThis as Partial<typeof globalThis> & { window?: unknown }).window
   }

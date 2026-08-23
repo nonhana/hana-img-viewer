@@ -62,7 +62,7 @@ export const HanaImgViewer = ({
   }, [desiredOpen])
 
   const requestOpenChange = useCallback(
-    (nextOpen: boolean): void => {
+    (nextOpen: boolean) => {
       if (isControlled) {
         if (desiredOpen !== nextOpen)
           onOpenChange?.(nextOpen)
@@ -79,19 +79,19 @@ export const HanaImgViewer = ({
     [desiredOpen, isControlled, onOpenChange],
   )
 
-  const requestOpen = useCallback((): void => {
+  const requestOpen = useCallback(() => {
     requestOpenChange(true)
   }, [requestOpenChange])
 
-  const requestClose = useCallback((): void => {
+  const requestClose = useCallback(() => {
     requestOpenChange(false)
   }, [requestOpenChange])
 
-  const finishOpening = useCallback((): void => {
+  const finishOpening = useCallback(() => {
     dispatch({ type: 'OPEN_FINISHED' })
   }, [])
 
-  const finishClosing = useCallback((): void => {
+  const finishClosing = useCallback(() => {
     restoreFocusRef.current = true
     dispatch({ type: 'CLOSE_FINISHED' })
   }, [])
@@ -140,7 +140,7 @@ export const HanaImgViewer = ({
 
   const handleThumbnailKeyDown = (
     event: ReactKeyboardEvent<HTMLImageElement>,
-  ): void => {
+  ) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       requestOpen()

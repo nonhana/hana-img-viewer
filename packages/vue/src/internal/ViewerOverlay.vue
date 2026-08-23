@@ -154,7 +154,7 @@ const animatePhase = async () => {
   previousPhase = props.phase
   overlay.focus({ preventScroll: true })
 
-  const animate = (element: HTMLElement, keyframes: Keyframe[]): void => {
+  const animate = (element: HTMLElement, keyframes: Keyframe[]) => {
     animations.push(element.animate(keyframes, {
       duration: FLIP_DURATION,
       easing: FLIP_EASING,
@@ -266,7 +266,7 @@ const installGestures = () => {
   let lastPointer: Point = { x: 0, y: 0 }
   let pinchDistance = 0
 
-  const finishDrag = (): void => {
+  const finishDrag = () => {
     if (pointerId !== null) {
       try {
         if (typeof preview.releasePointerCapture === 'function')
@@ -280,17 +280,17 @@ const installGestures = () => {
       gesture.value = 'idle'
     }
   }
-  const onWheel = (event: WheelEvent): void => {
+  const onWheel = (event: WheelEvent) => {
     event.preventDefault()
     const sensitivity = detector.detect(event) ? 0.01 : 0.002
     setScale(transform.scale - event.deltaY * sensitivity, { x: event.clientX, y: event.clientY })
   }
-  const onDoubleClick = (event: MouseEvent): void => {
+  const onDoubleClick = (event: MouseEvent) => {
     event.preventDefault()
     const baseline = transform.scale === 1
     setScale(baseline ? DOUBLE_CLICK_ZOOM : 1, { x: event.clientX, y: event.clientY }, !baseline)
   }
-  const onPointerDown = (event: PointerEvent): void => {
+  const onPointerDown = (event: PointerEvent) => {
     if (gestureOwner !== 'idle')
       return
     event.preventDefault()
@@ -301,7 +301,7 @@ const installGestures = () => {
     gestureOwner = 'drag'
     gesture.value = 'drag'
   }
-  const onPointerMove = (event: PointerEvent): void => {
+  const onPointerMove = (event: PointerEvent) => {
     if (gestureOwner !== 'drag' || event.pointerId !== pointerId)
       return
     event.preventDefault()
@@ -310,11 +310,11 @@ const installGestures = () => {
     lastPointer = { x: event.clientX, y: event.clientY }
     writeTransform()
   }
-  const onPointerEnd = (event: PointerEvent): void => {
+  const onPointerEnd = (event: PointerEvent) => {
     if (event.pointerId === pointerId)
       finishDrag()
   }
-  const onTouchStart = (event: TouchEvent): void => {
+  const onTouchStart = (event: TouchEvent) => {
     const touches = getTwoTouches(event.touches)
     if (!touches)
       return
@@ -324,7 +324,7 @@ const installGestures = () => {
     gestureOwner = 'pinch'
     gesture.value = 'pinch'
   }
-  const onTouchMove = (event: TouchEvent): void => {
+  const onTouchMove = (event: TouchEvent) => {
     if (gestureOwner !== 'pinch')
       return
     const touches = getTwoTouches(event.touches)
@@ -335,7 +335,7 @@ const installGestures = () => {
     setScale(transform.scale * (metrics.distance / pinchDistance), metrics.center)
     pinchDistance = metrics.distance
   }
-  const onTouchEnd = (event: TouchEvent): void => {
+  const onTouchEnd = (event: TouchEvent) => {
     if (gestureOwner === 'pinch' && event.touches.length < 2) {
       gestureOwner = 'idle'
       gesture.value = 'idle'
@@ -373,7 +373,7 @@ const installGestures = () => {
   }
 }
 
-const onKeyDown = (event: KeyboardEvent): void => {
+const onKeyDown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape' || !props.closeOnEscape)
     return
   event.preventDefault()
@@ -381,7 +381,7 @@ const onKeyDown = (event: KeyboardEvent): void => {
   emit('requestClose')
 }
 
-const onBackdropClick = (event: MouseEvent): void => {
+const onBackdropClick = (event: MouseEvent) => {
   if (!props.closeOnBackdropClick)
     return
   event.stopPropagation()
