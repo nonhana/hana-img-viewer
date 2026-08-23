@@ -20,7 +20,7 @@ export interface HanaImgViewerProps {
    */
   container?: HTMLElement | null
   /** Enable wheel, pinch, and double-click zoom. @default true */
-  zoom?: boolean
+  enableZoom?: boolean
   /** Minimum zoom. Callers must keep `0 < minZoom <= maxZoom`. @default 0.5 */
   minZoom?: number
   /** Maximum zoom. @default 10 */

@@ -601,8 +601,8 @@ describe('HanaImgViewer replacement', () => {
     await waitFor(() => expect(preview.style.cursor).toBe('grab'))
   })
 
-  it('[react-interface/R3] disables zoom gestures when zoom is false', async () => {
-    const { container } = render(<HanaImgViewer src="thumb.jpg" zoom={false} />)
+  it('[react-interface/R3] disables zoom gestures when enableZoom is false', async () => {
+    const { container } = render(<HanaImgViewer src="thumb.jpg" enableZoom={false} />)
     fireEvent.click(getTrigger(container))
     await waitFor(() => expect(getDialog()).not.toBeNull())
     await finishFrames()
