@@ -17,8 +17,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, '../../packages/vue/src'),
-      'hana-img-viewer': resolve(__dirname, '../../packages/vue/src/index.ts'),
+      '@': resolve(import.meta.dirname, '../../packages/vue/src'),
+      'hana-img-viewer': resolve(import.meta.dirname, '../../packages/vue/src/index.ts'),
     },
   },
   optimizeDeps: {

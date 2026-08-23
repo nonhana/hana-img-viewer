@@ -1,12 +1,12 @@
 import { resolve } from 'node:path'
-import { defineConfig, mergeConfig } from './scripts/vitest-config.mjs'
-import sharedConfig from './vitest.shared'
+import { defineConfig, mergeConfig } from 'vitest/config'
+import sharedConfig from './vitest.shared.ts'
 
 export default mergeConfig(sharedConfig, defineConfig({
   test: {
     name: 'component',
     environment: 'jsdom',
     include: ['tests/component/**/*.test.ts'],
-    setupFiles: [resolve(__dirname, 'tests/setup/component.setup.ts')],
+    setupFiles: [resolve(import.meta.dirname, 'tests/setup/component.setup.ts')],
   },
 }))

@@ -26,5 +26,5 @@
 - `.changeset/config.json` 使用 `fixed: []`；demo 保持 ignore。
 - Changesets 仅因真实包变更及 workspace dependency 更新决定 bump，不强制三包同版。
 - core 更新可按 `updateInternalDependencies: patch` 触发依赖方 metadata patch。
-- 当前源码 pre-version 为 React/core `0.0.0`；预期 Release PR 为 React/core `1.0.0`、Vue `4.0.1` dependency metadata patch。
+- 当前源码 pre-version 为 React/core `0.0.0`；Vue lightweight API contraction 通过新的 major changeset 发布，三包仍独立版本。
 - `pnpm changeset version`、commit、push、publish、tag 与 GitHub release 都需要单独授权；常规实现只运行 status、build、test 与 pack dry-run。

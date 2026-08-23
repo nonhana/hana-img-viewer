@@ -1,774 +1,262 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { nextTick } from 'vue'
-import { useFLIP } from '@/composables/core'
-import { resolvePortalTarget } from '@/composables/viewer/usePortalTarget'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import { HanaImgViewer } from '@/index'
-import {
-  addEventListenerSpy,
-  getAnimationCalls,
-  getImageRequestCount,
-  removeEventListenerSpy,
-  resolvePendingAnimation,
-  resolvePendingImage,
-  setAnimationSequence,
-  setImageSequence,
-} from '../setup/component.setup'
+import { getImageRequestCount, setImageSequence } from '../setup/component.setup'
 import { describe, expect, it, vi } from '../support/vitest'
 
-describe('HanaImgViewer component harness', () => {
-  it('renders a thumbnail without mounting preview markup while closed', () => {
-    const wrapper = mount(HanaImgViewer, {
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
+const settle = async (): Promise<void> => {
+  await nextTick()
+  await flushPromises()
+  await nextTick()
+}
 
-    const thumbnail = wrapper.get('img')
+const nextFrame = async (): Promise<void> => {
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+}
 
-    expect(thumbnail.attributes('src')).toBe('/thumb.jpg')
-    expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
+const dispatchPointer = (element: HTMLElement, type: string, pointerId: number, clientX: number, clientY: number): void => {
+  const event = new Event(type, { bubbles: true, cancelable: true })
+  Object.defineProperties(event, {
+    pointerId: { value: pointerId },
+    clientX: { value: clientX },
+    clientY: { value: clientY },
   })
+  element.dispatchEvent(event)
+}
 
-  it('mounts a teleported preview shell when opened from the thumbnail', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      const preview = document.body.querySelector('img[draggable="false"]')
-
-      expect(preview).not.toBeNull()
-      expect(document.body.style.overflow).toBe('hidden')
-    }
-    finally {
-      wrapper.unmount()
-    }
+const dispatchTouches = (element: HTMLElement, type: string, points: Array<{ clientX: number, clientY: number }>): void => {
+  const event = new Event(type, { bubbles: true, cancelable: true })
+  Object.defineProperty(event, 'touches', {
+    value: Object.assign([...points], { length: points.length }),
   })
-
-  it('keeps the preview cursor neutral until the opening motion finishes', async () => {
-    setAnimationSequence(['finish', 'pending'])
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      const previewDuringOpening = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(previewDuringOpening.style.cursor).toBe('default')
-
-      resolvePendingAnimation()
-      await flushPromises()
-      await nextTick()
-
-      const previewAfterOpening = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(previewAfterOpening.style.cursor).toBe('grab')
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('does not register idle global listeners while closed', () => {
-    mount(HanaImgViewer, {
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    expect(addEventListenerSpy).not.toHaveBeenCalledWith('pointermove', expect.any(Function), expect.anything())
-    expect(addEventListenerSpy).not.toHaveBeenCalledWith('pointerup', expect.any(Function), expect.anything())
-    expect(addEventListenerSpy).not.toHaveBeenCalledWith('pointercancel', expect.any(Function), expect.anything())
-  })
-
-  it('preserves the approved FLIP open/close interaction contract', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    await wrapper.get('img').trigger('click')
-    await nextTick()
-    await flushPromises()
-
-    const preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement | null
-    expect(preview).not.toBeNull()
-
-    await wrapper.vm.close()
-    await nextTick()
-    await flushPromises()
-
-    expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-    expect(document.body.style.overflow).toBe('')
-  })
-
-  it('keeps the FLIP engine cancelable and isAnimating accurate when an opening motion is interrupted and restarted', async () => {
-    setAnimationSequence(['pending', 'pending', 'finish'])
-
-    const rect = DOMRect.fromRect({ x: 0, y: 0, width: 100, height: 80 })
-    const element = document.createElement('div')
-    document.body.appendChild(element)
-
-    const { cancel, flip, isAnimating } = useFLIP()
-
-    const opening = flip(rect, rect, element)
-    // Aborts the in-flight opening animation.
-    cancel()
-    const reopening = flip(rect, rect, element)
-
-    // The aborted animation's rejection settles after the replacement has
-    // taken over the slot; it must not clear the replacement's reference.
-    await opening
-    await nextTick()
-    expect(isAnimating.value).toBe(true)
-
-    resolvePendingAnimation()
-    await reopening
-    await nextTick()
-
-    expect(isAnimating.value).toBe(false)
-  })
-
-  it('keeps the view state correct when an opening motion is interrupted by a close and the viewer reopens right after', async () => {
-    setAnimationSequence([
-      'pending',
-      'pending', // open #1: backdrop + flip
-      'pending',
-      'pending', // close #1: backdrop + reverse flip (aborts open #1)
-      'pending',
-      'pending', // open #2: backdrop + flip
-      'pending',
-      'pending', // close #2: backdrop + reverse flip
-    ])
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-
-      // Close while the opening motions are still pending.
-      await wrapper.vm.close()
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-
-      // The interrupted close settles back to closed.
-      resolvePendingAnimation()
-      resolvePendingAnimation()
-      await flushPromises()
-      await nextTick()
-
-      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-      expect(document.body.style.overflow).toBe('')
-
-      // A fresh session opens cleanly.
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-
-      resolvePendingAnimation()
-      resolvePendingAnimation()
-      await flushPromises()
-      await nextTick()
-
-      const previewAfterReopen = document.body.querySelector('img[draggable="false"]') as HTMLImageElement | null
-      expect(previewAfterReopen).not.toBeNull()
-      expect(previewAfterReopen!.style.cursor).toBe('grab')
-
-      // And closes cleanly.
-      await wrapper.vm.close()
-      await nextTick()
-      await flushPromises()
-      resolvePendingAnimation()
-      resolvePendingAnimation()
-      await flushPromises()
-      await nextTick()
-
-      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-      expect(document.body.style.overflow).toBe('')
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('fades the backdrop with the same motion contract as the flip animation', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      await wrapper.vm.close()
-      await nextTick()
-      await flushPromises()
-
-      const animationCalls = getAnimationCalls()
-      const backdropCalls = animationCalls.filter(call =>
-        call.element.classList.contains('hana-img-viewer-backdrop'),
-      )
-      const flipCalls = animationCalls.filter(call =>
-        call.element.classList.contains('hana-img-viewer-flip-shell'),
-      )
-
-      expect(backdropCalls).toHaveLength(2)
-      expect(flipCalls).toHaveLength(2)
-
-      expect(backdropCalls[0].keyframes).toEqual([
-        { opacity: 0 },
-        { opacity: 1 },
-      ])
-      expect(backdropCalls[1].keyframes).toEqual([
-        { opacity: 1 },
-        { opacity: 0 },
-      ])
-
-      expect(backdropCalls[0].options.duration).toBe(flipCalls[0].options.duration)
-      expect(backdropCalls[0].options.easing).toBe(flipCalls[0].options.easing)
-      expect(backdropCalls[1].options.duration).toBe(flipCalls[1].options.duration)
-      expect(backdropCalls[1].options.easing).toBe(flipCalls[1].options.easing)
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('keeps previewSrc enhancement silent and transform-stable during an open session', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-        previewSrc: '/preview.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      const preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      const initialTransform = preview.style.transform
-
-      await flushPromises()
-
-      const updatedPreview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-
-      expect(updatedPreview.getAttribute('src')).toBe('/preview.jpg')
-      expect(updatedPreview.style.transform).toBe(initialTransform)
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('updates the visible preview when src changes during an open session', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb-a.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      const initialPreview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(initialPreview.getAttribute('src')).toBe('/thumb-a.jpg')
-
-      await wrapper.setProps({ src: '/thumb-b.jpg' })
-      await nextTick()
-      await flushPromises()
-
-      const updatedPreview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(updatedPreview.getAttribute('src')).toBe('/thumb-b.jpg')
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('keeps the current enhanced preview visible until a replacement previewSrc is ready', async () => {
-    setImageSequence('/preview-2.jpg', ['pending'])
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-        previewSrc: '/preview-1.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-      await flushPromises()
-
-      const initialEnhancedPreview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(initialEnhancedPreview.getAttribute('src')).toBe('/preview-1.jpg')
-
-      await wrapper.setProps({ previewSrc: '/preview-2.jpg' })
-      await nextTick()
-      await flushPromises()
-
-      const previewBeforeReplacementReady = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(previewBeforeReplacementReady.getAttribute('src')).toBe('/preview-1.jpg')
-
-      resolvePendingImage('/preview-2.jpg')
-      await flushPromises()
-      await flushPromises()
-
-      const replacementPreview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(replacementPreview.getAttribute('src')).toBe('/preview-2.jpg')
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('retries a failed enhancement request on the next open session', async () => {
-    setImageSequence('/retry-preview.jpg', ['pending', 'pending'])
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-        previewSrc: '/retry-preview.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-      await flushPromises()
-
-      expect(getImageRequestCount('/retry-preview.jpg')).toBe(1)
-      resolvePendingImage('/retry-preview.jpg', 'error')
-      await flushPromises()
-      await flushPromises()
-
-      let preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(preview.getAttribute('src')).toBe('/thumb.jpg')
-
-      await wrapper.vm.close()
-      await nextTick()
-      await flushPromises()
-
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-      await flushPromises()
-
-      expect(getImageRequestCount('/retry-preview.jpg')).toBe(2)
-      resolvePendingImage('/retry-preview.jpg', 'load')
-      await flushPromises()
-      await flushPromises()
-
-      preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(preview.getAttribute('src')).toBe('/retry-preview.jpg')
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('does not bind a window Escape listener when mounted into a custom portal target', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-        portalTarget: '#custom-portal-target',
-      },
-    })
-
-    const portalTarget = document.createElement('div')
-    portalTarget.id = 'custom-portal-target'
-    document.body.appendChild(portalTarget)
-
-    await wrapper.get('img').trigger('click')
-    await nextTick()
-    await flushPromises()
-
-    expect(addEventListenerSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function), expect.anything())
-
+  element.dispatchEvent(event)
+}
+
+describe('HanaImgViewer public behavior', () => {
+  it('[behavior/B1] renders thumbnail-only markup until opened', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg', alt: 'Thumbnail' } })
+    expect(wrapper.get('.hana-img-viewer-thumbnail').attributes('src')).toBe('/thumb.jpg')
+    expect(document.body.querySelector('.hana-img-viewer-preview')).toBeNull()
+
+    await wrapper.get('.hana-img-viewer-thumbnail').trigger('click')
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).not.toBeNull()
     wrapper.unmount()
-    expect(removeEventListenerSpy).not.toHaveBeenCalledWith('keydown', expect.any(Function), expect.anything())
   })
 
-  it('keeps the viewer visually open in controlled mode until the parent updates open=false', async () => {
+  it('[behavior/B2] uses local ownership when only update listener is present', async () => {
+    const onUpdate = vi.fn()
     const wrapper = mount(HanaImgViewer, {
       attachTo: document.body,
-      props: {
-        'alt': 'thumbnail',
-        'open': true,
-        'src': '/thumb.jpg',
-        'onUpdate:open': () => {},
-      },
+      props: { src: '/thumb.jpg', ...{ 'onUpdate:open': onUpdate } },
     })
-
-    try {
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-
-      await wrapper.vm.close()
-      await nextTick()
-      await flushPromises()
-
-      expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false])
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-
-      await wrapper.setProps({ open: false })
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-    }
-    finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('cancels a pending open before the portal target becomes available', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        portalTarget: null,
-        src: '/thumb.jpg',
-      },
-    })
-
     await wrapper.get('img').trigger('click')
-    await nextTick()
-    await flushPromises()
-
-    expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-
-    await wrapper.vm.close()
-    await nextTick()
-    await flushPromises()
-
-    const portalTarget = document.createElement('div')
-    portalTarget.id = 'late-portal-target'
-    document.body.appendChild(portalTarget)
-
-    await wrapper.setProps({ portalTarget: '#late-portal-target' })
-    await nextTick()
-    await flushPromises()
-
-    expect(portalTarget.querySelector('img[draggable="false"]')).toBeNull()
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).not.toBeNull()
+    expect(onUpdate).toHaveBeenCalledWith(true)
+    wrapper.unmount()
   })
 
-  it('emits close intent when controlled open is pending behind a missing portal target', async () => {
-    const onUpdateOpen = vi.fn()
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        'alt': 'thumbnail',
-        'open': true,
-        'portalTarget': null,
-        'src': '/thumb.jpg',
-        'onUpdate:open': onUpdateOpen,
+  it('[behavior/B2] waits for controlled owner acknowledgement', async () => {
+    const open = ref(true)
+    const Host = defineComponent({
+      setup() {
+        return () => h(HanaImgViewer, {
+          src: '/thumb.jpg',
+          open: open.value,
+          ...{
+            'onUpdate:open': (value: boolean) => {
+              open.value = value
+            },
+          },
+        })
       },
     })
-
-    await nextTick()
-    await flushPromises()
-
-    expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-
-    await wrapper.vm.close()
-    await nextTick()
-    await flushPromises()
-
-    expect(onUpdateOpen).toHaveBeenLastCalledWith(false)
+    const wrapper = mount(Host, { attachTo: document.body })
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).not.toBeNull()
+    document.body.querySelector('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(open.value).toBe(false)
+    expect(document.body.querySelector('.hana-img-viewer-preview')).toBeNull()
+    wrapper.unmount()
   })
 
-  it('degrades an invalid portalTarget selector to missing without throwing', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  it('[behavior/B3] zooms around a wheel event anchor', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 10, clientY: 10, deltaY: -100 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(1.2)')
+    wrapper.unmount()
+  })
 
+  it('[behavior/B4] gives pinch the sole gesture ownership', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    dispatchPointer(preview, 'pointerdown', 1, 0, 0)
+    dispatchTouches(preview, 'touchstart', [{ clientX: 0, clientY: 0 }, { clientX: 10, clientY: 0 }])
+    dispatchTouches(preview, 'touchmove', [{ clientX: 0, clientY: 0 }, { clientX: 20, clientY: 0 }])
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(2)')
+    wrapper.unmount()
+  })
+
+  it('[behavior/B5] drags at baseline scale and cleans the owner on close', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    dispatchPointer(preview, 'pointerdown', 1, 10, 10)
+    dispatchPointer(preview, 'pointermove', 1, 30, 35)
+    await nextFrame()
+    expect(preview.style.transform).toContain('translate3d(20px, 25px')
+    preview.closest('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).toBeNull()
+    wrapper.unmount()
+  })
+
+  it('[behavior/B6] toggles double-click zoom between baseline and 2x', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg' } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    preview.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 20, clientY: 20 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(2)')
+    preview.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 20, clientY: 20 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(1)')
+    wrapper.unmount()
+  })
+
+  it('[interface/Vue] disables every transform gesture when enableZoom is false', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg', enableZoom: false } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
+    const initialTransform = preview.style.transform
+    preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -100 }))
+    preview.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true }))
+    dispatchPointer(preview, 'pointerdown', 1, 0, 0)
+    dispatchPointer(preview, 'pointermove', 1, 20, 20)
+    await nextFrame()
+    expect(preview.style.transform).toBe(initialTransform)
+    wrapper.unmount()
+  })
+
+  it('[interface/Vue] clamps configured zoom bounds without resetting drag translation', async () => {
     const wrapper = mount(HanaImgViewer, {
       attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        portalTarget: '[',
-        src: '/thumb.jpg',
-      },
+      props: { src: '/thumb.jpg', minZoom: 0.8, maxZoom: 1.1 },
     })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    const preview = document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement
 
-    try {
-      await nextTick()
-      await flushPromises()
+    preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 10, clientY: 10, deltaY: 1000 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(0.8)')
 
-      expect(wrapper.get('img')).toBeTruthy()
-      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
+    preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 10, clientY: 10, deltaY: -1000 }))
+    await nextFrame()
+    expect(preview.style.transform).toContain('scale(1.1)')
 
-      expect(warnSpy).toHaveBeenCalledTimes(1)
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('invalid selector'),
-      )
-    }
-    finally {
-      wrapper.unmount()
-      warnSpy.mockRestore()
-    }
+    dispatchPointer(preview, 'pointerdown', 1, 10, 10)
+    dispatchPointer(preview, 'pointermove', 1, 30, 35)
+    await nextFrame()
+    const transformBeforeBoundUpdate = preview.style.transform
+    await wrapper.setProps({ maxZoom: 0.9 })
+    await nextFrame()
+    expect(preview.style.transform).toBe(transformBeforeBoundUpdate.replace('scale(1.1)', 'scale(0.9)'))
+    wrapper.unmount()
   })
 
-  it('treats document.body as the same body portal mode as the default body portal', async () => {
+  it('[interface/Vue] leaves backdrop and Escape dismissal to the host when disabled', async () => {
     const wrapper = mount(HanaImgViewer, {
       attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-        portalTarget: document.body,
-      },
+      props: { src: '/thumb.jpg', closeOnBackdropClick: false, closeOnEscape: false },
     })
+    await wrapper.get('img').trigger('click')
+    await settle()
 
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-      expect(document.body.style.overflow).toBe('hidden')
-
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
-      expect(document.body.style.overflow).toBe('')
-    }
-    finally {
-      wrapper.unmount()
-    }
+    document.body.querySelector('.hana-img-viewer-backdrop')?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    document.body.querySelector('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).not.toBeNull()
+    wrapper.unmount()
   })
 
-  it('releases body locking when an open viewer moves from the body portal to a custom target', async () => {
+  it('[behavior/B8-B9] upgrades silently and retries in a new session', async () => {
+    setImageSequence('/preview.jpg', ['error', 'load'])
     const wrapper = mount(HanaImgViewer, {
       attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
+      props: { src: '/thumb.jpg', previewSrc: '/preview.jpg' },
     })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/thumb.jpg')
+    expect(getImageRequestCount('/preview.jpg')).toBe(1)
 
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.style.overflow).toBe('hidden')
-
-      const customTarget = document.createElement('div')
-      customTarget.id = 'runtime-custom-portal'
-      document.body.appendChild(customTarget)
-
-      await wrapper.setProps({ portalTarget: '#runtime-custom-portal' })
-      await nextTick()
-      await flushPromises()
-
-      expect(customTarget.querySelector('img[draggable="false"]')).not.toBeNull()
-      expect(document.body.style.overflow).toBe('')
-    }
-    finally {
-      wrapper.unmount()
-    }
+    document.body.querySelector('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    await wrapper.get('img').trigger('click')
+    await settle()
+    expect(getImageRequestCount('/preview.jpg')).toBe(2)
+    await settle()
+    expect((document.body.querySelector('.hana-img-viewer-preview') as HTMLImageElement).src).toContain('/preview.jpg')
+    wrapper.unmount()
   })
 
-  it('allows keyboard users to open the default thumbnail trigger', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      const buttonTrigger = wrapper.find('button')
-
-      if (buttonTrigger.exists()) {
-        expect(buttonTrigger.attributes('type')).toBe('button')
-        await buttonTrigger.trigger('click')
-      }
-      else {
-        const imageTrigger = wrapper.get('img')
-        expect(imageTrigger.attributes('role')).toBe('button')
-        expect(imageTrigger.attributes('tabindex')).toBe('0')
-        await imageTrigger.trigger('keydown', { key: 'Enter' })
-      }
-
-      await nextTick()
-      await flushPromises()
-
-      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
-    }
-    finally {
-      wrapper.unmount()
-    }
+  it('[behavior/B10] restores the focused trigger and scopes Escape to the focused body overlay', async () => {
+    const first = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/one.jpg' } })
+    const second = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/two.jpg' } })
+    await first.get('img').trigger('click')
+    await settle()
+    await second.get('img').trigger('click')
+    await settle()
+    const secondPreview = document.body.querySelectorAll('.hana-img-viewer-preview')[1] as HTMLElement
+    secondPreview.closest('[role="dialog"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(document.body.querySelectorAll('.hana-img-viewer-preview')).toHaveLength(1)
+    expect(document.activeElement).toBe(second.get('img').element)
+    first.unmount()
+    second.unmount()
   })
 
-  it('recomputes overlay geometry when the viewport changes during an open session', async () => {
-    const originalWidth = window.innerWidth
-    const originalHeight = window.innerHeight
-
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumbnail',
-        src: '/thumb.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-
-      const shell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
-      const initialWidth = shell.style.width
-
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 400 })
-      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 300 })
-      window.dispatchEvent(new Event('resize'))
-
-      await new Promise(resolve => setTimeout(resolve, 60)) // wait debounce window
-      await flushPromises()
-
-      const resizedShell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
-      const resizedWidth = resizedShell.style.width
-
-      expect(resizedWidth).toBe('360px')
-      expect(resizedWidth).not.toBe(initialWidth)
-    }
-    finally {
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
-      Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight })
-      wrapper.unmount()
-    }
+  it('[behavior/B11] keeps thumbnail visible while a null container is pending', async () => {
+    const wrapper = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/thumb.jpg', container: null } })
+    await wrapper.get('img').trigger('click')
+    await settle()
+    expect(wrapper.get('img').isVisible()).toBe(true)
+    expect(document.body.querySelector('.hana-img-viewer-preview')).toBeNull()
+    wrapper.unmount()
   })
-})
 
-describe('resolvePortalTarget', () => {
-  it('resolves undefined to document.body', () => {
-    expect(resolvePortalTarget(undefined)).toBe(document.body)
+  it('[behavior/B12] preserves host body writes after the final owner closes', async () => {
+    const first = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/one.jpg' } })
+    const second = mount(HanaImgViewer, { attachTo: document.body, props: { src: '/two.jpg' } })
+    await first.get('img').trigger('click')
+    await second.get('img').trigger('click')
+    await settle()
+    document.body.style.overflow = 'scroll'
+    first.unmount()
+    expect(document.body.style.overflow).toBe('scroll')
+    second.unmount()
+    expect(document.body.style.overflow).toBe('scroll')
   })
-  it('resolves "body" string to document.body', () => {
-    expect(resolvePortalTarget('body')).toBe(document.body)
-  })
-  it('resolves document.body to document.body', () => {
-    expect(resolvePortalTarget(document.body)).toBe(document.body)
-  })
-  it('resolves null to null', () => {
-    expect(resolvePortalTarget(null)).toBeNull()
-  })
-  it('resolves a CSS selector to the matched element', () => {
-    const el = document.createElement('div')
-    el.id = 'portal-target-test'
-    document.body.appendChild(el)
-    expect(resolvePortalTarget('#portal-target-test')).toBe(el)
-    el.remove()
-  })
-  it('resolves a missing selector to null', () => {
-    expect(resolvePortalTarget('#does-not-exist')).toBeNull()
-  })
-  it('resolves blank or invalid selectors to null without throwing', () => {
-    expect(resolvePortalTarget('')).toBeNull()
-    expect(resolvePortalTarget('   ')).toBeNull()
-    expect(resolvePortalTarget('[')).toBeNull()
-    expect(resolvePortalTarget(':')).toBeNull()
-  })
-  it('resolves an HTMLElement to itself', () => {
-    const el = document.createElement('section')
-    expect(resolvePortalTarget(el)).toBe(el)
-  })
-})
 
-describe('PRD: box-stability proof', () => {
-  it('keeps the flip shell dimensions stable when previewSrc upgrades with different aspect ratio', async () => {
-    const wrapper = mount(HanaImgViewer, {
-      attachTo: document.body,
-      props: {
-        alt: 'thumb',
-        src: '/thumb-square.jpg', // 1:1 (mock createRect returns 160x120 → 4:3)
-        previewSrc: '/preview-wide.jpg',
-      },
-    })
-
-    try {
-      await wrapper.get('img').trigger('click')
-      await nextTick()
-      await flushPromises()
-      await flushPromises()
-
-      const shell = document.body.querySelector('.hana-img-viewer-flip-shell') as HTMLElement
-      const initialWidth = shell.style.width
-      const initialHeight = shell.style.height
-
-      // Verify previewSrc is now the visible bitmap
-      const preview = document.body.querySelector('img[draggable="false"]') as HTMLImageElement
-      expect(preview.getAttribute('src')).toBe('/preview-wide.jpg')
-
-      // Verify shell dimensions did not change (box-stability)
-      expect(shell.style.width).toBe(initialWidth)
-      expect(shell.style.height).toBe(initialHeight)
-    }
-    finally {
-      wrapper.unmount()
-    }
+  it('[behavior/B13] leaves SSR hydration ownership to the client mount', async () => {
+    const wrapper = mount(HanaImgViewer, { props: { src: '/thumb.jpg', open: true } })
+    expect(wrapper.get('img')).toBeTruthy()
+    await settle()
+    expect(document.body.querySelector('.hana-img-viewer-preview')).not.toBeNull()
+    wrapper.unmount()
   })
 })

@@ -7,8 +7,9 @@ Vue 已发布库 + React/core 首次发布待准备。外部支持面由各包 `
 - `exports["."]` → `./dist/index.js`（types `./dist/index.d.ts`）；无 CJS 构建。
 - `exports["./style.css"]` → `./dist/style.css`；`sideEffects: ["**/*.css", "src/index.ts"]`。
 - `files: ["dist"]`。
-- 导出：default（带 `install` 的插件对象）+ 具名 `HanaImgViewer`；类型 `HanaImgViewerProps`、`HanaImgViewerEmits`、`HanaImgViewerExposed`（含 `types/utils` re-export 的 core 共享类型）。
-- Peer：`vue` ^3.5.0、`@vueuse/core` ^14.0.0；dependencies：`hana-img-viewer-core`。
+- 导出：default 与具名 `HanaImgViewer` 是同一个带 `install(app)` 的组件引用；类型只有 `HanaImgViewerProps`。
+- `HanaImgViewerProps` 只有 `src`、`previewSrc`、`alt`、`open`、`container?: HTMLElement | null`、`enableZoom`、`minZoom`、`maxZoom`、`closeOnBackdropClick`、`closeOnEscape`；事件只有 `update:open`，slot 只有 `thumbnail`。
+- Peer：`vue` ^3.5.0；dependencies：`hana-img-viewer-core`。不再依赖 `@vueuse/core`。
 
 ## `hana-img-viewer-react`
 

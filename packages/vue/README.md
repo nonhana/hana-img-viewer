@@ -1,22 +1,14 @@
 # hana-img-viewer
 
-A lightweight Vue 3 image viewer that is simple to drop in.
-
-## Features
-
-- Thumbnail-origin FLIP open and close
-- `src`-first preview path with optional silent `previewSrc` enhancement
-- Wheel, double-click, drag, and pinch interactions
-- SSR-safe thumbnail-only server render
-- Extracted CSS output with a standard bundler-friendly entry
-
-## Installation
+一个轻量的 Vue 3 图片预览器。默认只需要 `src` 和可选的 `alt`，样式从 `style.css` 单独引入。
 
 ```bash
 pnpm add hana-img-viewer
 ```
 
-## Basic usage
+```ts
+import 'hana-img-viewer/style.css'
+```
 
 ```vue
 <script setup lang="ts">
@@ -24,35 +16,8 @@ import { HanaImgViewer } from 'hana-img-viewer'
 </script>
 
 <template>
-  <HanaImgViewer
-    src="/images/post-thumb.jpg"
-    alt="Article cover"
-  />
+  <HanaImgViewer src="/images/post-thumb.jpg" alt="Article cover" />
 </template>
-```
-
-Import `style.css` in `main.ts`:
-
-```ts
-import 'hana-img-viewer/style.css'
-```
-
-## `src` and `previewSrc`
-
-`src` is required and always drives:
-
-- the thumbnail
-- the first visible preview frame
-- the FLIP transition source
-
-If `previewSrc` is provided, the viewer opens from `src` immediately and upgrades the visible bitmap in place after `previewSrc` is ready. There is no explicit loading UI and no second transition.
-
-```vue
-<HanaImgViewer
-  src="/images/post-thumb.jpg"
-  preview-src="/images/post-full.jpg"
-  alt="Article cover"
-/>
 ```
 
 ## API
@@ -61,122 +26,56 @@ If `previewSrc` is provided, the viewer opens from `src` immediately and upgrade
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `src` | `string` | - | Required thumbnail and first-preview source. |
-| `alt` | `string` | `''` | Accessible alt text. |
-| `previewSrc` | `string` | - | Optional silent enhancement source. |
-| `open` | `boolean` | - | Controlled open state. |
-| `portalTarget` | `string \| HTMLElement \| null` | `'body'` | Overlay mount target. `null` keeps the open request pending until a custom target exists. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, and pinch zoom. |
-| `enableDrag` | `boolean` | `true` | Enable drag while open. |
-| `minZoom` | `number` | `0.5` | Minimum zoom ratio. |
-| `maxZoom` | `number` | `10` | Maximum zoom ratio. |
-| `closeOnMaskClick` | `boolean` | `true` | Close when clicking the backdrop. |
-| `enableKeyboard` | `boolean` | `true` | Allow ESC close when the viewer owns the active body portal. |
-| `containerClass` | `HTMLAttributes['class']` | - | Thumbnail container class hook. |
-| `containerStyle` | `StyleValue` | - | Thumbnail container style hook. |
-| `thumbnailClass` | `HTMLAttributes['class']` | - | Thumbnail image class hook. |
-| `thumbnailStyle` | `StyleValue` | - | Thumbnail image style hook. |
+| `src` | `string` | required | 缩略图与预览第一帧。 |
+| `previewSrc` | `string` | `undefined` | 预加载成功后静默替换当前预览。 |
+| `alt` | `string` | `''` | 两张图片的替代文本。 |
+| `open` | `boolean` | `false` | 使用 `v-model:open` 绑定 desired visibility。 |
+| `container` | `HTMLElement \| null` | `undefined` | `undefined` 使用 `document.body`；`null` 保持 pending。 |
+| `enableZoom` | `boolean` | `true` | 统一启用或禁用 wheel、pinch、double-click、drag。 |
+| `minZoom` | `number` | `0.5` | 最小缩放；调用方必须保证 `0 < minZoom <= maxZoom`。 |
+| `maxZoom` | `number` | `10` | 最大缩放。 |
+| `closeOnBackdropClick` | `boolean` | `true` | 点击 backdrop 时请求关闭。 |
+| `closeOnEscape` | `boolean` | `true` | focused overlay 收到 Escape 时请求关闭。 |
 
-### Emits
-
-| Event | Payload | Description |
-| --- | --- | --- |
-| `update:open` | `boolean` | Controlled open-state intent. |
-| `open` | - | Fired when the viewer becomes visibly open on the client. |
-| `close` | - | Fired when the viewer finishes closing. |
-| `load` | `Event` | Fired when the enhancement source becomes active. |
-| `error` | `Event` | Fired when the enhancement source fails. |
-
-### Slots
-
-| Slot | Props | Description |
-| --- | --- | --- |
-| `thumbnail` | `{ open: () => void }` | Custom thumbnail trigger. |
-
-### Exposed methods
-
-```ts
-interface HanaImgViewerExposed {
-  open: () => void | Promise<void>
-  close: () => void | Promise<void>
-  reset: () => void
-}
-```
-
-Example:
+组件只发出 `update:open`，slot 只有 `thumbnail`：
 
 ```vue
-<script setup lang="ts">
-import type { HanaImgViewerExposed } from 'hana-img-viewer'
-import { ref } from 'vue'
-
-const viewerRef = ref<HanaImgViewerExposed | null>(null)
-</script>
-
-<template>
-  <button @click="viewerRef?.open()">
-    Open
-  </button>
-  <HanaImgViewer ref="viewerRef" src="/images/post-thumb.jpg" />
-</template>
-```
-
-## Controlled mode
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const isOpen = ref(false)
-</script>
-
-<template>
-  <button @click="isOpen = true">
-    Open preview
-  </button>
-
-  <HanaImgViewer
-    v-model:open="isOpen"
-    src="/images/post-thumb.jpg"
-    alt="Controlled preview"
-  />
-</template>
-```
-
-## Custom thumbnail
-
-```vue
-<HanaImgViewer src="/images/post-full.jpg" alt="Custom trigger preview">
+<HanaImgViewer v-model:open="open" src="/images/post-thumb.jpg" preview-src="/images/post-full.jpg">
   <template #thumbnail="{ open }">
-    <button class="thumb-button" type="button" @click="open">
-      Open preview
-    </button>
+    <button type="button" @click="open">Open preview</button>
   </template>
 </HanaImgViewer>
 ```
 
-## Custom portal target
+普通 `class`、`style` 与其他 attrs 会落到可见的 thumbnail root；需要完全控制图片节点时使用 `thumbnail` slot。
 
-Use `portalTarget` when the preview should stay inside a host layer, such as a dialog.
+自定义 mount target 只传 HTMLElement：
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const portalTarget = ref<HTMLElement | null>(null)
+const container = ref<HTMLElement | null>(null)
 </script>
 
 <template>
-  <div ref="portalTarget" />
-
-  <HanaImgViewer
-    :portal-target="portalTarget"
-    src="/images/post-thumb.jpg"
-    alt="Dialog scoped preview"
-  />
+  <div ref="container" />
+  <HanaImgViewer :container="container" src="/images/post-thumb.jpg" />
 </template>
 ```
 
-`portalTarget="body"` and `:portal-target="document.body"` both use the default body portal behavior.
+组件本身同时支持局部注册和 `app.use(HanaImgViewer)`；default 与 named export 是同一个组件引用。
 
-When `portalTarget` is a custom element, the host remains the final ESC authority by default.
+## Migrating from v4
+
+| v4 surface | v5 replacement |
+| --- | --- |
+| selector、`'body'` 字符串 portal | `container` 传 `HTMLElement`、`null` 或省略 prop |
+| `enableDrag` | 没有独立开关；`enableZoom` 统一控制 transform gestures |
+| zoom bounds | `minZoom` / `maxZoom`；默认 `0.5`–`10` |
+| dismissal/keyboard flags | `closeOnBackdropClick` / `closeOnEscape` |
+| container/thumbnail class/style props | 普通 attrs；image-level 定制使用 `thumbnail` slot |
+| `open`、`close`、`load`、`error` emits | 只监听 `update:open` |
+| `open()`、`close()`、`reset()` exposed methods | 通过 `v-model:open` 改变状态 |
+| `HanaImgViewerEmits`、`HanaImgViewerExposed` 与 core aliases | 只导入 `HanaImgViewerProps` |
+| `@vueuse/core` peer | 不再需要额外安装 |

@@ -18,21 +18,21 @@ overrides:
 catalog:
   '@antfu/eslint-config': ^9.3.0
   '@changesets/changelog-github': ^1.0.0
-  '@changesets/cli': ^3.0.0
-  '@eslint-react/eslint-plugin': ^5.6.0
-  '@microsoft/api-extractor': ^7.53.3
+  '@changesets/cli': ^3.0.1
+  '@eslint-react/eslint-plugin': ^5.18.6
+  '@microsoft/api-extractor': ^7.59.0
   '@types/node': ^26.2.0
   '@types/throttle-debounce': ^5.0.2
   cpy: ^13.2.2
-  eslint: ^10.8.1
+  eslint: ^10.9.0
   eslint-plugin-jsx-a11y: ^6.10.2
-  eslint-plugin-react-refresh: ^0.5.0
+  eslint-plugin-react-refresh: ^0.5.4
   fast-glob: ^3.3.3
   jsdom: ^30.0.1
   throttle-debounce: ^5.0.2
   typescript: 6.0.3
-  vite: ^8.2.1
-  vitest: ^4.1.10
+  vite: ^8.2.2
+  vitest: ^4.1.11
 
 catalogs:
   ui-react:
@@ -40,7 +40,7 @@ catalogs:
     '@testing-library/react': ^16.3.2
     '@types/react': ^19.2.18
     '@types/react-dom': ^19.2.4
-    '@vitejs/plugin-react': ^6.0.5
+    '@vitejs/plugin-react': ^6.1.0
     react: ^19.2.8
     react-dom: ^19.2.8
     vite-plugin-dts: ^5.0.3
@@ -50,14 +50,13 @@ catalogs:
     '@vue/server-renderer': ^3.5.41
     '@vue/shared': ^3.5.41
     '@vue/test-utils': ^2.4.11
-    '@vueuse/core': ^14.4.0
-    element-plus: ^2.14.4
-    sass: ^1.102.0
+    element-plus: ^2.14.5
+    sass: ^1.103.1
     unplugin-auto-import: ^21.1.0
     unplugin-dts: ^1.0.3
     unplugin-vue-components: ^32.1.0
     vue: ^3.5.41
-    vue-tsc: ^3.3.10
+    vue-tsc: ^3.3.11
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild

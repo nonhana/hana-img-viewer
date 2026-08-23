@@ -25,33 +25,21 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     minify: true,
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log'],
-      },
-    },
+    sourcemap: true,
     cssCodeSplit: false,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'HanaImgViewer',
+      entry: resolve(import.meta.dirname, 'src/index.ts'),
       fileName: 'index',
       cssFileName: 'style',
       formats: ['es'],
     },
-    rollupOptions: {
+    rolldownOptions: {
       external: ['vue'],
-      output: {
-        globals: {
-          vue: 'Vue',
-        },
-      },
     },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(import.meta.dirname, 'src'),
     },
   },
 })

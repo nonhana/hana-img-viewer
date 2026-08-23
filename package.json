@@ -2,7 +2,7 @@
   "name": "hana-img-viewer-monorepo",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev:vue": "pnpm -F hana-img-viewer-demo-vue dev",
     "dev:react": "pnpm -F hana-img-viewer-demo-react dev",

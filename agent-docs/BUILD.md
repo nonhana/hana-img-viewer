@@ -25,6 +25,7 @@
 
 - `index.js`：ES module；Vue 或 React/React DOM external；所用 core 逻辑在构建时内联。
 - `style.css`：`cssCodeSplit: false` 提取的样式，无 JS 运行时注入。
+- `index.js.map`：Vue 与 React 构建均生成运行时 source map。
 - `index.d.ts`：公开声明入口。
 - `index.js.map`：运行时 source map。
 

@@ -27,7 +27,22 @@ packages/react/src/
 
 React 用 state/reducer 表达 JSX 可见状态，用 ref 保存 DOM 邻近的高频瞬时状态。用户意图从 event handler 发出；DOM 测量与动画位于可清理的 layout effect。禁止重新引入 lifecycle `flushSync`、microtask bridge、getter/ref bus 或按帧 React state。
 
-Vue 保持现有 `components/`、`composables/`、`types/` 布局，除非新的 Vue 专属设计另行批准。React 的结构不是 Vue 后续工作的模板要求。
+Vue 生产源码固定为：
+
+```text
+packages/vue/src/
+├── HanaImgViewer.vue
+├── index.ts
+├── internal/
+│   ├── ViewerOverlay.vue
+│   ├── bodyLock.ts
+│   └── viewerState.ts
+├── public-types.ts
+├── style.css
+└── vite-env.d.ts
+```
+
+`HanaImgViewer.vue` 拥有 `defineModel`、thumbnail/slot、hydration 后 target normalization、active target 与 focus restore；`internal/ViewerOverlay.vue` 局部拥有一次 overlay session 的 DOM、source、animation、gesture、focus 与 cleanup；`viewerState.ts` 只含纯 transition；`bodyLock.ts` 是唯一跨实例 body owner seam。Vue 不再从单调用方 composable lattice 公开或导入 lifecycle helper。
 
 ## 依赖与工具链边界
 

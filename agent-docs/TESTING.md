@@ -11,13 +11,20 @@ Vitest 4。两库分别拥有 unit、component、SSR 与 dist-contract 配置；
 
 不要恢复 hook/component private-unit tests。纯数学/输入逻辑属于 core tests；React effect 与事件链属于 public component tests。
 
+## Vue ownership
+
+- `tests/component/hana-img-viewer.component.test.ts`：所有 lifecycle、source、portal、body lock、focus 与公开 gesture 行为经 `@/index` 验证。
+- `tests/unit/viewer-state.unit.test.ts`：唯一允许直接越过公开 seam 的 Vue unit test，只验证纯 transition。
+- `tests/ssr/hana-img-viewer.ssr.test.ts`：证明 server thumbnail-only 输出；client hydration/commit 后才创建 overlay。
+- Vue 不再新增或保留 composable-private tests；`packages/vue/src/internal` 的 DOM behavior 必须通过 component seam 验证。
+
 ## Component setup
 
 React `tests/setup/component.setup.ts` 提供并在 `afterEach` 重置：
 
 - 图片 outcome 序列、pending resolve 与 request count；
 - 多 Animation outcome/pending ownership 与调用记录；
-- 按 element/selector 配置的不同 rect；
+- 按 element 配置的不同 rect；
 - pointer/touch event 构造、pointer capture 与 RAF；
 - body/focus/window listener 可观察状态。
 

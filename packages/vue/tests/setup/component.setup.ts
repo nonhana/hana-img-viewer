@@ -26,6 +26,8 @@ const imageRequestCounts = new Map<string, number>()
 const animationOutcomeQueue: MockAnimationOutcome[] = []
 const pendingAnimations: PendingAnimationRequest[] = []
 const animationCalls: MockAnimationCall[] = []
+const elementRects = new Map<HTMLElement, DOMRect>()
+const pointerCaptures = new Map<HTMLElement, Set<number>>()
 
 function createRect(): DOMRect {
   return (
@@ -110,6 +112,10 @@ function getAnimationCalls(): MockAnimationCall[] {
   return [...animationCalls]
 }
 
+function setElementRect(element: HTMLElement, rect: DOMRectInit): void {
+  elementRects.set(element, DOMRect.fromRect(rect))
+}
+
 function resolvePendingImage(url: string, outcome: Exclude<MockImageOutcome, 'pending'> = 'load'): void {
   const requests = pendingImageRequests.get(url)
   const request = requests?.shift()
@@ -118,7 +124,7 @@ function resolvePendingImage(url: string, outcome: Exclude<MockImageOutcome, 'pe
     throw new Error(`No pending image request found for ${url}`)
   }
 
-  if (!requests.length)
+  if (!requests?.length)
     pendingImageRequests.delete(url)
 
   queueImageResult(() => {
@@ -189,10 +195,30 @@ if (!HTMLElement.prototype.animate) {
 
 Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
   configurable: true,
-  value() {
-    return createRect()
+  value(this: HTMLElement) {
+    return elementRects.get(this) ?? createRect()
   },
 })
+
+if (!HTMLElement.prototype.setPointerCapture) {
+  Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
+    configurable: true,
+    value(this: HTMLElement, pointerId: number) {
+      const captures = pointerCaptures.get(this) ?? new Set<number>()
+      captures.add(pointerId)
+      pointerCaptures.set(this, captures)
+    },
+  })
+}
+
+if (!HTMLElement.prototype.releasePointerCapture) {
+  Object.defineProperty(HTMLElement.prototype, 'releasePointerCapture', {
+    configurable: true,
+    value(this: HTMLElement, pointerId: number) {
+      pointerCaptures.get(this)?.delete(pointerId)
+    },
+  })
+}
 
 class MockImage {
   onload: ((event: Event) => void) | null = null
@@ -243,6 +269,8 @@ afterEach(() => {
   removeEventListenerSpy.mockClear()
   resetImageMockState()
   resetAnimationMockState()
+  elementRects.clear()
+  pointerCaptures.clear()
 })
 
 export {
@@ -253,5 +281,6 @@ export {
   resolvePendingAnimation,
   resolvePendingImage,
   setAnimationSequence,
+  setElementRect,
   setImageSequence,
 }

@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   id-token: write # for OIDC
@@ -28,7 +28,7 @@ jobs:
         run: pnpm install
 
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v2.1.0
+        uses: changesets/action@v2.1.1
         with:
           version: pnpm changeset version
           publish: pnpm release
