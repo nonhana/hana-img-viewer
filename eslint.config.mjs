@@ -19,6 +19,7 @@ export default antfu({
     '**/dist/**',
     '**/node_modules/**',
     '**/*.d.ts',
+    '_notes/**',
     'apps/vue-demo/components.d.ts',
     'apps/vue-demo/auto-imports.d.ts',
   ],
@@ -26,7 +27,6 @@ export default antfu({
     'antfu/top-level-function': 'off',
     'ts/no-use-before-define': 'off',
     'react-refresh/only-export-components': 'off',
-    'react/dom-no-flush-sync': 'off',
   },
 }, {
   files: ['**/*.{ts,tsx,mts,cts,mjs,cjs,js}'],

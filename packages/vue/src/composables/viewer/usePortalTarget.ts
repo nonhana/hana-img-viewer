@@ -48,7 +48,7 @@ export const usePortalTarget = (target: () => PortalTarget | undefined) => {
         return
 
       warnedSelectors.add(currentTarget)
-      console.warn(`[hana-img-viewer] portalTarget "${currentTarget}" was not found. Overlay mount was skipped.`)
+      console.warn(`[hana-img-viewer] portalTarget "${currentTarget}" was not found or is an invalid selector. Overlay mount was skipped.`)
     })
   }
 

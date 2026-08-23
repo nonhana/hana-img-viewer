@@ -19,10 +19,11 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     minify: true,
+    sourcemap: true, // F5b: only way consumers can map library stack traces
     cssCodeSplit: false,
     lib: {
       entry: resolve(import.meta.dirname, 'src/index.ts'),
-      name: 'HanaImgViewer',
+      // 'name' removed — no UMD/IIFE output, so it was dead config
       fileName: 'index',
       cssFileName: 'style',
       formats: ['es'],

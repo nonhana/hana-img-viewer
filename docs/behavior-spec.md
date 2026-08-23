@@ -1,50 +1,48 @@
 # hana-img-viewer 行为规格（Behavior Spec）
 
-> 本文件是双框架实现（`hana-img-viewer` Vue / `hana-img-viewer-react` React）的行为契约，
-> 由两实现现状反向提取（2026-08-15，v4.0.0），**非新增功能**。
->
-> **变更纪律：任何一方修改下表任一行为前，必须先在本文更新条目（描述/断言），再双端同发实现。**
-> 组件测试按 `behavior/<id>` 组织命名；新行为必测两端的 component 套件。
+本文只定义 Vue 与 React 图像预览器共同追求的、框架无关的可观察结果。公开 prop/event 名称、源码布局、effect/composable 组织与版本可独立演进。
 
-## 用例清单
+修改共享结果前先更新对应条目和最低断言。框架专属接口或实现可以独立变更、独立发布，但必须同步更新该端测试与下表 conformance；一端完成不能自动标记另一端完成。
 
-| ID | 行为 | 行为描述 | 最低断言 | Vue | React |
+## 用例与 conformance
+
+| ID | 行为 | 框架无关结果 | 最低断言 | Vue | React |
 | --- | --- | --- | --- | --- | --- |
-| B1 | 基础打开/关闭 | 关闭时仅渲染缩略图，不挂载 preview 标记；点击缩略图打开 teleport 到 body 的预览层；backdrop 点击 / Escape 关闭后卸载 preview 标记 | 关闭态 DOM 无 overlay；打开后 overlay 存在；关闭后再次无 overlay | ✅ | ✅ |
-| B2 | 受控 open | `open` 受控时 viewer 保持视觉打开直到父组件更新 `open=false`；打开意图经 `update:open`/`onOpenChange` 事件回传 | 受控 `open=true` 且组件未更新时 overlay 保持挂载 | ✅ | ✅ |
-| B3 | 滚轮缩放 | 滚轮/触控板滚动缩放（TrackpadDetector 区分 delta），围绕 viewport 中心锚定缩放 | 缩放 1→2 后预览位移满足 `getZoomAnchoredPosition` 契约（无 viewportCenter 时 0,0） | ✅ | ✅ |
-| B4 | 双指捏合 | 触屏双指 pinch 缩放 | pinch 手势更新 scale，钳制在 [minScale, maxScale] | ✅ | ✅ |
-| B5 | 拖拽平移 | 单指/鼠标拖拽平移（open 态）；FLIP 开合过渡中不注册 idle 全局监听 | 拖拽更新 translate；无关事件的全局监听 closed 时不绑定 | ✅ | ✅ |
-| B6 | 双击还原 | 双击缩放至 `doubleClickScale`（默认 2），再双击还原到 1 | 双击两轮后 scale 回到 1 | ✅ | ✅ |
-| B7 | FLIP 开合动画 | 打开/关闭时从缩略图位置 FLIP 到全屏几何；backdrop 以相同运动契约淡入/淡出；开合动画中保持几何稳定（含 previewSrc 升级换图时 flip shell 尺寸稳定） | animated shell 位置/尺寸与缩略图到视口几何一致 | ✅ | ✅ |
-| B8 | 预览源切换（画廊） | 打开会话中 `src` 变化 → 可见预览更新为新图；`previewSrc` 就绪前保持当前增强预览可见 | src 更新后 preview src 变化 | ✅ | ✅ |
-| B9 | previewSrc 静默增强 | 增强请求成功静默替换（transform 稳定）；失败在下次打开重试；请求进行中保持当前图 | 增强中预览不变；失败后下个会话重试 | ✅ | ✅ |
-| B10 | 键盘快捷键 | 缩略图 Enter/Space 打开；Escape 关闭（窗口监听仅 open 态绑定；自定义 portal target 时不绑 window 监听） | 键盘触发打开/关闭；custom portal 无 window listener | ✅ | ✅ |
-| B11 | 自定义 portal target | `portalTarget` 支持 body/CSS 选择器/HTMLElement/null/缺失；null 时 open 挂起等待 target 就绪；resolve 失败则发出 close 意图 | resolve 分支正确（body/selector/element/null/missing） | ✅ | ✅ |
-| B12 | body 锁 | 打开会锁定 body 滚动（多个实例 refcount；scope 释放自动解锁） | 两实例开/关后 overflow 恢复 '' | ✅ | ✅ |
-| B13 | SSR 无 window 分支 | SSR 默认 closed 仅渲染缩略图；`open=true` 服务端不触 client globals、不输出 overlay | 服务端渲染输出无 overlay 标记 | ✅ | ✅ |
-| B14 | 样式契约 | `./style.css` 导出提取后的样式；JS 产物无运行时 CSS 注入 | dist 契约测试：style.css 存在、index.js 无 createElement('style') | ✅ | ✅ |
+| B1 | 基础打开/关闭 | 关闭时只有 thumbnail；打开时挂载 overlay；允许的 backdrop/Escape 意图完成关闭后卸载 overlay。 | closed/open/closed 三态 DOM 可观察。 | ✅ | ✅ |
+| B2 | 可见性 ownership 与反转 | 受控模式等待 owner 确认；非受控模式自行更新；opening/closing 中相反 desired visibility 到达时立即反转。 | 受控关闭等待确认；opening→closing 与 closing→opening 均有 active-animation 用例。 | ⚠️ | ✅ |
+| B3 | 滚轮缩放 | 滚轮/触控板围绕事件锚点缩放并钳制边界。 | 真实 wheel 事件更新 scale/position 且不越界。 | ⚠️ | ✅ |
+| B4 | 双指捏合 | 双指距离变化缩放；pinch 与 drag 只有一个 owner。 | 真实 touch 事件更新 scale，pinch 会终止 drag。 | ⚠️ | ✅ |
+| B5 | 拖拽平移 | open 时 pointer drag 平移，不受当前 scale 或 zoom 边界变化限制；非交互期无残留监听/RAF。 | scale 为 1 和小于 1 时，真实 pointer 事件都更新 translate；动态 zoom 边界变化保留 translate；cleanup 后无继续写入。 | ⚠️ | ✅ |
+| B6 | 双击还原 | 双击在 1 与允许的 2× scale 之间切换。 | 两轮双击回到 1。 | ⚠️ | ✅ |
+| B7 | FLIP 开合动画 | thumbnail 与 preview 的不同几何间 FLIP；backdrop 同期过渡；重叠 transition 只由当前 owner 完成。 | distinct rect keyframes；反转/卸载取消旧 Animation。 | ✅ | ✅ |
+| B8 | 会话中 source 替换 | `src` 更新立即回到新 base；并发 enhancement 只有最新 generation 可生效。 | base 立即变化；旧 pending completion 被忽略。 | ✅ | ✅ |
+| B9 | 静默 enhancement | 可选高质量源成功后静默替换；失败保留当前源并在下一会话重试；transform 不重置。 | success/failure/retry/in-flight replacement。 | ✅ | ✅ |
+| B10 | 键盘与焦点 | 默认 trigger 可由 Enter/Space 打开；焦点进入 overlay；只有收到事件的 focused overlay 处理 Escape；关闭恢复 origin focus。 | 双实例 focused Escape 只关闭一个并恢复对应 trigger。 | ✅ | ✅ |
+| B11 | 自定义 mount container | container 未就绪时不挂 overlay/不隐藏 thumbnail/不锁 body；就绪后恢复；自定义 container 的 dismiss ownership 可交给 host。 | pending→custom、body→custom→pending 与 side-effect cleanup。 | ⚠️ | ✅ |
+| B12 | body lock | 只有真实挂到 body 的 overlay 持锁；多实例引用安全；host 在锁期间的新样式不被 cleanup 覆盖。 | 两实例顺序关闭与 host-write preservation。 | ✅ | ✅ |
+| B13 | SSR/hydration | server 和 first hydration snapshot 都只有 thumbnail；client commit 后才解析 container/portal。 | open/closed SSR 无 overlay；StrictMode hydrate 无 mismatch/leak。 | ✅ | ✅ |
+| B14 | 样式与 dist | stylesheet 单独提取，JS 无 runtime CSS 注入，公开 exports 与声明面受契约测试保护。 | dist-contract 检查 CSS、metadata、runtime/type exports。 | ✅ | ✅ |
 
-## 双端实现对照（物理共享面）
+`✅` 表示该端已有与最低断言相符的公开 seam 测试；`⚠️` 表示行为实现存在，但 conformance 证据或已知 edge case 未完成。
 
-- 纯逻辑（缩放锚定/距离/中点/clamp、滚轮触控板检测 `createTrackpadDetector`、触摸 `getTwoTouches`/`getTouchMetrics`/`createPinchState`、portal 目标解析 `isHTMLElement`/`isBodyPortalTarget`/`resolvePortalTarget`、`getScrollbarWidth`、`resolveAspectRatio`、`loadImage`）与共享类型（Point/Transform/ViewerTransformAnchor/ViewerInteractionPhase/ViewerSourcePhase/PortalTarget/WheelState/PinchState/DEFAULT_TRANSFORM）收敛于 `packages/hana-img-viewer-core`（`packages/core`），双端构建时内联进各自 dist，发布时作为双包 dependency 提供类型。
-- 交互状态机（useFLIP/useDrag/usePinch/useWheel 平行实现）**尚未**共享 —— 下一里程碑（L2）目标，行为以本表为契约。
+## 框架接口映射
 
-## 测试组织策略
+- React：`open/defaultOpen/onOpenChange` 表达 ownership；`container?: HTMLElement | null` 表达 body/custom/pending；overlay 自己处理 focused Escape，可由 dismissal flags 交回 host。完整接口见 `docs/react-api.md`。
+- Vue：沿用 v4 `v-model:open`、`portalTarget` selector/element/null 与 custom-target keyboard 约定，直到独立 Vue 设计另行批准。该 legacy API 不要求 React 提供兼容 alias。
 
-- 双端 component 套件按上表条目组织：Vue `tests/component/*.component.test.ts`、React `tests/component/*.component.test.tsx`，用例断言以本表"最低断言"为基准的等价行为。
-- 存量测试（2026-08-15 前编写）命名未全部对齐 `behavior/<id>`；**新增行为**必须以 `behavior/<id>` 命名并双端同加。
-- dist 契约测试（`tests/dist-contract`）守护 B14。
+## Deferred / conformance notes
 
-## Demo 可演示性
+- Vue B2 尚缺 active closing→opening reversal 的等价证明与已知修复。
+- Vue B11 仍是 selector-capable legacy portal contract；pending/missing target 与 host Escape ownership 需要 Vue 专属后续设计和测试。
+- Vue B3-B6 当前主要由内部/composable 路径覆盖，尚缺与 React 等价的 public component real wheel/pointer/touch/double-click 事件链，因此保持 `⚠️`。
+- 完整 focus trap、nested dismissable-layer stack 与 `prefers-reduced-motion` 不属于当前共享结果。
 
-| ID | vue-demo | react-demo |
-|----| --- | --- |
-| B1/B2 | Previewer（第一图 open 状态展示） | Previewer（同） |
-| B3-B7 | 打开后滚轮/拖拽/双击均可演示 | 同 |
-| B8/B9 | Previewer 第二图 + previewSrc 用例 | 同 |
-| B10-B12 | Previewer/Dialog 内嵌 viewer | 同 |
-| B13 | 不可浏览器演示；由 SSR 套件守护 | 同 |
-| B14 | 由 dist-contract 测试守护 | 同 |
+## 共享实现边界
 
-- demo 入口：`apps/vue-demo`（`hana-img-viewer-demo-vue`）、`apps/react-demo`（`hana-img-viewer-demo-react`），启动 `pnpm dev:vue` / `pnpm dev:react`。
+`packages/core` 只承载已被实际复用的纯逻辑，例如 clamp、缩放锚点、触摸距离/中心、trackpad 判断、scrollbar/aspect ratio 与图片 preload。框架 lifecycle reducer、gesture owner、Animation ownership、portal orchestration 与 effects/composables 不要求共享，也没有物理对称或共享状态机里程碑。
+
+## Demo 与测试入口
+
+- React：`packages/react/tests/component/hana-img-viewer.component.test.tsx`、SSR、dist-contract 与 `apps/react-demo`。
+- Vue：`packages/vue/tests/**` 与 `apps/vue-demo`。
+- B13 由 SSR/hydration 测试守护；B14 由 dist-contract 守护；浏览器 demo 只做交互冒烟。

@@ -5,9 +5,7 @@
     { "repo": "nonhana/hana-img-viewer" }
   ],
   "commit": false,
-  "fixed": [
-    ["hana-img-viewer", "hana-img-viewer-react", "hana-img-viewer-core"]
-  ],
+  "fixed": [],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

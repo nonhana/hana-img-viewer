@@ -1,7 +1,7 @@
 {
   "name": "hana-img-viewer-core",
   "type": "module",
-  "version": "4.0.0",
+  "version": "0.0.0",
   "description": "Shared pure logic and types for hana-img-viewer (Vue) and hana-img-viewer-react",
   "author": "nonhana",
   "license": "MIT",

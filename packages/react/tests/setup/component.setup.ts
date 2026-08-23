@@ -29,6 +29,31 @@ const imageRequestCounts = new Map<string, number>()
 const animationOutcomeQueue: MockAnimationOutcome[] = []
 const pendingAnimations: PendingAnimationRequest[] = []
 const animationCalls: MockAnimationCall[] = []
+let elementRects = new WeakMap<HTMLElement, DOMRect>()
+const selectorRects = new Map<string, DOMRect>()
+const selectorClientSizes = new Map<
+  string,
+  { width: number, height: number }
+>()
+const resizeObservers = new Set<MockResizeObserver>()
+
+class MockResizeObserver {
+  constructor(private readonly callback: ResizeObserverCallback) {
+    resizeObservers.add(this)
+  }
+
+  disconnect(): void {
+    resizeObservers.delete(this)
+  }
+
+  observe(): void {}
+
+  trigger(): void {
+    this.callback([], this as unknown as ResizeObserver)
+  }
+
+  unobserve(): void {}
+}
 
 function createRect(): DOMRect {
   return DOMRect.fromRect({
@@ -83,6 +108,30 @@ function resetAnimationMockState(): void {
   animationOutcomeQueue.length = 0
   pendingAnimations.length = 0
   animationCalls.length = 0
+  elementRects = new WeakMap<HTMLElement, DOMRect>()
+  selectorClientSizes.clear()
+  selectorRects.clear()
+  resizeObservers.clear()
+}
+
+function setElementRect(element: HTMLElement, rect: DOMRectInit): void {
+  elementRects.set(element, DOMRect.fromRect(rect))
+}
+
+function setSelectorRect(selector: string, rect: DOMRectInit): void {
+  selectorRects.set(selector, DOMRect.fromRect(rect))
+}
+
+function setSelectorClientSize(
+  selector: string,
+  size: { width: number, height: number },
+): void {
+  selectorClientSizes.set(selector, size)
+}
+
+function triggerResizeObservers(): void {
+  for (const observer of resizeObservers)
+    observer.trigger()
 }
 
 function setImageSequence(url: string, outcomes: MockImageOutcome[]): void {
@@ -105,6 +154,10 @@ function resolvePendingAnimation(): void {
   }
 
   queueImageResult(animation.finish)
+}
+
+function getPendingAnimationCount(): number {
+  return pendingAnimations.length
 }
 
 function getAnimationCalls(): MockAnimationCall[] {
@@ -206,10 +259,110 @@ if (!HTMLElement.prototype.animate) {
 
 Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
   configurable: true,
-  value() {
+  value(this: HTMLElement) {
+    const elementRect = elementRects.get(this)
+    if (elementRect)
+      return elementRect
+
+    for (const [selector, rect] of selectorRects) {
+      if (this.matches(selector))
+        return rect
+    }
+
+    if (this.classList.contains('hana-img-viewer-overlay')) {
+      return DOMRect.fromRect({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
     return createRect()
   },
 })
+
+Object.defineProperties(HTMLElement.prototype, {
+  clientHeight: {
+    configurable: true,
+    get(this: HTMLElement) {
+      for (const [selector, size] of selectorClientSizes) {
+        if (this.matches(selector))
+          return size.height
+      }
+      return 0
+    },
+  },
+  clientWidth: {
+    configurable: true,
+    get(this: HTMLElement) {
+      for (const [selector, size] of selectorClientSizes) {
+        if (this.matches(selector))
+          return size.width
+      }
+      return 0
+    },
+  },
+})
+
+if (!HTMLElement.prototype.setPointerCapture) {
+  Object.defineProperties(HTMLElement.prototype, {
+    releasePointerCapture: {
+      configurable: true,
+      value() {},
+    },
+    setPointerCapture: {
+      configurable: true,
+      value() {},
+    },
+  })
+}
+
+if (!window.requestAnimationFrame) {
+  Object.defineProperties(window, {
+    cancelAnimationFrame: {
+      configurable: true,
+      value: (id: number) => window.clearTimeout(id),
+    },
+    requestAnimationFrame: {
+      configurable: true,
+      value: (callback: FrameRequestCallback) =>
+        window.setTimeout(() => callback(performance.now()), 0),
+    },
+  })
+}
+
+if (!window.ResizeObserver) {
+  Object.defineProperty(window, 'ResizeObserver', {
+    configurable: true,
+    value: MockResizeObserver,
+  })
+}
+
+function createPointerEvent(
+  type: string,
+  init: PointerEventInit,
+): PointerEvent {
+  const event = new MouseEvent(type, init) as PointerEvent
+  Object.defineProperties(event, {
+    pointerId: { configurable: true, value: init.pointerId ?? 1 },
+    pointerType: { configurable: true, value: init.pointerType ?? 'mouse' },
+  })
+  return event
+}
+
+function createTouchEvent(
+  type: string,
+  touches: Array<{ clientX: number, clientY: number }>,
+): TouchEvent {
+  const event = new Event(type, { bubbles: true, cancelable: true }) as TouchEvent
+  Object.defineProperty(event, 'touches', {
+    configurable: true,
+    value: touches.map((touch, index) => ({
+      ...touch,
+      identifier: index,
+    })),
+  })
+  return event
+}
 
 class MockImage {
   onload: ((event: Event) => void) | null = null
@@ -263,11 +416,18 @@ afterEach(() => {
 
 export {
   addEventListenerSpy,
+  createPointerEvent,
+  createTouchEvent,
   getAnimationCalls,
   getImageRequestCount,
+  getPendingAnimationCount,
   removeEventListenerSpy,
   resolvePendingAnimation,
   resolvePendingImage,
   setAnimationSequence,
+  setElementRect,
   setImageSequence,
+  setSelectorClientSize,
+  setSelectorRect,
+  triggerResizeObservers,
 }

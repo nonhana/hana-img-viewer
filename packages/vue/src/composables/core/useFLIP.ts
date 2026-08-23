@@ -71,16 +71,17 @@ export const useFLIP = (options: UseFLIPOptions = {}): UseFLIPReturn => {
     isAnimating.value = true
     onStart?.()
 
+    const anim = element.animate(keyframes, {
+      duration: toValue(duration),
+      easing: toValue(easing),
+      fill: 'forwards',
+    })
+    currentAnimation = anim
+
     try {
-      currentAnimation = element.animate(keyframes, {
-        duration: toValue(duration),
-        easing: toValue(easing),
-        fill: 'forwards',
-      })
+      await anim.finished
 
-      await currentAnimation.finished
-
-      if (currentAnimation) {
+      if (currentAnimation === anim) {
         currentAnimation.commitStyles()
         currentAnimation.cancel()
       }
@@ -96,8 +97,12 @@ export const useFLIP = (options: UseFLIPOptions = {}): UseFLIPReturn => {
       }
     }
     finally {
-      currentAnimation = null
-      isAnimating.value = false
+      // Only the owning animation clears the slot; a newer animation may
+      // have superseded this one while its AbortError was in flight.
+      if (currentAnimation === anim) {
+        currentAnimation = null
+        isAnimating.value = false
+      }
     }
   }
 

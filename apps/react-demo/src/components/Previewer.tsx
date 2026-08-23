@@ -39,7 +39,16 @@ export default function Previewer() {
         </div>
       </div>
       <div className="image image-spaced">
-        <HanaImgViewer src={demoImg2} alt={demoImg2} />
+        <HanaImgViewer src={demoImg2} alt={demoImg2}>
+          {({ open }) => (
+            <button type="button" className="custom-trigger" onClick={open}>
+              Open the second image
+            </button>
+          )}
+        </HanaImgViewer>
+        <div className="status">
+          Uncontrolled function child; no callback or imperative ref
+        </div>
       </div>
     </div>
   )

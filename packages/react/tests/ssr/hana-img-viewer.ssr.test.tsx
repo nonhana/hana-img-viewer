@@ -1,27 +1,17 @@
 import { renderToString } from 'react-dom/server'
 
-import { HanaImgViewer } from '@/index'
-
+import HanaImgViewer from '@/index'
 import { describe, expect, it } from '../support/vitest'
 
-describe('HanaImgViewer SSR harness', () => {
-  it('renders thumbnail-only markup for the default closed state', () => {
-    const html = renderToString(
-      <HanaImgViewer src="/thumb.jpg" alt="ssr thumbnail" />,
-    )
+describe('HanaImgViewer replacement SSR', () => {
+  it.each([
+    ['closed', <HanaImgViewer key="closed" src="thumb.jpg" />],
+    ['controlled open', <HanaImgViewer key="controlled" src="thumb.jpg" open />],
+    ['default open', <HanaImgViewer key="default" src="thumb.jpg" defaultOpen />],
+  ])('[behavior/B13] renders only the thumbnail when %s', (_label, element) => {
+    const html = renderToString(element)
 
-    expect(html).toContain('/thumb.jpg')
-    expect(html).toContain('ssr thumbnail')
-    expect(html).not.toContain('draggable="false"')
-  })
-
-  it('supports SSR with open=true without touching client globals or emitting overlay markup on the server', () => {
-    const html = renderToString(
-      <HanaImgViewer src="/thumb.jpg" alt="ssr thumbnail" open={true} />,
-    )
-
-    expect(html).toContain('/thumb.jpg')
-    expect(html).toContain('ssr thumbnail')
-    expect(html).not.toContain('draggable="false"')
+    expect(html).toContain('thumb.jpg')
+    expect(html).not.toContain('hana-img-viewer-overlay')
   })
 })

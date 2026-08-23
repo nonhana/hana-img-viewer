@@ -7,6 +7,8 @@
     "dev:vue": "pnpm -F hana-img-viewer-demo-vue dev",
     "dev:react": "pnpm -F hana-img-viewer-demo-react dev",
     "build": "pnpm -r --workspace-concurrency=1 run build",
+    "build:vue": "pnpm -F hana-img-viewer build",
+    "build:react": "pnpm -F hana-img-viewer-react build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "pnpm -F hana-img-viewer typecheck && pnpm -F hana-img-viewer-react typecheck",

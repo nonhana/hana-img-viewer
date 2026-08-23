@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
+import { useFLIP } from '@/composables/core'
 import { resolvePortalTarget } from '@/composables/viewer/usePortalTarget'
 import { HanaImgViewer } from '@/index'
 import {
@@ -119,6 +120,109 @@ describe('HanaImgViewer component harness', () => {
 
     expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
     expect(document.body.style.overflow).toBe('')
+  })
+
+  it('keeps the FLIP engine cancelable and isAnimating accurate when an opening motion is interrupted and restarted', async () => {
+    setAnimationSequence(['pending', 'pending', 'finish'])
+
+    const rect = DOMRect.fromRect({ x: 0, y: 0, width: 100, height: 80 })
+    const element = document.createElement('div')
+    document.body.appendChild(element)
+
+    const { cancel, flip, isAnimating } = useFLIP()
+
+    const opening = flip(rect, rect, element)
+    // Aborts the in-flight opening animation.
+    cancel()
+    const reopening = flip(rect, rect, element)
+
+    // The aborted animation's rejection settles after the replacement has
+    // taken over the slot; it must not clear the replacement's reference.
+    await opening
+    await nextTick()
+    expect(isAnimating.value).toBe(true)
+
+    resolvePendingAnimation()
+    await reopening
+    await nextTick()
+
+    expect(isAnimating.value).toBe(false)
+  })
+
+  it('keeps the view state correct when an opening motion is interrupted by a close and the viewer reopens right after', async () => {
+    setAnimationSequence([
+      'pending',
+      'pending', // open #1: backdrop + flip
+      'pending',
+      'pending', // close #1: backdrop + reverse flip (aborts open #1)
+      'pending',
+      'pending', // open #2: backdrop + flip
+      'pending',
+      'pending', // close #2: backdrop + reverse flip
+    ])
+
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: {
+        alt: 'thumbnail',
+        src: '/thumb.jpg',
+      },
+    })
+
+    try {
+      await wrapper.get('img').trigger('click')
+      await nextTick()
+      await flushPromises()
+
+      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
+
+      // Close while the opening motions are still pending.
+      await wrapper.vm.close()
+      await nextTick()
+      await flushPromises()
+
+      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
+
+      // The interrupted close settles back to closed.
+      resolvePendingAnimation()
+      resolvePendingAnimation()
+      await flushPromises()
+      await nextTick()
+
+      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
+      expect(document.body.style.overflow).toBe('')
+
+      // A fresh session opens cleanly.
+      await wrapper.get('img').trigger('click')
+      await nextTick()
+      await flushPromises()
+
+      expect(document.body.querySelector('img[draggable="false"]')).not.toBeNull()
+
+      resolvePendingAnimation()
+      resolvePendingAnimation()
+      await flushPromises()
+      await nextTick()
+
+      const previewAfterReopen = document.body.querySelector('img[draggable="false"]') as HTMLImageElement | null
+      expect(previewAfterReopen).not.toBeNull()
+      expect(previewAfterReopen!.style.cursor).toBe('grab')
+
+      // And closes cleanly.
+      await wrapper.vm.close()
+      await nextTick()
+      await flushPromises()
+      resolvePendingAnimation()
+      resolvePendingAnimation()
+      await flushPromises()
+      await nextTick()
+
+      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
+      expect(document.body.style.overflow).toBe('')
+    }
+    finally {
+      wrapper.unmount()
+    }
   })
 
   it('fades the backdrop with the same motion contract as the flip animation', async () => {
@@ -432,6 +536,36 @@ describe('HanaImgViewer component harness', () => {
     expect(onUpdateOpen).toHaveBeenLastCalledWith(false)
   })
 
+  it('degrades an invalid portalTarget selector to missing without throwing', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const wrapper = mount(HanaImgViewer, {
+      attachTo: document.body,
+      props: {
+        alt: 'thumbnail',
+        portalTarget: '[',
+        src: '/thumb.jpg',
+      },
+    })
+
+    try {
+      await nextTick()
+      await flushPromises()
+
+      expect(wrapper.get('img')).toBeTruthy()
+      expect(document.body.querySelector('img[draggable="false"]')).toBeNull()
+
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('invalid selector'),
+      )
+    }
+    finally {
+      wrapper.unmount()
+      warnSpy.mockRestore()
+    }
+  })
+
   it('treats document.body as the same body portal mode as the default body portal', async () => {
     const wrapper = mount(HanaImgViewer, {
       attachTo: document.body,
@@ -591,6 +725,12 @@ describe('resolvePortalTarget', () => {
   })
   it('resolves a missing selector to null', () => {
     expect(resolvePortalTarget('#does-not-exist')).toBeNull()
+  })
+  it('resolves blank or invalid selectors to null without throwing', () => {
+    expect(resolvePortalTarget('')).toBeNull()
+    expect(resolvePortalTarget('   ')).toBeNull()
+    expect(resolvePortalTarget('[')).toBeNull()
+    expect(resolvePortalTarget(':')).toBeNull()
   })
   it('resolves an HTMLElement to itself', () => {
     const el = document.createElement('section')

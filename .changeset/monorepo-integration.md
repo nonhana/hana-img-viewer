@@ -1,7 +1,7 @@
 ---
-'hana-img-viewer': minor
-'hana-img-viewer-react': minor
-'hana-img-viewer-core': minor
+'hana-img-viewer-react': major
+'hana-img-viewer-core': major
+'hana-img-viewer': patch
 ---
 
-Monorepo 集成：React 版并入同仓双包发布；共享纯逻辑与类型（缩放锚定/距离/中点/clamp、Point/Transform/交互阶段类型）提取到 `hana-img-viewer-core`；两包版本经 changesets fixed 全同步。
+准备 React 1.0 的 idiomatic React 公开接口与深模块实现，首次发布共享 core 1.0；Vue 仅更新新 core 发布后的 dependency metadata。三个库改为独立语义版本，不再 fixed 同版。

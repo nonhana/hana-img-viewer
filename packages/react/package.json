@@ -1,7 +1,7 @@
 {
   "name": "hana-img-viewer-react",
   "type": "module",
-  "version": "4.0.0",
+  "version": "0.0.0",
   "description": "A lightweight and easy-to-use image previewer for React",
   "author": "nonhana",
   "license": "MIT",
@@ -35,6 +35,7 @@
   ],
   "scripts": {
     "build": "vite build",
+    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
     "test:component": "vitest run --config vitest.component.config.ts",
     "test:dist": "pnpm run build && vitest run --config vitest.dist.config.ts",
     "test:ssr": "vitest run --config vitest.ssr.config.ts",

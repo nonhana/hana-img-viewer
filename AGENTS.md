@@ -11,4 +11,4 @@ Vue 3 与 React 19 双框架图像预览组件的单仓库双包源码（Vue 库
 - [PUBLIC_API.md](./agent-docs/PUBLIC_API.md) — 改包导出面、exports map 或 dist 产物前
 - [CODE_STYLE.md](./agent-docs/CODE_STYLE.md) — 写代码前
 
-行为契约（双框架等价性）见 [docs/behavior-spec.md](./docs/behavior-spec.md)：行为变更必须先更新 spec 条目，再双端同发。
+框架无关的行为结果见 [docs/behavior-spec.md](./docs/behavior-spec.md)。修改共享结果前先更新对应条目；框架特定接口与实现可独立演进、独立发布，但 conformance 状态必须如实记录，不能用一端完成代替另一端完成。

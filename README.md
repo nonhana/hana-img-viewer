@@ -1,22 +1,25 @@
 # hana-img-viewer
 
-A lightweight image previewer in two framework flavors, in one monorepo.
+A lightweight image previewer with independent Vue and React packages in one
+monorepo.
 
-| 包 | 框架 | 发布名 |
+| 包 | 框架 | 发布状态 |
 | --- | --- | --- |
-| `packages/vue` | Vue 3 | [`hana-img-viewer`](https://www.npmjs.com/package/hana-img-viewer) |
-| `packages/react` | React 19 | [`hana-img-viewer-react`](https://www.npmjs.com/package/hana-img-viewer-react) |
-| `packages/core` | — | `hana-img-viewer-core`（共享纯逻辑/类型，双包 dependency） |
+| `packages/vue` | Vue 3 | [`hana-img-viewer`](https://www.npmjs.com/package/hana-img-viewer) v4.x |
+| `packages/react` | React 19 | `hana-img-viewer-react`，源码 0.0.0；Release PR 目标 1.0.0 |
+| `packages/core` | — | `hana-img-viewer-core`，源码 0.0.0；Release PR 目标 1.0.0 |
 
-两库共享同一行为契约（[docs/behavior-spec.md](./docs/behavior-spec.md)），版本经 changesets `fixed` 全同步发布（任一方变更 → 双包+core 同版本）。双框架 API 形态一致，仅框架适配层不同。
+两端共享框架无关的行为结果（[docs/behavior-spec.md](./docs/behavior-spec.md)），
+但各自采用符合框架习惯的独立接口和实现。React API 见
+[docs/react-api.md](./docs/react-api.md)。Vue、React 与 core 使用独立语义版本。
 
 ## Installation
 
 ```bash
 # Vue
 pnpm add hana-img-viewer
-# React
-pnpm add hana-img-viewer-react
+# React（首次发布完成后）
+pnpm add hana-img-viewer-react react react-dom
 ```
 
 ## Demo
@@ -211,3 +214,28 @@ const portalTarget = ref<HTMLElement | null>(null)
 `portalTarget="body"` and `:portal-target="document.body"` both use the default body portal behavior.
 
 When `portalTarget` is a custom element, the host remains the final ESC authority by default.
+
+## React
+
+The React 19 package is a separate, React-idiomatic interface. Its first public
+release target is 1.0.0; the source package is not published yet.
+
+```tsx
+import { HanaImgViewer } from 'hana-img-viewer-react'
+import 'hana-img-viewer-react/style.css'
+
+export function Cover() {
+  return (
+    <HanaImgViewer
+      src="/images/post-thumb.jpg"
+      previewSrc="/images/post-full.jpg"
+      alt="Article cover"
+    />
+  )
+}
+```
+
+React supports controlled `open`, uncontrolled `defaultOpen`, function
+children for custom triggers, and an `HTMLElement | null` `container`. It does
+not expose an imperative ref or selector-based portal API. See the complete
+[React API reference](./docs/react-api.md).

@@ -1,28 +1,43 @@
 # Architecture
 
-pnpm workspace（`pnpm-workspace.yaml`）：`apps/*` + `packages/*`。根包只做编排（脚本全部委托）；根 tsconfig 是各包共享 base。包级产权与依赖规则见 [PACKAGES.md](./PACKAGES.md)。
+pnpm workspace（`pnpm-workspace.yaml`）包含 `apps/*` 与 `packages/*`。根包只负责编排脚本；根 tsconfig 提供共享基线。包产权与依赖方向见 [PACKAGES.md](./PACKAGES.md)。
 
-## 双库源码布局（对称）
+## 独立框架模块
 
-Vue `packages/vue/src` ↔ React `packages/react/src`：
+Vue 与 React 共享框架无关的行为结果，不追求物理目录、状态机或公开 API 对称。两端可以采用各自框架最容易局部推理的实现，并独立验证、发布。
 
-- `index.ts` — 入口：默认 + 具名导出组件；re-export 公开类型；副作用 import `style.css`。
-- `components/HanaImgViewer.vue` / `.tsx` — 唯一组件。
-- Vue `composables/` ↔ React `hooks/` — 平行实现：`core/`（useFLIP/useDrag/usePinch/useWheel 手势基元）+ `viewer/`（useViewerPhase/useViewerSource/useViewerTransform/useViewerGeometry/useViewerInteractions/usePortalTarget/useBodyLock 状态编排）。
-- `utils/helpers.ts` — 框架侧工具（Vue re-export @vueuse 的 isClient/tryOnScopeDispose；React 本地 `isClient`）。纯数值逻辑在 core，不在此重复。
-- `types/` — 框架侧公开类型（props/emits），`types/utils.ts` re-export core 共享类型；`types/index.ts` 聚合。
+React 生产源码固定为：
 
-`@` alias 在 Vite/Vitest/tsconfig 中解析到各自包 `src`；包内 import 一律用 `@`，跨包引用一律走包名。
+```text
+packages/react/src/
+├── HanaImgViewer.tsx
+├── index.ts
+├── internal/
+│   ├── ViewerOverlay.tsx
+│   └── viewerReducer.ts
+├── public-types.ts
+├── style.css
+└── vite-env.d.ts
+```
+
+- `HanaImgViewer.tsx` 是唯一公开 seam：标准化 props，固定 controlled/uncontrolled ownership，持有 lifecycle reducer，渲染 thumbnail/children，并解析 hydration 后的 container。
+- `internal/ViewerOverlay.tsx` 局部拥有 portal、图片增强、FLIP/WAAPI、body lock、焦点、Escape、resize、transform ref、RAF writer 与唯一 gesture owner。
+- `internal/viewerReducer.ts` 只包含 `closed/opening/open/closing` 与纯 transition，不持有 DOM、callback、source、transform 或 timer。
+- `public-types.ts` 只声明 `HanaImgViewerProps`；`index.ts` 只导出组件、Props 类型并导入 CSS。
+
+React 用 state/reducer 表达 JSX 可见状态，用 ref 保存 DOM 邻近的高频瞬时状态。用户意图从 event handler 发出；DOM 测量与动画位于可清理的 layout effect。禁止重新引入 lifecycle `flushSync`、microtask bridge、getter/ref bus 或按帧 React state。
+
+Vue 保持现有 `components/`、`composables/`、`types/` 布局，除非新的 Vue 专属设计另行批准。React 的结构不是 Vue 后续工作的模板要求。
 
 ## 依赖与工具链边界
 
-- 框架无关的数学/类型：`hana-img-viewer-core`（源码形式发布，`exports` → `src/index.ts`）；两库构建时将其逻辑内联进各自 dist，类型经 dist d.ts 引用该 dependency。
-- TypeScript 全仓统一 6.0.3（根 catalog `typescript: 6.0.3` + `overrides` 钉住 vite-plugin-dts 的 peer）。Vue 域用 vue-tsc，React 域用 tsc——框架绑定层双轨，不算第二套基建。
-- dts 生成：两库各自 vite 配置内 unplugin-dts/vite-plugin-dts（同一实现）。**不要启用 `bundleTypes`**：`.vue` 组件的 VLS slot 类型会丢符号。
+- `hana-img-viewer-core` 只承载已经被实际复用的纯数学、输入解析、DOM 数值工具与类型；框架 lifecycle、Animation ownership 和 effect orchestration 不进入 core。
+- `@` alias 在各自 Vite/Vitest/tsconfig 中指向本包 `src`；跨包引用只走包名。
+- TypeScript 全仓统一 6.0.3。Vue 用 vue-tsc，React 用 tsc。
+- 两库分别用 unplugin-dts/vite-plugin-dts 生成声明。不要启用 `bundleTypes`，避免 Vue VLS slot 类型丢失符号。
 
-## 运营约束
+## 产物约束
 
-- CSS 是副作用导入（两侧 `sideEffects` 声明含 `**/*.css`）：消费者必须显式 import `style.css`；构建必须保持提取（dist-contract 断言）。
-- `packages/vue` 的入口 `src/index.ts` 因真实导入 `style.css` 列入其 `sideEffects`（React 入口无此需求）。
-- 双框架行为契约：`docs/behavior-spec.md`；行为变更必须先在 spec 更新条目，再双端同发。
-- 版本：changesets `fixed` 三包联动（PACKAGES.md）；demo 永不发布。
+- 两个 UI 包均保持 ESM-only、extracted `style.css`、source map 与 framework external。
+- 消费者显式 import `style.css`；dist-contract 断言 CSS 无运行时注入。
+- 框架无关行为及逐端 conformance 见 `docs/behavior-spec.md`。框架特定 API 见各自公开文档。

@@ -22,7 +22,17 @@ export const resolvePortalTarget = (target: PortalTarget | undefined): HTMLEleme
     return null
 
   if (typeof target === 'string') {
-    return document.querySelector<HTMLElement>(target)
+    if (!target.trim())
+      return null
+
+    try {
+      return document.querySelector<HTMLElement>(target)
+    }
+    catch {
+      // Invalid selector: degrade to missing instead of throwing a
+      // DOMException during render and crashing the host tree.
+      return null
+    }
   }
 
   return isHTMLElement(target) ? target : null

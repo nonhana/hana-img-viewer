@@ -63,6 +63,16 @@ body {
   cursor: pointer;
 }
 
+.custom-trigger {
+  padding: 12px 18px;
+  color: #213547;
+  font: inherit;
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  background: #f7f7f7;
+  cursor: pointer;
+}
+
 .example-button:hover {
   border-color: #646cff;
   color: #646cff;
@@ -71,13 +81,21 @@ body {
 .dialog-mask {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
   display: grid;
   place-items: center;
   z-index: 10000;
 }
 
+.dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
 .dialog-panel {
+  position: relative;
   width: 30%;
   min-width: 320px;
   max-height: 80vh;
