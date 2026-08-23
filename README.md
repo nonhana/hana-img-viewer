@@ -1,58 +1,176 @@
 # hana-img-viewer
 
-一个包含独立 Vue 与 React 包的轻量图片预览器 monorepo。
+A lightweight image viewer.
 
-| 包 | 框架 | 状态 |
-| --- | --- | --- |
-| `packages/vue` | Vue 3 | `hana-img-viewer` |
-| `packages/react` | React 19 | `hana-img-viewer-react`，待首次发布 |
-| `packages/core` | — | `hana-img-viewer-core`，待首次发布 |
+## Features
 
-```bash
-pnpm install
-pnpm dev:vue
-pnpm dev:react
-```
+- Thumbnail-origin FLIP open and close
+- src-first preview path with optional silent previewSrc enhancement
+- Wheel, double-click, drag, and pinch interactions
+- SSR-safe thumbnail-only server render
 
-## Vue
+## Usage
+
+Currently support:
+
+- Vue
+- React
+
+### Vue
+
+install:
 
 ```bash
 pnpm add hana-img-viewer
 ```
 
+import in `.vue` component:
+
 ```vue
 <script setup lang="ts">
 import { HanaImgViewer } from 'hana-img-viewer'
-import 'hana-img-viewer/style.css'
 </script>
 
 <template>
-  <HanaImgViewer src="/images/post-thumb.jpg" preview-src="/images/post-full.jpg" alt="Article cover" />
+  <HanaImgViewer
+    src="/images/post-thumb.jpg"
+    alt="Article cover"
+  />
 </template>
 ```
 
-Vue v5 提供 `src`、`previewSrc`、`alt`、`open`、`container`、`enableZoom`、`minZoom`、`maxZoom`、`closeOnBackdropClick` 与 `closeOnEscape` props，visibility 通过 `v-model:open` 表达。`container` 接受 `HTMLElement | null`，不再接受 selector 或 `'body'` 字符串；attrs 作用于 thumbnail root，完全定制使用 `thumbnail` slot。完整迁移表见 [`packages/vue/README.md`](./packages/vue/README.md)。
+import `style.css` in `main.ts`:
 
-## React
+```ts
+import 'hana-img-viewer/style.css'
+```
+
+### React
+
+install:
+
+```bash
+pnpm add hana-img-viewer-react
+```
+
+import in `.tsx` component:
 
 ```tsx
 import { HanaImgViewer } from 'hana-img-viewer-react'
-import 'hana-img-viewer-react/style.css'
 
-export function Cover() {
-  return <HanaImgViewer src="/images/post-thumb.jpg" alt="Article cover" />
+export default function App() {
+  return (
+    <HanaImgViewer
+      src="/images/post-thumb.jpg"
+      alt="Article cover"
+    />
+  )
 }
 ```
 
-React 使用独立的 `open/defaultOpen/onOpenChange`、function children 与 `HTMLElement | null` `container` 接口，不提供 imperative ref 或 selector portal。详见 [`docs/react-api.md`](./docs/react-api.md)。
+import `style.css` in `main.tsx`:
 
-## Verification
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm changeset status
-pnpm test:dist
+```ts
+import 'hana-img-viewer-react/style.css'
 ```
+
+controlled usage:
+
+```tsx
+import { HanaImgViewer } from 'hana-img-viewer-react'
+import { useState } from 'react'
+
+export default function App() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <HanaImgViewer
+      src="/images/post-thumb.jpg"
+      open={open}
+      onOpenChange={setOpen}
+    />
+  )
+}
+```
+
+custom trigger:
+
+```tsx
+<HanaImgViewer src="/images/post-thumb.jpg">
+  {({ open }) => (
+    <button type="button" onClick={open}>
+      Open preview
+    </button>
+  )}
+</HanaImgViewer>
+```
+
+## API
+
+### Vue props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | required | Thumbnail and initial preview source. |
+| `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
+| `alt` | `string` | `''` | Alternative text for both images. |
+| `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
+| `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
+| `enableZoom` | `boolean` | `true` | Enable transform interactions. |
+| `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
+| `maxZoom` | `number` | `10` | Maximum zoom. |
+| `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
+| `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+
+Vue emits only `update:open`. Use `v-model:open` to keep the state in sync:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const open = ref(false)
+</script>
+
+<template>
+  <HanaImgViewer
+    v-model:open="open"
+    src="/images/post-thumb.jpg"
+  />
+</template>
+```
+
+Vue provides one `thumbnail` slot. The slot receives an `open` function:
+
+```vue
+<HanaImgViewer src="/images/post-thumb.jpg">
+  <template #thumbnail="{ open }">
+    <button type="button" @click="open">
+      Open preview
+    </button>
+  </template>
+</HanaImgViewer>
+```
+
+### React props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | required | Thumbnail and initial preview source. |
+| `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
+| `alt` | `string` | `''` | Alternative text for both images. |
+| `open` | `boolean` | `undefined` | Controlled viewer visibility. |
+| `defaultOpen` | `boolean` | `false` | Initial visibility for uncontrolled usage. |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | Called when the viewer requests a visibility change. |
+| `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
+| `zoom` | `boolean` | `true` | Enable wheel, pinch, and double-click zoom. |
+| `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
+| `maxZoom` | `number` | `10` | Maximum zoom. |
+| `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
+| `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
+| `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
+| `children` | `(controls: { open: () => void }) => ReactNode` | `undefined` | Render a custom trigger with the provided `open` function. |
+
+`open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.
+
+Custom triggers own their semantics, focus, and styles. The default image trigger already supports click, Enter, and Space.

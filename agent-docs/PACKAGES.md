@@ -1,30 +1,27 @@
 # Packages
 
-单仓库包含三个库包与两个 private demo。每个库拥有独立接口、实现与语义版本。
+The repository contains three library packages and two private demos. Library packages have independent public surfaces and semantic versions.
 
-## 包清单与产权
+## Ownership
 
-| 路径 | 发布名 | 状态 | 产权 |
-| --- | --- | --- | --- |
-| `packages/vue` | `hana-img-viewer` | 已发布，v4.x | Vue 3 库；Vue 专属实现留在本包。 |
-| `packages/react` | `hana-img-viewer-react` | 未发布，首次 1.0.0 待准备 | React 19 深模块；接口见 `docs/react-api.md`。 |
-| `packages/core` | `hana-img-viewer-core` | 未发布，首次 1.0.0 待准备 | 已被实际复用的框架无关纯逻辑/类型。 |
-| `apps/vue-demo` | `hana-img-viewer-demo-vue` | private | 只消费 Vue 库。 |
-| `apps/react-demo` | `hana-img-viewer-demo-react` | private | 只消费 React 库。 |
+| Path | Package | Responsibility |
+| --- | --- | --- |
+| `packages/vue` | `hana-img-viewer` | Vue 3 library and Vue-only behavior. |
+| `packages/react` | `hana-img-viewer-react` | React 19 library and React-only behavior. |
+| `packages/core` | `hana-img-viewer-core` | Framework-independent utilities and types used by the UI libraries. |
+| `apps/vue-demo` | `hana-img-viewer-demo-vue` | Private Vue source consumer. |
+| `apps/react-demo` | `hana-img-viewer-demo-react` | Private React source consumer. |
 
-## 依赖方向
+## Dependency Direction
 
-- `apps/*` → 对应库源码入口；demo 不承载库实现，也不发布。
-- Vue/React 库 → `hana-img-viewer-core`（`dependencies: workspace:*`）。
-- core 不依赖框架；库不得引用另一个框架库或反向引用 app。
-- 框架 peer 仍归各 UI 包所有；不增加第二套 runtime framework dependency。
+- Each demo depends only on its matching UI library and must not publish library code.
+- Both UI libraries depend on `hana-img-viewer-core` through `workspace:*`.
+- Core must remain framework-independent. React and Vue lifecycle, gesture ownership, animation ownership, and effects remain in their respective UI packages.
+- A UI library must not depend on the other UI library, and packages must not depend on apps.
+- Move code into core only after both production libraries genuinely share the same framework-independent contract; physical symmetry is not a goal.
 
-共享不是目标本身。纯函数或类型只有在两个生产实现真实复用且不会泄漏框架 lifecycle 时才进入 core。React reducer、gesture owner、Animation ownership 与 effects 必须留在 React 包；不设“共享交互状态机”里程碑。
+## Versioning and Releases
 
-## 独立版本与发布集合
+`.changeset/config.json` keeps `fixed` and `linked` empty, ignores both demos, and uses patch updates for internal dependency changes. Do not force Vue, React, and core onto one version or release one package merely because another changed.
 
-- `.changeset/config.json` 使用 `fixed: []`；demo 保持 ignore。
-- Changesets 仅因真实包变更及 workspace dependency 更新决定 bump，不强制三包同版。
-- core 更新可按 `updateInternalDependencies: patch` 触发依赖方 metadata patch。
-- 当前源码 pre-version 为 React/core `0.0.0`；Vue lightweight API contraction 通过新的 major changeset 发布，三包仍独立版本。
-- `pnpm changeset version`、commit、push、publish、tag 与 GitHub release 都需要单独授权；常规实现只运行 status、build、test 与 pack dry-run。
+Package manifests and unconsumed `.changeset/*.md` files are the release-state authority. Inspect both before selecting a bump or describing the next release. Creating or consuming changesets, changing versions, publishing, tagging, pushing, and creating releases require explicit authorization; routine validation may use `pnpm changeset status`.

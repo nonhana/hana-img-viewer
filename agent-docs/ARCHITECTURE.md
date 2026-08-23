@@ -1,58 +1,36 @@
 # Architecture
 
-pnpm workspace（`pnpm-workspace.yaml`）包含 `apps/*` 与 `packages/*`。根包只负责编排脚本；根 tsconfig 提供共享基线。包产权与依赖方向见 [PACKAGES.md](./PACKAGES.md)。
+## Workspace Boundaries
 
-## 独立框架模块
+The pnpm workspace contains `apps/*` and `packages/*`. The root package orchestrates workspace commands and provides the shared TypeScript and ESLint baselines.
 
-Vue 与 React 共享框架无关的行为结果，不追求物理目录、状态机或公开 API 对称。两端可以采用各自框架最容易局部推理的实现，并独立验证、发布。
+- `packages/vue` owns the Vue component, Vue-specific lifecycle, and Vue package output.
+- `packages/react` owns the React component, React-specific lifecycle, and React package output.
+- `packages/core` exposes framework-independent DOM, input, math, and shared types. It must not own framework lifecycle, portal orchestration, animation ownership, or effects.
+- `apps/vue-demo` and `apps/react-demo` are private consumers. They demonstrate source behavior and must not own library implementation.
 
-React 生产源码固定为：
+Both UI libraries depend on `hana-img-viewer-core`. Core does not depend on either framework, and neither UI library may import the other UI library or an app. Local `@/*` aliases resolve to the current package's `src`; cross-package imports use package names.
 
-```text
-packages/react/src/
-├── HanaImgViewer.tsx
-├── index.ts
-├── internal/
-│   ├── ViewerOverlay.tsx
-│   └── viewerReducer.ts
-├── public-types.ts
-├── style.css
-└── vite-env.d.ts
-```
+## Shared Results, Independent Implementations
 
-- `HanaImgViewer.tsx` 是唯一公开 seam：标准化 props，固定 controlled/uncontrolled ownership，持有 lifecycle reducer，渲染 thumbnail/children，并解析 hydration 后的 container。
-- `internal/ViewerOverlay.tsx` 局部拥有 portal、图片增强、FLIP/WAAPI、body lock、焦点、Escape、resize、transform ref、RAF writer 与唯一 gesture owner。
-- `internal/viewerReducer.ts` 只包含 `closed/opening/open/closing` 与纯 transition，不持有 DOM、callback、source、transform 或 timer。
-- `public-types.ts` 只声明 `HanaImgViewerProps`；`index.ts` 只导出组件、Props 类型并导入 CSS。
+[`docs/behavior-spec.md`](../docs/behavior-spec.md) is the source of truth for framework-independent observable results and per-framework conformance. Update the relevant behavior and minimum assertion before changing a shared result.
 
-React 用 state/reducer 表达 JSX 可见状态，用 ref 保存 DOM 邻近的高频瞬时状态。用户意图从 event handler 发出；DOM 测量与动画位于可清理的 layout effect。禁止重新引入 lifecycle `flushSync`、microtask bridge、getter/ref bus 或按帧 React state。
+Vue and React do not require matching public props, physical layouts, state machines, or lifecycle abstractions. A framework-specific change can ship independently, but its tests and conformance status must remain accurate. Core exports such as selector-aware portal helpers do not expand the supported Vue or React container APIs.
 
-Vue 生产源码固定为：
+## React Ownership
 
-```text
-packages/vue/src/
-├── HanaImgViewer.vue
-├── index.ts
-├── internal/
-│   ├── ViewerOverlay.vue
-│   ├── bodyLock.ts
-│   └── viewerState.ts
-├── public-types.ts
-├── style.css
-└── vite-env.d.ts
-```
+- `src/HanaImgViewer.tsx` is the public seam. It normalizes props, fixes controlled or uncontrolled ownership at mount, gates portal creation until hydration, owns the phase reducer, renders the trigger, and resolves the active container.
+- `src/internal/ViewerOverlay.tsx` owns one mounted overlay session: the portal, source enhancement, FLIP/WAAPI transitions, body locking, focus, dismissal, measurement, gestures, transforms, and cleanup.
+- `src/internal/viewerReducer.ts` is a pure `closed` / `opening` / `open` / `closing` transition module. It does not own DOM, callbacks, sources, transforms, or timers.
+- `src/public-types.ts` declares the public props; `src/index.ts` exports the component and props type and imports the stylesheet.
 
-`HanaImgViewer.vue` 拥有 `defineModel`、thumbnail/slot、hydration 后 target normalization、active target 与 focus restore；`internal/ViewerOverlay.vue` 局部拥有一次 overlay session 的 DOM、source、animation、gesture、focus 与 cleanup；`viewerState.ts` 只含纯 transition；`bodyLock.ts` 是唯一跨实例 body owner seam。Vue 不再从单调用方 composable lattice 公开或导入 lifecycle helper。
+Keep JSX-visible lifecycle in React state or the reducer. Keep high-frequency DOM-adjacent interaction state, animation identities, and frame writers local to the overlay. Do not reintroduce lifecycle `flushSync`, microtask bridges, ref buses, or single-caller hook lattices.
 
-## 依赖与工具链边界
+## Vue Ownership
 
-- `hana-img-viewer-core` 只承载已经被实际复用的纯数学、输入解析、DOM 数值工具与类型；框架 lifecycle、Animation ownership 和 effect orchestration 不进入 core。
-- `@` alias 在各自 Vite/Vitest/tsconfig 中指向本包 `src`；跨包引用只走包名。
-- TypeScript 全仓统一 6.0.3。Vue 用 vue-tsc，React 用 tsc。
-- 两库分别用 unplugin-dts/vite-plugin-dts 生成声明。不要启用 `bundleTypes`，避免 Vue VLS slot 类型丢失符号。
+- `src/HanaImgViewer.vue` owns `v-model:open`, thumbnail and slot rendering, hydration-aware Teleport target selection, the active target, and focus restoration.
+- `src/internal/ViewerOverlay.vue` owns one overlay session's DOM, source enhancement, animation, gestures, focus, dismissal, and cleanup.
+- `src/internal/viewerState.ts` contains only pure phase transitions; `src/internal/bodyLock.ts` is the cross-instance body-lock ownership seam.
+- `src/public-types.ts` declares public props; `src/index.ts` creates the installable component identity, exports it as default and named, exports the props type, and imports the stylesheet.
 
-## 产物约束
-
-- 两个 UI 包均保持 ESM-only、extracted `style.css`、source map 与 framework external。
-- 消费者显式 import `style.css`；dist-contract 断言 CSS 无运行时注入。
-- 框架无关行为及逐端 conformance 见 `docs/behavior-spec.md`。框架特定 API 见各自公开文档。
+Do not move Vue lifecycle work into core or rebuild a composable lattice for single production callers.

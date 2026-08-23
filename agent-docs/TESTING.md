@@ -1,35 +1,43 @@
 # Testing
 
-Vitest 4。两库分别拥有 unit、component、SSR 与 dist-contract 配置；core 使用 node unit tests。框架测试从各自 `tests/support/vitest.ts` 导入 Vitest API。
+Vitest 4 is the test runner. The core package uses Node unit tests; each UI package has separate unit, component, SSR, and distribution-contract configurations.
 
-## React ownership
+## Commands
 
-- `tests/component/hana-img-viewer.component.test.tsx`：所有 lifecycle、source、portal、body lock、focus、animation 与 gesture 行为都经 `@/index` 公开 seam 验证。
-- `tests/unit/viewer-reducer.unit.test.ts`：唯一允许越过公开 seam 的 React unit test，只验证纯 transition。
-- `tests/ssr/hana-img-viewer.ssr.test.tsx`：证明 server thumbnail-only 输出。
-- `tests/dist-contract/dist-contract.test.ts`：守护 runtime exports、Props-only declaration reachability、package metadata、CSS extraction 与 source map。
+| Scope | Command | Coverage |
+| --- | --- | --- |
+| Core | `pnpm -F hana-img-viewer-core test` | Framework-independent DOM, input, and math utilities. |
+| React | `pnpm -F hana-img-viewer-react test` | Unit, component, and SSR suites. |
+| Vue | `pnpm -F hana-img-viewer test` | Unit, component, and SSR suites. |
+| React distribution | `pnpm -F hana-img-viewer-react test:dist` | Rebuild plus package metadata, runtime export, declaration, CSS, and source-map contracts. |
+| Vue distribution | `pnpm -F hana-img-viewer test:dist` | Rebuild plus package metadata, runtime export, declaration, CSS, and source-map contracts. |
 
-不要恢复 hook/component private-unit tests。纯数学/输入逻辑属于 core tests；React effect 与事件链属于 public component tests。
+Use `test:unit`, `test:component`, or `test:ssr` on either UI package for a narrower run.
 
-## Vue ownership
+## Test Ownership
 
-- `tests/component/hana-img-viewer.component.test.ts`：所有 lifecycle、source、portal、body lock、focus 与公开 gesture 行为经 `@/index` 验证。
-- `tests/unit/viewer-state.unit.test.ts`：唯一允许直接越过公开 seam 的 Vue unit test，只验证纯 transition。
-- `tests/ssr/hana-img-viewer.ssr.test.ts`：证明 server thumbnail-only 输出；client hydration/commit 后才创建 overlay。
-- Vue 不再新增或保留 composable-private tests；`packages/vue/src/internal` 的 DOM behavior 必须通过 component seam 验证。
+- React behavior is tested through `packages/react/tests/component/hana-img-viewer.component.test.tsx` and the public `@/index` seam. Direct unit coverage is reserved for the pure `viewerReducer` transitions.
+- Vue behavior is tested through `packages/vue/tests/component/hana-img-viewer.component.test.ts` and the public `@/index` seam. Direct unit coverage is reserved for the pure viewer-state transitions.
+- SSR suites prove thumbnail-only server output. React component coverage also exercises StrictMode hydration; Vue component coverage exercises post-mount portal ownership.
+- Distribution suites are separate from each package's normal `test` script because they require fresh build output.
+- Tests import Vitest APIs through each package's `tests/support/vitest.ts`. Component suites use the package-specific setup file for DOM, image, animation, gesture, and focus fakes.
 
-## Component setup
+Shared observable outcomes and per-framework conformance live in [`docs/behavior-spec.md`](../docs/behavior-spec.md). Prefix shared cases with `[behavior/Bx]`; React-only interface cases use `[react-interface/Rx]`. Do not mark one framework conformant from the other framework's test.
 
-React `tests/setup/component.setup.ts` 提供并在 `afterEach` 重置：
+## Validation
 
-- 图片 outcome 序列、pending resolve 与 request count；
-- 多 Animation outcome/pending ownership 与调用记录；
-- 按 element 配置的不同 rect；
-- pointer/touch event 构造、pointer capture 与 RAF；
-- body/focus/window listener 可观察状态。
+For a full repository check, run:
 
-## 命名与验证
+```sh
+pnpm lint
+pnpm -F hana-img-viewer-core typecheck
+pnpm typecheck
+pnpm -F hana-img-viewer-demo-vue typecheck
+pnpm -F hana-img-viewer-demo-react typecheck
+pnpm test
+pnpm build
+pnpm changeset status
+pnpm test:dist
+```
 
-共享结果测试以 `[behavior/Bx]` 开头；React 接口专属断言以 `[react-interface/Rx]` 开头。behavior spec 的逐端状态只在对应公开测试存在时标为完成，不能以另一框架测试代替。
-
-根验证：`pnpm lint` → `pnpm typecheck` → `pnpm test` → `pnpm build` → `pnpm changeset status` → `pnpm test:dist`。UI 冒烟用 `pnpm dev:react` / `pnpm dev:vue`；demo 消费源码 alias，不代表 dist 契约。
+There is no automated browser E2E suite. Use `pnpm dev:vue` or `pnpm dev:react` for a manual interaction smoke test; demos consume source aliases and are not distribution verification.

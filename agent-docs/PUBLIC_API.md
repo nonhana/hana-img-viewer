@@ -1,36 +1,34 @@
 # Public API
 
-Vue 已发布库 + React/core 首次发布待准备。外部支持面由各包 `exports` map 固定，dist-contract 套件守护。
+The root [`README.md`](../README.md) is the single source of truth for consumer-facing Vue and React API descriptions and examples. Keep it aligned with the package manifests, `src/public-types.ts`, runtime exports, and distribution-contract tests; do not create a second framework API document.
 
-## `hana-img-viewer`（Vue）
+## UI Package Surfaces
 
-- `exports["."]` → `./dist/index.js`（types `./dist/index.d.ts`）；无 CJS 构建。
-- `exports["./style.css"]` → `./dist/style.css`；`sideEffects: ["**/*.css", "src/index.ts"]`。
-- `files: ["dist"]`。
-- 导出：default 与具名 `HanaImgViewer` 是同一个带 `install(app)` 的组件引用；类型只有 `HanaImgViewerProps`。
-- `HanaImgViewerProps` 只有 `src`、`previewSrc`、`alt`、`open`、`container?: HTMLElement | null`、`enableZoom`、`minZoom`、`maxZoom`、`closeOnBackdropClick`、`closeOnEscape`；事件只有 `update:open`，slot 只有 `thumbnail`。
-- Peer：`vue` ^3.5.0；dependencies：`hana-img-viewer-core`。不再依赖 `@vueuse/core`。
+Both UI packages are ESM-only. Their package roots resolve to `dist/index.js` with `dist/index.d.ts`, and their stylesheets are separate `./style.css` exports. Consumers must import the stylesheet explicitly.
 
-## `hana-img-viewer-react`
+`hana-img-viewer` exposes:
 
-- `exports["."]` → `./dist/index.js`（types `./dist/index.d.ts`）；`exports["./style.css"]` 同名结构；`sideEffects: ["**/*.css"]`；`files: ["dist"]`。
-- 导出面只有 default + 具名 `HanaImgViewer` 与类型 `HanaImgViewerProps`；不 re-export core/internal 类型。
-- 无 imperative ref/controller、selector portal、兼容 alias 或额外生命周期/图片事件。完整 props 契约见 `docs/react-api.md`。
-- 当前尚未公开发布，源码 manifest pre-version 为 0.0.0，首次 Release PR 目标为 1.0.0。
-- Peer：`react` / `react-dom` ^19.0.0；dependencies：`hana-img-viewer-core`。
+- default and named `HanaImgViewer` as the same installable Vue component identity;
+- the `HanaImgViewerProps` type;
+- only the `update:open` event and `thumbnail` slot described in the root README.
 
-## `hana-img-viewer-core`
+Its `sideEffects` contract is `['**/*.css', 'src/index.ts']`, its peer is Vue `^3.5.0`, and its package files are limited to `dist`.
 
-- 源码形式发布：`exports["."]` → `./src/index.ts`（types 同）；`files: ["src"]`。
-- 当前尚未公开发布，源码 manifest pre-version 为 0.0.0，首次 Release PR 目标为 1.0.0。
-- 导出：`getDistance`、`getMidpoint`、`getZoomAnchoredPosition`、`clamp`、`createTrackpadDetector`、`getTwoTouches`、`getTouchMetrics`、`createPinchState`、`isHTMLElement`、`isBodyPortalTarget`、`resolvePortalTarget`、`getScrollbarWidth`、`resolveAspectRatio`、`loadImage`；类型 `Point`、`Transform`、`ViewerTransformAnchor`、`ViewerInteractionPhase`、`ViewerSourcePhase`、`PortalTarget`、`WheelState`、`PinchState`、`DEFAULT_TRANSFORM`。
-- 通常不作为消费者直接依赖，由两库 dependency 引入；版本按实际 core/API 与 workspace dependency 影响独立计算。
+`hana-img-viewer-react` exposes:
 
-## 契约（dist-contract 断言）
+- default and named `HanaImgViewer` as the same component identity;
+- the `HanaImgViewerProps` type;
+- no imperative controller, selector portal, compatibility aliases, lifecycle callbacks, source callbacks, or core/internal type re-exports.
 
-- 各 dist 必须包含 `index.js` / `index.d.ts` / `style.css`。
-- JS 产物不得运行时注入 CSS（无 `document.createElement('style')` / `document.head.appendChild`）。
-- exports map 与 `sideEffects` 保持精确值。
-- React dist 的 default/具名组件必须同一引用，root declaration graph 只能触达 `HanaImgViewerProps`，legacy 类型名必须缺席。
+Its `sideEffects` contract is `['**/*.css']`, its peers are React and React DOM `^19.0.0`, and its package files are limited to `dist`.
 
-改以上任一文件、构建配置或 package.json 字段后，跑 `pnpm test:dist` 再宣称导出面完好。
+The two frameworks may evolve different props and ownership models. In both current UI APIs, `container` accepts only `HTMLElement | null` when provided; the selector-aware core portal types are not UI package exports.
+
+## Core Package Surface
+
+`hana-img-viewer-core` exports `src/index.ts` directly and publishes only `src`. The root re-exports:
+
+- values and functions: `DEFAULT_TRANSFORM`, `clamp`, `createPinchState`, `createTrackpadDetector`, `getDistance`, `getMidpoint`, `getScrollbarWidth`, `getTouchMetrics`, `getTwoTouches`, `getZoomAnchoredPosition`, `isBodyPortalTarget`, `isHTMLElement`, `loadImage`, `resolveAspectRatio`, and `resolvePortalTarget`;
+- types: `PinchState`, `Point`, `PortalTarget`, `TrackpadDetector`, `Transform`, `ViewerInteractionPhase`, `ViewerSourcePhase`, `ViewerTransformAnchor`, and `WheelState`.
+
+Changing any named export, export map, peer dependency, `files`, `sideEffects`, generated declaration surface, or CSS delivery contract requires the matching package's `test:dist` command before claiming compatibility.

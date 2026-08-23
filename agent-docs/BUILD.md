@@ -1,34 +1,35 @@
 # Build
 
-包管理器是根 `package.json` 固定的 pnpm 11.21.0。依赖版本来自 `pnpm-workspace.yaml` 的 root、Vue 与 React catalogs。安装使用 `pnpm install`。
+The root `package.json` pins pnpm 11.22.0. Install dependencies from the repository root with `pnpm install`.
 
-## 根命令
+## Root Commands
 
-从仓库根目录执行：
-
-| Command | Effect |
+| Command | Purpose |
 | --- | --- |
-| `pnpm dev:vue` | 启动 `apps/vue-demo`，alias 到 Vue 源码入口。 |
-| `pnpm dev:react` | 启动 `apps/react-demo`，alias 到 React 源码入口。 |
-| `pnpm lint` / `pnpm lint:fix` | 根 ESLint 检查/格式化；`_notes/**` 属于 repo-owned ignore。 |
-| `pnpm typecheck` | Vue 用 vue-tsc；React 用 tsc；demo 各自检查。 |
-| `pnpm test` | core 与两库的 unit/component/SSR。 |
-| `pnpm build` | 串行构建两库与两 demo。 |
-| `pnpm test:dist` | 构建并运行两库 dist-contract。 |
-| `pnpm changeset status` | 检查独立版本的待发布集合，不发布。 |
+| `pnpm dev:vue` | Start the Vue demo against `packages/vue/src`. |
+| `pnpm dev:react` | Start the React demo against `packages/react/src`. |
+| `pnpm build:vue` | Build only `hana-img-viewer`. |
+| `pnpm build:react` | Build only `hana-img-viewer-react`. |
+| `pnpm build` | Run all workspace `build` scripts serially; this builds both libraries and both demos. |
+| `pnpm lint` / `pnpm lint:fix` | Check or fix the repository with the root ESLint configuration. |
+| `pnpm typecheck` | Type-check the Vue and React libraries only. |
+| `pnpm test` | Run the core tests and both UI-library unit, component, and SSR suites. |
+| `pnpm test:dist` | Rebuild both UI libraries and run their distribution-contract suites. |
+| `pnpm changeset status` | Inspect the pending release set without changing versions or publishing. |
+| `pnpm release` | Build and run `changeset publish`; use only with explicit release authorization. |
 
-根质量门顺序固定为：`lint` → `typecheck` → `test` → `build` → `changeset status` → `test:dist`。
+The root `typecheck` script does not cover the core package or demos. Run their scripts explicitly when they are in scope:
 
-## Build output
+```sh
+pnpm -F hana-img-viewer-core typecheck
+pnpm -F hana-img-viewer-demo-vue typecheck
+pnpm -F hana-img-viewer-demo-react typecheck
+```
 
-`packages/vue/dist/` 与 `packages/react/dist/` 只作为各包 `files: ["dist"]` 的发布内容：
+## Generated Output
 
-- `index.js`：ES module；Vue 或 React/React DOM external；所用 core 逻辑在构建时内联。
-- `style.css`：`cssCodeSplit: false` 提取的样式，无 JS 运行时注入。
-- `index.js.map`：Vue 与 React 构建均生成运行时 source map。
-- `index.d.ts`：公开声明入口。
-- `index.js.map`：运行时 source map。
-
-React dist 还必须证明 default/named 组件引用相同，root declaration graph 只能暴露 `HanaImgViewerProps`。完整契约由两包 `tests/dist-contract` 断言。
-
-版本独立管理；Changesets 不再把 Vue、React、core 固定成同一版本。React/core 源码 manifest 使用 0.0.0 pre-version，预期 Release PR 分别生成 1.0.0；当前 release contract 以 [PACKAGES.md](./PACKAGES.md) 为准。
+- `packages/vue/dist/` and `packages/react/dist/` are generated ESM library outputs. Each build emits `index.js`, `index.js.map`, extracted `style.css`, and declarations.
+- The Vue build externalizes `vue`; the React build externalizes `react`, `react-dom`, and `react/jsx-runtime`. Both builds enable source maps and disable CSS code splitting.
+- `packages/core` has no build script. Its package exports `src/index.ts` directly and publishes `src/`.
+- `apps/vue-demo/dist/` and `apps/react-demo/dist/` are demo build outputs. Development demos resolve their corresponding library source, so they do not validate packaged `dist` files.
+- Do not edit generated `dist/` files. Change source or build configuration and rebuild instead.
