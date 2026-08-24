@@ -1,5 +1,11 @@
 # hana-img-viewer
 
+## 5.0.0
+
+### Major Changes
+
+- [#11](https://github.com/nonhana/hana-img-viewer/pull/11) [`17d4922`](https://github.com/nonhana/hana-img-viewer/commit/17d49223c2ecd98125f47a61d255eafc2efaca83) Thanks [@nonhana](https://github.com/nonhana)! - Slim the Vue image previewer down to a lightweight `v-model:open`, HTMLElement portal, and thumbnail slot interface. Drop the selector portal, imperative/exposed API, lifecycle/source events, generic styles, and gesture props, and remove the `@vueuse/core` peer dependency.
+
 ## 4.0.0
 
 ### Major Changes
