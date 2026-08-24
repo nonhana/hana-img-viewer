@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["../../../packages/vue/src/*"]
+    },
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "../../../tests/**/*.ts",
+    "../../../packages/vue/src/**/*.ts",
+    "../../../packages/vue/src/**/*.vue"
+  ]
+}

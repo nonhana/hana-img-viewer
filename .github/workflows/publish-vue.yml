@@ -1,0 +1,145 @@
+name: Publish Vue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - packages/vue/package.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-vue
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6.0.10
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Vue release
+        run: |
+          pnpm --filter hana-img-viewer run typecheck
+          pnpm test:contract:vue
+          pnpm test:dist:vue
+
+      - name: Prepare Vue package
+        id: release
+        env:
+          PACKAGE_DIR: packages/vue
+          PACKAGE_NAME: hana-img-viewer
+        run: |
+          set -euo pipefail
+
+          package_version=$(node -p "require('./${PACKAGE_DIR}/package.json').version")
+          if [[ "$package_version" == "0.0.0" ]]; then
+            echo "Refusing to publish bootstrap version 0.0.0"
+            exit 1
+          fi
+
+          package_tag="${PACKAGE_NAME}@${package_version}"
+          package_tarball="${RUNNER_TEMP}/${PACKAGE_NAME}-${package_version}.tgz"
+          release_notes="${RUNNER_TEMP}/${PACKAGE_NAME}-${package_version}.md"
+          release_commit=$(git log --first-parent -1 -S "\"version\": \"${package_version}\"" --format=%H -- "${PACKAGE_DIR}/package.json")
+
+          if [[ -z "$release_commit" ]]; then
+            echo "Unable to locate the main-branch commit that introduced ${package_tag}"
+            exit 1
+          fi
+
+          awk -v heading="## ${package_version}" '
+            $0 == heading { capturing = 1; next }
+            capturing && /^## / { exit }
+            capturing { print }
+          ' "${PACKAGE_DIR}/CHANGELOG.md" > "$release_notes"
+
+          if [[ ! -s "$release_notes" ]]; then
+            echo "Missing CHANGELOG entry for ${package_tag}"
+            exit 1
+          fi
+
+          pnpm --filter "$PACKAGE_NAME" pack --pack-destination "$RUNNER_TEMP"
+          test -f "$package_tarball"
+
+          echo "name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${package_version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${package_tag}" >> "$GITHUB_OUTPUT"
+          echo "tarball=${package_tarball}" >> "$GITHUB_OUTPUT"
+          echo "notes=${release_notes}" >> "$GITHUB_OUTPUT"
+          echo "commit=${release_commit}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Vue package
+        env:
+          PACKAGE_NAME: ${{ steps.release.outputs.name }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+          PACKAGE_TARBALL: ${{ steps.release.outputs.tarball }}
+        run: |
+          set -euo pipefail
+
+          registry_url="https://registry.npmjs.org/${PACKAGE_NAME}/${PACKAGE_VERSION}"
+          if curl --fail --silent --show-error "$registry_url" > /dev/null; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published"
+          else
+            npm publish "$PACKAGE_TARBALL" --access public --provenance
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --show-error "$registry_url" > /dev/null; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+
+          echo "Registry did not expose ${PACKAGE_NAME}@${PACKAGE_VERSION} after publishing"
+          exit 1
+
+      - name: Create Vue tag
+        env:
+          PACKAGE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
+        run: |
+          set -euo pipefail
+
+          git fetch --force --tags origin
+          if git rev-parse --quiet --verify "refs/tags/${PACKAGE_TAG}" > /dev/null; then
+            existing_commit=$(git rev-list -n 1 "$PACKAGE_TAG")
+            if [[ "$existing_commit" != "$RELEASE_COMMIT" ]]; then
+              echo "${PACKAGE_TAG} already points to ${existing_commit}, expected ${RELEASE_COMMIT}"
+              exit 1
+            fi
+          else
+            git tag --annotate "$PACKAGE_TAG" "$RELEASE_COMMIT" --message "$PACKAGE_TAG"
+            git push origin "refs/tags/${PACKAGE_TAG}"
+          fi
+
+      - name: Create Vue GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_NOTES: ${{ steps.release.outputs.notes }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$PACKAGE_TAG" > /dev/null 2>&1; then
+            echo "GitHub release ${PACKAGE_TAG} already exists"
+          else
+            gh release create "$PACKAGE_TAG" --verify-tag --title "$PACKAGE_TAG" --notes-file "$RELEASE_NOTES"
+          fi

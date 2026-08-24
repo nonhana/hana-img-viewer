@@ -1,0 +1,63 @@
+{
+  "name": "hana-img-viewer-react",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "A lightweight and easy-to-use image previewer for React",
+  "author": "nonhana",
+  "license": "MIT",
+  "homepage": "https://github.com/nonhana/hana-img-viewer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonhana/hana-img-viewer.git"
+  },
+  "keywords": [
+    "component",
+    "image",
+    "previewer",
+    "react",
+    "ssr"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "pnpm build",
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:ui-react",
+    "@types/react-dom": "catalog:ui-react",
+    "@vitejs/plugin-react": "catalog:ui-react",
+    "hana-img-viewer-core": "workspace:*",
+    "react": "catalog:ui-react",
+    "react-dom": "catalog:ui-react",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:ui-react",
+    "vitest": "catalog:"
+  }
+}

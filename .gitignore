@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 
+.DS_Store
+
 ### Node ###
 # Logs
 logs
@@ -147,5 +149,5 @@ dist
 .cursor/
 
 # generated example type helpers
-examples/auto-imports.d.ts
-examples/components.d.ts
+apps/vue-demo/auto-imports.d.ts
+apps/vue-demo/components.d.ts

@@ -1,0 +1,62 @@
+{
+  "name": "hana-img-viewer",
+  "type": "module",
+  "version": "4.0.0",
+  "description": "A lightweight and easy-to-use image previewer for Vue 3",
+  "author": "nonhana",
+  "license": "MIT",
+  "homepage": "https://github.com/nonhana/hana-img-viewer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonhana/hana-img-viewer.git"
+  },
+  "keywords": [
+    "image",
+    "previewer",
+    "vue",
+    "component",
+    "ssr",
+    "nuxt"
+  ],
+  "sideEffects": [
+    "**/*.css",
+    "src/index.ts"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "pnpm run test:unit",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:ui-vue",
+    "hana-img-viewer-core": "workspace:*",
+    "typescript": "catalog:",
+    "unplugin-dts": "catalog:ui-vue",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue": "catalog:ui-vue",
+    "vue-tsc": "catalog:ui-vue"
+  }
+}

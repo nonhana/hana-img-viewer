@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["../../../packages/react/src/*"]
+    },
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "../../../tests/**/*.ts",
+    "../../../tests/**/*.tsx",
+    "../../../packages/react/src/**/*.ts",
+    "../../../packages/react/src/**/*.tsx"
+  ]
+}

@@ -10,5 +10,9 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "hana-img-viewer-core",
+    "hana-img-viewer-demo-vue",
+    "hana-img-viewer-demo-react"
+  ]
 }

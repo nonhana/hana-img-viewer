@@ -1,22 +1,30 @@
 # hana-img-viewer
 
-A lightweight Vue 3 image viewer that is simple to drop in.
+A lightweight image viewer.
 
 ## Features
 
 - Thumbnail-origin FLIP open and close
-- `src`-first preview path with optional silent `previewSrc` enhancement
+- src-first preview path with optional silent previewSrc enhancement
 - Wheel, double-click, drag, and pinch interactions
 - SSR-safe thumbnail-only server render
-- Extracted CSS output with a standard bundler-friendly entry
 
-## Installation
+## Usage
+
+Currently support:
+
+- Vue
+- React
+
+### Vue
+
+install:
 
 ```bash
 pnpm add hana-img-viewer
 ```
 
-## Basic usage
+import in `.vue` component:
 
 ```vue
 <script setup lang="ts">
@@ -31,152 +39,138 @@ import { HanaImgViewer } from 'hana-img-viewer'
 </template>
 ```
 
-Import `style.css` in `main.ts`:
+import `style.css` in `main.ts`:
 
 ```ts
 import 'hana-img-viewer/style.css'
 ```
 
-## `src` and `previewSrc`
+### React
 
-`src` is required and always drives:
+install:
 
-- the thumbnail
-- the first visible preview frame
-- the FLIP transition source
+```bash
+pnpm add hana-img-viewer-react
+```
 
-If `previewSrc` is provided, the viewer opens from `src` immediately and upgrades the visible bitmap in place after `previewSrc` is ready. There is no explicit loading UI and no second transition.
+import in `.tsx` component:
 
-```vue
-<HanaImgViewer
-  src="/images/post-thumb.jpg"
-  preview-src="/images/post-full.jpg"
-  alt="Article cover"
-/>
+```tsx
+import { HanaImgViewer } from 'hana-img-viewer-react'
+
+export default function App() {
+  return (
+    <HanaImgViewer
+      src="/images/post-thumb.jpg"
+      alt="Article cover"
+    />
+  )
+}
+```
+
+import `style.css` in `main.tsx`:
+
+```ts
+import 'hana-img-viewer-react/style.css'
+```
+
+controlled usage:
+
+```tsx
+import { HanaImgViewer } from 'hana-img-viewer-react'
+import { useState } from 'react'
+
+export default function App() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <HanaImgViewer
+      src="/images/post-thumb.jpg"
+      open={open}
+      onOpenChange={setOpen}
+    />
+  )
+}
+```
+
+custom trigger:
+
+```tsx
+<HanaImgViewer src="/images/post-thumb.jpg">
+  {({ open }) => (
+    <button type="button" onClick={open}>
+      Open preview
+    </button>
+  )}
+</HanaImgViewer>
 ```
 
 ## API
 
-### Props
+### Vue props
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `src` | `string` | - | Required thumbnail and first-preview source. |
-| `alt` | `string` | `''` | Accessible alt text. |
-| `previewSrc` | `string` | - | Optional silent enhancement source. |
-| `open` | `boolean` | - | Controlled open state. |
-| `portalTarget` | `string \| HTMLElement \| null` | `'body'` | Overlay mount target. `null` keeps the open request pending until a custom target exists. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, and pinch zoom. |
-| `enableDrag` | `boolean` | `true` | Enable drag while open. |
-| `minZoom` | `number` | `0.5` | Minimum zoom ratio. |
-| `maxZoom` | `number` | `10` | Maximum zoom ratio. |
-| `closeOnMaskClick` | `boolean` | `true` | Close when clicking the backdrop. |
-| `enableKeyboard` | `boolean` | `true` | Allow ESC close when the viewer owns the active body portal. |
-| `containerClass` | `HTMLAttributes['class']` | - | Thumbnail container class hook. |
-| `containerStyle` | `StyleValue` | - | Thumbnail container style hook. |
-| `thumbnailClass` | `HTMLAttributes['class']` | - | Thumbnail image class hook. |
-| `thumbnailStyle` | `StyleValue` | - | Thumbnail image style hook. |
+| `src` | `string` | required | Thumbnail and initial preview source. |
+| `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
+| `alt` | `string` | `''` | Alternative text for both images. |
+| `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
+| `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
+| `enableZoom` | `boolean` | `true` | Enable transform interactions. |
+| `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
+| `maxZoom` | `number` | `10` | Maximum zoom. |
+| `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
+| `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 
-### Emits
-
-| Event | Payload | Description |
-| --- | --- | --- |
-| `update:open` | `boolean` | Controlled open-state intent. |
-| `open` | - | Fired when the viewer becomes visibly open on the client. |
-| `close` | - | Fired when the viewer finishes closing. |
-| `load` | `Event` | Fired when the enhancement source becomes active. |
-| `error` | `Event` | Fired when the enhancement source fails. |
-
-### Slots
-
-| Slot | Props | Description |
-| --- | --- | --- |
-| `thumbnail` | `{ open: () => void }` | Custom thumbnail trigger. |
-
-### Exposed methods
-
-```ts
-interface HanaImgViewerExposed {
-  open: () => void | Promise<void>
-  close: () => void | Promise<void>
-  reset: () => void
-}
-```
-
-Example:
-
-```vue
-<script setup lang="ts">
-import type { HanaImgViewerExposed } from 'hana-img-viewer'
-import { ref } from 'vue'
-
-const viewerRef = ref<HanaImgViewerExposed | null>(null)
-</script>
-
-<template>
-  <button @click="viewerRef?.open()">
-    Open
-  </button>
-  <HanaImgViewer ref="viewerRef" src="/images/post-thumb.jpg" />
-</template>
-```
-
-## Controlled mode
+Vue emits only `update:open`. Use `v-model:open` to keep the state in sync:
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const isOpen = ref(false)
+const open = ref(false)
 </script>
 
 <template>
-  <button @click="isOpen = true">
-    Open preview
-  </button>
-
   <HanaImgViewer
-    v-model:open="isOpen"
+    v-model:open="open"
     src="/images/post-thumb.jpg"
-    alt="Controlled preview"
   />
 </template>
 ```
 
-## Custom thumbnail
+Vue provides one `thumbnail` slot. The slot receives an `open` function:
 
 ```vue
-<HanaImgViewer src="/images/post-full.jpg" alt="Custom trigger preview">
+<HanaImgViewer src="/images/post-thumb.jpg">
   <template #thumbnail="{ open }">
-    <button class="thumb-button" type="button" @click="open">
+    <button type="button" @click="open">
       Open preview
     </button>
   </template>
 </HanaImgViewer>
 ```
 
-## Custom portal target
+### React props
 
-Use `portalTarget` when the preview should stay inside a host layer, such as a dialog.
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | required | Thumbnail and initial preview source. |
+| `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
+| `alt` | `string` | `''` | Alternative text for both images. |
+| `open` | `boolean` | `undefined` | Controlled viewer visibility. |
+| `defaultOpen` | `boolean` | `false` | Initial visibility for uncontrolled usage. |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | Called when the viewer requests a visibility change. |
+| `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
+| `enableZoom` | `boolean` | `true` | Enable wheel, pinch, and double-click zoom. |
+| `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
+| `maxZoom` | `number` | `10` | Maximum zoom. |
+| `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
+| `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
+| `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
+| `children` | `(controls: { open: () => void }) => ReactNode` | `undefined` | Render a custom trigger with the provided `open` function. |
 
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
+`open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.
 
-const portalTarget = ref<HTMLElement | null>(null)
-</script>
-
-<template>
-  <div ref="portalTarget" />
-
-  <HanaImgViewer
-    :portal-target="portalTarget"
-    src="/images/post-thumb.jpg"
-    alt="Dialog scoped preview"
-  />
-</template>
-```
-
-`portalTarget="body"` and `:portal-target="document.body"` both use the default body portal behavior.
-
-When `portalTarget` is a custom element, the host remains the final ESC authority by default.
+Custom triggers own their semantics and styles. When a focused custom trigger opens the viewer, focus returns to that exact element after closing. The default image trigger already supports click, Enter, and Space.
