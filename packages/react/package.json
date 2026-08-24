@@ -1,7 +1,7 @@
 {
   "name": "hana-img-viewer-react",
   "type": "module",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A lightweight and easy-to-use image previewer for React",
   "author": "nonhana",
   "license": "MIT",
