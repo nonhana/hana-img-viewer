@@ -19,6 +19,7 @@ The repository contains three library packages and two private demos. Library pa
 - Core must remain framework-independent. React and Vue lifecycle, gesture ownership, animation ownership, and effects remain in their respective UI packages.
 - A UI library must not depend on the other UI library, and packages must not depend on apps.
 - Move code into core only after both production libraries genuinely share the same framework-independent contract; physical symmetry is not a goal.
+- Root test adapters may import each matching UI package's public source seam for dev-time contract evidence. They are not workspace packages, runtime dependencies, or published files.
 
 ## Versioning and Releases
 

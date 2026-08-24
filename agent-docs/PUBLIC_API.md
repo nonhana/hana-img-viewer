@@ -31,4 +31,4 @@ The two frameworks may evolve different props and ownership models. In both curr
 - values and functions: `DEFAULT_TRANSFORM`, `clamp`, `createPinchState`, `createTrackpadDetector`, `getDistance`, `getMidpoint`, `getScrollbarWidth`, `getTouchMetrics`, `getTwoTouches`, `getZoomAnchoredPosition`, `isBodyPortalTarget`, `isHTMLElement`, `loadImage`, `resolveAspectRatio`, and `resolvePortalTarget`;
 - types: `PinchState`, `Point`, `PortalTarget`, `TrackpadDetector`, `Transform`, `ViewerInteractionPhase`, `ViewerSourcePhase`, `ViewerTransformAnchor`, and `WheelState`.
 
-Changing any named export, export map, peer dependency, `files`, `sideEffects`, generated declaration surface, or CSS delivery contract requires the matching package's `test:dist` command before claiming compatibility.
+Changing any named export, export map, peer dependency, `files`, `sideEffects`, generated declaration surface, or CSS delivery contract requires the matching root command (`pnpm test:dist:react` or `pnpm test:dist:vue`) before claiming compatibility.

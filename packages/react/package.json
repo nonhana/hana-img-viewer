@@ -35,10 +35,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
-    "test:component": "vitest run --config vitest.component.config.ts",
-    "test:dist": "pnpm run build && vitest run --config vitest.dist.config.ts",
-    "test:ssr": "vitest run --config vitest.ssr.config.ts",
+    "test": "pnpm run test:unit",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
@@ -50,13 +47,10 @@
     "hana-img-viewer-core": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/dom": "catalog:ui-react",
-    "@testing-library/react": "catalog:ui-react",
     "@types/node": "catalog:",
     "@types/react": "catalog:ui-react",
     "@types/react-dom": "catalog:ui-react",
     "@vitejs/plugin-react": "catalog:ui-react",
-    "jsdom": "catalog:",
     "react": "catalog:ui-react",
     "react-dom": "catalog:ui-react",
     "typescript": "catalog:",

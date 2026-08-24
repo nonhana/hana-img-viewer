@@ -136,12 +136,27 @@ importers:
       '@microsoft/api-extractor':
         specifier: 'catalog:'
         version: 7.59.0(@types/node@26.2.0)
+      '@testing-library/dom':
+        specifier: catalog:ui-react
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: catalog:ui-react
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
+      '@types/react':
+        specifier: catalog:ui-react
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: catalog:ui-react
+        version: 19.2.4(@types/react@19.2.18)
       '@types/throttle-debounce':
         specifier: 'catalog:'
         version: 5.0.2
+      '@vitejs/plugin-react':
+        specifier: catalog:ui-react
+        version: 6.1.0(@rolldown/plugin-babel@0.2.3(@babel/core@8.0.1)(@babel/runtime@7.29.7)(rolldown@1.2.4)(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0)))(babel-plugin-react-compiler@1.0.0)(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0))
       '@vitejs/plugin-vue':
         specifier: catalog:ui-vue
         version: 6.0.8(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0))(vue@3.5.41(typescript@6.0.3))
@@ -169,6 +184,12 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 30.0.1
+      react:
+        specifier: catalog:ui-react
+        version: 19.2.8
+      react-dom:
+        specifier: catalog:ui-react
+        version: 19.2.8(react@19.2.8)
       sass:
         specifier: catalog:ui-vue
         version: 1.103.1
@@ -253,12 +274,6 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@testing-library/dom':
-        specifier: catalog:ui-react
-        version: 10.4.1
-      '@testing-library/react':
-        specifier: catalog:ui-react
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
@@ -271,9 +286,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: catalog:ui-react
         version: 6.1.0(@rolldown/plugin-babel@0.2.3(@babel/core@8.0.1)(@babel/runtime@7.29.7)(rolldown@1.2.4)(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0)))(babel-plugin-react-compiler@1.0.0)(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0))
-      jsdom:
-        specifier: 'catalog:'
-        version: 30.0.1
       react:
         specifier: catalog:ui-react
         version: 19.2.8
@@ -305,15 +317,6 @@ importers:
       '@vitejs/plugin-vue':
         specifier: catalog:ui-vue
         version: 6.0.8(vite@8.2.2(@types/node@26.2.0)(esbuild@0.27.2)(jiti@2.5.1)(sass@1.103.1)(terser@5.44.0)(yaml@2.9.0))(vue@3.5.41(typescript@6.0.3))
-      '@vue/server-renderer':
-        specifier: catalog:ui-vue
-        version: 3.5.41
-      '@vue/test-utils':
-        specifier: catalog:ui-vue
-        version: 2.4.11(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(vue@3.5.41(typescript@6.0.3))
-      jsdom:
-        specifier: 'catalog:'
-        version: 30.0.1
       typescript:
         specifier: 6.0.3
         version: 6.0.3

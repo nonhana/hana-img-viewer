@@ -1,10 +1,15 @@
-import { defineConfig, mergeConfig } from 'vitest/config'
-import sharedConfig from './vitest.shared.ts'
+import { resolve } from 'node:path'
+import { defineConfig } from 'vitest/config'
 
-export default mergeConfig(sharedConfig, defineConfig({
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(import.meta.dirname, 'src'),
+    },
+  },
   test: {
     name: 'unit',
     environment: 'node',
-    include: ['tests/unit/**/*.test.ts'],
+    include: ['**/*.test.ts'],
   },
-}))
+})

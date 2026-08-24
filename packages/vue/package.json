@@ -38,11 +38,8 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
-    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:ssr",
+    "test": "pnpm run test:unit",
     "test:unit": "vitest run --config vitest.unit.config.ts",
-    "test:component": "vitest run --config vitest.component.config.ts",
-    "test:ssr": "vitest run --config vitest.ssr.config.ts",
-    "test:dist": "pnpm run build && vitest run --config vitest.dist.config.ts",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
@@ -54,9 +51,6 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "catalog:ui-vue",
-    "@vue/server-renderer": "catalog:ui-vue",
-    "@vue/test-utils": "catalog:ui-vue",
-    "jsdom": "catalog:",
     "typescript": "catalog:",
     "unplugin-dts": "catalog:ui-vue",
     "vite": "catalog:",

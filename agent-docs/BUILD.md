@@ -12,9 +12,11 @@ The root `package.json` pins pnpm 11.22.0. Install dependencies from the reposit
 | `pnpm build:react` | Build only `hana-img-viewer-react`. |
 | `pnpm build` | Run all workspace `build` scripts serially; this builds both libraries and both demos. |
 | `pnpm lint` / `pnpm lint:fix` | Check or fix the repository with the root ESLint configuration. |
-| `pnpm typecheck` | Type-check the Vue and React libraries only. |
-| `pnpm test` | Run the core tests and both UI-library unit, component, and SSR suites. |
-| `pnpm test:dist` | Rebuild both UI libraries and run their distribution-contract suites. |
+| `pnpm typecheck` | Type-check both UI libraries and root contract adapters. |
+| `pnpm test:unit` | Run the core tests and both UI-library pure unit suites. |
+| `pnpm test:contract` | Run governance plus all registered React/Vue B1-B13 contracts. |
+| `pnpm test:dist` | Fresh-build both UI libraries and run the shared B14 distribution projects. |
+| `pnpm test` | Run root unit and contract suites. |
 | `pnpm changeset status` | Inspect the pending release set without changing versions or publishing. |
 | `pnpm release` | Build and run `changeset publish`; use only with explicit release authorization. |
 

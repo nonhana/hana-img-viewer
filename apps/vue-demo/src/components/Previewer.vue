@@ -3,8 +3,8 @@ import { HanaImgViewer } from 'hana-img-viewer'
 import { ref } from 'vue'
 import GithubSVG from './GithubSVG.vue'
 
-const demoImg1 = 'https://pixiv-r2.caelum.moe/121909597.png'
-const demoImg1Preview = 'https://pixiv-r2.caelum.moe/121909597.png?preview=1'
+const demoImg1 = 'https://grey-flowers-r2.caelum.moe/article-covers/202608/23b4cde2-be1a-47f2-b15a-5abe5dacc3af.jpg'
+const demoImg1Preview = 'https://pixiv-r2.caelum.moe/121909597.png'
 const demoImg2 = 'https://pixiv-r2.caelum.moe/129115891.png'
 
 const demoImg1Open = ref(false)

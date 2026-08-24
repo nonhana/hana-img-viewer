@@ -17,6 +17,13 @@ Both UI libraries depend on `hana-img-viewer-core`. Core does not depend on eith
 
 Vue and React do not require matching public props, physical layouts, state machines, or lifecycle abstractions. A framework-specific change can ship independently, but its tests and conformance status must remain accurate. Core exports such as selector-aware portal helpers do not expand the supported Vue or React container APIs.
 
+## Root Contract Test Seam
+
+- `tests/contracts/**` is the executable conformance layer for B1-B14. It is test architecture, not a production runtime or `ViewerContract` abstraction.
+- `tests/adapters/react/**` and `tests/adapters/vue/**` map each public source seam to the same shared contracts. Adapters own mount/update/settle/lookup/request history/unmount only.
+- `tests/environment/dom.setup.ts` owns deterministic browser controls and complete per-test cleanup. Framework scheduler details remain inside adapters.
+- UI packages retain only pure transition unit tests; adding a framework requires adapters and root Vitest projects without copying behavior bodies.
+
 ## React Ownership
 
 - `src/HanaImgViewer.tsx` is the public seam. It normalizes props, fixes controlled or uncontrolled ownership at mount, gates portal creation until hydration, owns the phase reducer, renders the trigger, and resolves the active container.
