@@ -2,7 +2,7 @@
   "name": "hana-img-viewer-demo-vue",
   "type": "module",
   "version": "0.0.0",
-  "private": "true",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "postinstall": "pnpm -F hana-img-viewer build",

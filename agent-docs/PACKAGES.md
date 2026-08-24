@@ -25,6 +25,6 @@ The repository contains two public libraries, one private shared implementation 
 
 `.changeset/config.json` keeps `fixed` and `linked` empty and ignores core plus both demos. Do not force Vue and React onto one version or release one package merely because the other changed.
 
-The repository uses one Changesets ledger and one aggregated release PR. Publishing remains package-specific: `publish-vue.yml` and `publish-react.yml` run separate validation, npm publish, tag, and GitHub release paths. A shared behavior implemented by both frameworks therefore needs separate Vue and React changeset entries.
+The repository uses one Changesets ledger and one aggregated release PR. Publishing remains package-specific: `publish-vue.yml` and `release-react.yml` run separate validation, npm publish, tag, and GitHub release paths. A shared behavior implemented by both frameworks therefore needs separate Vue and React changeset entries.
 
 Public package manifests and unconsumed `.changeset/*.md` files are the release-state authority. Inspect both before selecting a bump or describing the next release. Creating or consuming changesets, changing versions, publishing, tagging, pushing, and creating releases require explicit authorization; routine validation may use `pnpm changeset status`.

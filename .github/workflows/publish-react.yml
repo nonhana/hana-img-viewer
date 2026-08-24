@@ -88,7 +88,6 @@ jobs:
 
       - name: Publish React package
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           PACKAGE_NAME: ${{ steps.release.outputs.name }}
           PACKAGE_VERSION: ${{ steps.release.outputs.version }}
           PACKAGE_TARBALL: ${{ steps.release.outputs.tarball }}
