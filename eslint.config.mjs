@@ -1,7 +1,7 @@
 import antfu from '@antfu/eslint-config'
 import pluginReact from '@eslint-react/eslint-plugin'
 
-// Vue 相关不启用 React 规则
+// Disable React rules for Vue files
 const disableReactForVue = Object.fromEntries(
   Object.keys(pluginReact.configs.recommended.rules).map(rule => [rule, 'off']),
 )

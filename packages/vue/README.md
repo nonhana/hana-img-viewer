@@ -1,14 +1,29 @@
 # hana-img-viewer
 
-一个轻量的 Vue 3 图片预览器。默认只需要 `src` 和可选的 `alt`，样式从 `style.css` 单独引入。
+A lightweight Vue 3 image previewer. Only `src` and an optional `alt` are required to get started; the styles are shipped separately in `style.css`.
+
+## Features
+
+- Thumbnail-origin FLIP open and close
+- src-first preview path with optional silent previewSrc enhancement
+- Wheel, double-click, drag, and pinch interactions
+- SSR-safe thumbnail-only server render
+
+## Usage
+
+Install:
 
 ```bash
 pnpm add hana-img-viewer
 ```
 
+Import `style.css` in `main.ts`:
+
 ```ts
 import 'hana-img-viewer/style.css'
 ```
+
+Import in a `.vue` component:
 
 ```vue
 <script setup lang="ts">
@@ -26,18 +41,32 @@ import { HanaImgViewer } from 'hana-img-viewer'
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `src` | `string` | required | 缩略图与预览第一帧。 |
-| `previewSrc` | `string` | `undefined` | 预加载成功后静默替换当前预览。 |
-| `alt` | `string` | `''` | 两张图片的替代文本。 |
-| `open` | `boolean` | `false` | 使用 `v-model:open` 绑定 desired visibility。 |
-| `container` | `HTMLElement \| null` | `undefined` | `undefined` 使用 `document.body`；`null` 保持 pending。 |
-| `enableZoom` | `boolean` | `true` | 统一启用或禁用 wheel、pinch、double-click、drag。 |
-| `minZoom` | `number` | `0.5` | 最小缩放；调用方必须保证 `0 < minZoom <= maxZoom`。 |
-| `maxZoom` | `number` | `10` | 最大缩放。 |
-| `closeOnBackdropClick` | `boolean` | `true` | 点击 backdrop 时请求关闭。 |
-| `closeOnEscape` | `boolean` | `true` | focused overlay 收到 Escape 时请求关闭。 |
+| `src` | `string` | required | Thumbnail and initial preview source. |
+| `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
+| `alt` | `string` | `''` | Alternative text for both images. |
+| `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
+| `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
+| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, drag, and pinch interactions. |
+| `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
+| `maxZoom` | `number` | `10` | Maximum zoom. |
+| `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
+| `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 
-组件只发出 `update:open`，slot 只有 `thumbnail`：
+The component emits only `update:open`. Use `v-model:open` to keep the state in sync:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const open = ref(false)
+</script>
+
+<template>
+  <HanaImgViewer v-model:open="open" src="/images/post-thumb.jpg" />
+</template>
+```
+
+It provides one `thumbnail` slot, which receives an `open` function:
 
 ```vue
 <HanaImgViewer v-model:open="open" src="/images/post-thumb.jpg" preview-src="/images/post-full.jpg">
@@ -47,9 +76,9 @@ import { HanaImgViewer } from 'hana-img-viewer'
 </HanaImgViewer>
 ```
 
-普通 `class`、`style` 与其他 attrs 会落到可见的 thumbnail root；需要完全控制图片节点时使用 `thumbnail` slot。
+Plain `class`, `style`, and other attrs fall through to the visible thumbnail root. Use the `thumbnail` slot when you need full control over the image node.
 
-自定义 mount target 只传 HTMLElement：
+A custom mount target only accepts an `HTMLElement`:
 
 ```vue
 <script setup lang="ts">
@@ -64,18 +93,18 @@ const container = ref<HTMLElement | null>(null)
 </template>
 ```
 
-组件本身同时支持局部注册和 `app.use(HanaImgViewer)`；default 与 named export 是同一个组件引用。
+The component supports both local registration and `app.use(HanaImgViewer)`; the default and named exports are the same component reference.
 
 ## Migrating from v4
 
 | v4 surface | v5 replacement |
 | --- | --- |
-| selector、`'body'` 字符串 portal | `container` 传 `HTMLElement`、`null` 或省略 prop |
-| `enableDrag` | 没有独立开关；`enableZoom` 统一控制 transform gestures |
-| zoom bounds | `minZoom` / `maxZoom`；默认 `0.5`–`10` |
+| selector / `'body'` string portal | `container` accepts an `HTMLElement`, `null`, or omission |
+| `enableDrag` | no standalone flag; `enableZoom` controls transform gestures |
+| zoom bounds | `minZoom` / `maxZoom`; default `0.5`–`10` |
 | dismissal/keyboard flags | `closeOnBackdropClick` / `closeOnEscape` |
-| container/thumbnail class/style props | 普通 attrs；image-level 定制使用 `thumbnail` slot |
-| `open`、`close`、`load`、`error` emits | 只监听 `update:open` |
-| `open()`、`close()`、`reset()` exposed methods | 通过 `v-model:open` 改变状态 |
-| `HanaImgViewerEmits`、`HanaImgViewerExposed` 与 core aliases | 只导入 `HanaImgViewerProps` |
-| `@vueuse/core` peer | 不再需要额外安装 |
+| container/thumbnail class/style props | plain attrs; use the `thumbnail` slot for image-level customization |
+| `open`, `close`, `load`, `error` emits | listen only to `update:open` |
+| `open()`, `close()`, `reset()` exposed methods | change state through `v-model:open` |
+| `HanaImgViewerEmits`, `HanaImgViewerExposed`, core aliases | import `HanaImgViewerProps` only |
+| `@vueuse/core` peer | no longer needs separate installation |

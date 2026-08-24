@@ -23,7 +23,7 @@ describe('getMidpoint', () => {
 
 describe('getZoomAnchoredPosition', () => {
   it('keeps the anchor position stationary when current position is at the anchor', () => {
-    // viewportCenter 缺省 (0,0)，current === anchor → 缩放后位置不变
+    // viewportCenter defaults to (0,0); current === anchor → position unchanged after zoom
     const anchor = { x: 30, y: 40 }
     const result = getZoomAnchoredPosition(anchor, anchor, 1, 2)
     expect(result).toEqual(anchor)
