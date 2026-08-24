@@ -35,6 +35,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
@@ -45,12 +48,10 @@
   "peerDependencies": {
     "vue": "^3.5.0"
   },
-  "dependencies": {
-    "hana-img-viewer-core": "workspace:*"
-  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "catalog:ui-vue",
+    "hana-img-viewer-core": "workspace:*",
     "typescript": "catalog:",
     "unplugin-dts": "catalog:ui-vue",
     "vite": "catalog:",

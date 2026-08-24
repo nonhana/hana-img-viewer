@@ -38,10 +38,13 @@ describe('[governance] contract coverage', () => {
   })
 
   it('leaves package tests with unit ownership only', () => {
-    const packageTestPaths = fg.sync(['packages/react/tests/**/*.test.*', 'packages/vue/tests/**/*.test.*'], { cwd: root, absolute: true })
+    const packageTestPaths = fg.sync(
+      ['packages/react/**/*.test.*', 'packages/vue/**/*.test.*'],
+      { cwd: root, absolute: true, ignore: ['**/dist/**', '**/node_modules/**'] },
+    )
     expect(packageTestPaths.map(path => path.replace(`${root}/`, '')).sort()).toEqual([
-      'packages/react/tests/unit/viewer-reducer.unit.test.ts',
-      'packages/vue/tests/unit/viewer-state.unit.test.ts',
+      'packages/react/src/internal/viewer-reducer.unit.test.ts',
+      'packages/vue/src/internal/viewer-state.unit.test.ts',
     ])
   })
 })

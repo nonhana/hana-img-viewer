@@ -2,6 +2,7 @@ export interface DistributionDescriptor {
   packageDir: string
   expectedArtifacts: string[]
   expectedPackage: {
+    dependencies: Record<string, string>
     exports: Record<string, unknown>
     files: string[]
     main: string
@@ -9,6 +10,7 @@ export interface DistributionDescriptor {
     sideEffects: boolean | string[]
     types: string
     peerDependencies: Record<string, string>
+    publishConfig: Record<string, unknown>
   }
   runtimeExportNames: string[]
   requiredDeclarationNames: string[]

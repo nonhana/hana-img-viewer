@@ -2,7 +2,8 @@
   "name": "hana-img-viewer-core",
   "type": "module",
   "version": "0.0.0",
-  "description": "Shared pure logic and types for hana-img-viewer (Vue) and hana-img-viewer-react",
+  "private": true,
+  "description": "Internal shared pure logic and types for the Vue and React image viewers",
   "author": "nonhana",
   "license": "MIT",
   "homepage": "https://github.com/nonhana/hana-img-viewer#readme",
@@ -27,7 +28,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run --config vitest.unit.config.ts"
   },
   "devDependencies": {
     "typescript": "catalog:",

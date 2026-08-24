@@ -48,6 +48,7 @@ export const registerB14Distribution = (adapter: DistributionAdapter) => {
       const { packageDir, expectedPackage, runtimeExportNames } = adapter.descriptor
       const packageJson = readJson(resolve(packageDir, 'package.json'))
       expect({
+        dependencies: packageJson.dependencies ?? {},
         exports: packageJson.exports,
         files: packageJson.files,
         main: packageJson.main,
@@ -55,6 +56,7 @@ export const registerB14Distribution = (adapter: DistributionAdapter) => {
         sideEffects: packageJson.sideEffects,
         types: packageJson.types,
         peerDependencies: packageJson.peerDependencies,
+        publishConfig: packageJson.publishConfig,
       }).toEqual(expectedPackage)
 
       const runtime = await import(pathToFileURL(resolve(packageDir, 'dist/index.js')).href)

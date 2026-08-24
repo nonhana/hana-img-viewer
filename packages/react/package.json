@@ -33,8 +33,12 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build",
+    "prepublishOnly": "pnpm build",
     "test": "pnpm run test:unit",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -43,14 +47,12 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
-  "dependencies": {
-    "hana-img-viewer-core": "workspace:*"
-  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "catalog:ui-react",
     "@types/react-dom": "catalog:ui-react",
     "@vitejs/plugin-react": "catalog:ui-react",
+    "hana-img-viewer-core": "workspace:*",
     "react": "catalog:ui-react",
     "react-dom": "catalog:ui-react",
     "typescript": "catalog:",

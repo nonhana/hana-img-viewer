@@ -6,6 +6,7 @@ export const vueDistributionAdapter: DistributionAdapter = {
     packageDir: resolve(import.meta.dirname, '../../../packages/vue'),
     expectedArtifacts: ['index.js', 'index.d.ts', 'style.css', 'index.js.map'],
     expectedPackage: {
+      dependencies: {},
       exports: {
         '.': { types: './dist/index.d.ts', import: './dist/index.js' },
         './style.css': './dist/style.css',
@@ -16,6 +17,7 @@ export const vueDistributionAdapter: DistributionAdapter = {
       sideEffects: ['**/*.css', 'src/index.ts'],
       types: './dist/index.d.ts',
       peerDependencies: { vue: '^3.5.0' },
+      publishConfig: { access: 'public' },
     },
     runtimeExportNames: ['HanaImgViewer', 'default'],
     requiredDeclarationNames: ['HanaImgViewerProps'],

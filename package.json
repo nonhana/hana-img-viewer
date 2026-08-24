@@ -21,7 +21,6 @@
     "test:unit": "pnpm -F hana-img-viewer-core run test && pnpm -F hana-img-viewer run test:unit && pnpm -F hana-img-viewer-react run test:unit",
     "test:dist": "pnpm run test:dist:vue && pnpm run test:dist:react",
     "typecheck:contracts": "tsc -p tests/adapters/react/tsconfig.json --noEmit && vue-tsc -p tests/adapters/vue/tsconfig.json --noEmit",
-    "release": "pnpm build && changeset publish",
     "changeset": "changeset"
   },
   "devDependencies": {

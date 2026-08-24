@@ -1,18 +1,19 @@
-name: Release
+name: Release PR
 
 on:
   push:
     branches: [main]
 
 permissions:
-  id-token: write # for OIDC
   contents: write
   pull-requests: write
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: release-pr-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -25,14 +26,11 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish
+      - name: Create or update release pull request
         uses: changesets/action@v2.1.1
         with:
-          version: pnpm changeset version
-          publish: pnpm release
-          title: 'chore: version packages'
-          commit: 'chore: version packages'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm changeset version
+          pr-title: 'chore: version packages'
+          commit-message: 'chore: version packages'
