@@ -38,7 +38,7 @@ pnpm -F hana-img-viewer-demo-react typecheck
 ## Release Automation
 
 - `.github/workflows/release.yml` uses Changesets only to create or update the version/changelog PR.
-- Merging that PR triggers `publish-vue.yml` and/or `publish-react.yml` according to which public package manifest changed.
+- Merging that PR triggers `publish-vue.yml` and/or `release-react.yml` according to which public package manifest changed.
 - Each publish workflow rebuilds and validates only its framework, packs a tarball, publishes through npm, then creates the package-scoped tag and GitHub release.
 - The workflows are idempotent around npm, tags, and GitHub releases and can be rerun manually on `main`.
-- npm Trusted Publisher configuration must use the exact publish workflow filename. The first React release requires the temporary `NPM_TOKEN` bootstrap secret described in `.changeset/README.md`.
+- npm Trusted Publisher configuration must use the exact publish workflow filename: `publish-vue.yml` for Vue and `release-react.yml` for React. React's published `0.0.0` bootstrap release means the React workflow can use OIDC without an `NPM_TOKEN` secret.

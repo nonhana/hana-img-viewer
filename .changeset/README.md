@@ -22,7 +22,7 @@ pnpm changeset --empty
 1. Merge implementation changes and their changesets into `main`.
 2. `.github/workflows/release.yml` creates or updates the aggregated Changesets release PR. This workflow changes versions and changelogs but never publishes to npm.
 3. Review and merge the release PR when the listed package releases are ready.
-4. A changed `packages/vue/package.json` triggers `publish-vue.yml`; a changed `packages/react/package.json` triggers `publish-react.yml`.
+4. A changed `packages/vue/package.json` triggers `publish-vue.yml`; a changed `packages/react/package.json` triggers `release-react.yml`.
 5. Each publish workflow runs its own typecheck, behavior contracts, distribution contract, npm publish, package tag, and GitHub release. Either workflow can be rerun independently with `workflow_dispatch` on `main`.
 
 ## npm trusted publishing
@@ -30,6 +30,6 @@ pnpm changeset --empty
 Configure npm Trusted Publishers with the exact workflow filenames:
 
 - `hana-img-viewer`: `publish-vue.yml`;
-- `hana-img-viewer-react`: `publish-react.yml` after its first release exists.
+- `hana-img-viewer-react`: `release-react.yml`.
 
-The first `hana-img-viewer-react` publish must use a granular npm token stored as the `NPM_TOKEN` GitHub Actions secret because npm cannot attach a Trusted Publisher to an unpublished package. After `1.0.0` exists, configure its Trusted Publisher and remove the bootstrap secret.
+The `hana-img-viewer-react@0.0.0` bootstrap release has been published, so subsequent React releases use OIDC through `release-react.yml` and do not require an `NPM_TOKEN` GitHub Actions secret.
