@@ -1,5 +1,11 @@
 # hana-img-viewer
 
+## 5.1.0
+
+### Minor Changes
+
+- [#15](https://github.com/nonhana/hana-img-viewer/pull/15) [`64df65d`](https://github.com/nonhana/hana-img-viewer/commit/64df65df30ae736f73231407989ed1063d88face) Thanks [@nonhana](https://github.com/nonhana)! - Refactoring the architectural design of hana-img-viewer
+
 ## 5.0.0
 
 ### Major Changes
