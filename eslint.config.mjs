@@ -20,8 +20,8 @@ export default antfu({
     '**/node_modules/**',
     '**/*.d.ts',
     '_notes/**',
-    'apps/vue-demo/components.d.ts',
-    'apps/vue-demo/auto-imports.d.ts',
+    'apps/demo/components.d.ts',
+    'apps/demo/auto-imports.d.ts',
   ],
   rules: {
     'antfu/top-level-function': 'off',
@@ -32,7 +32,7 @@ export default antfu({
   files: ['**/*.{ts,tsx,mts,cts,mjs,cjs,js}'],
   ignores: [
     'packages/react/**',
-    'apps/react-demo/**',
+    'apps/demo/src/vue/**',
     'eslint.config.mjs',
   ],
   rules: disableReactForVue,

@@ -1,0 +1,40 @@
+{
+  "name": "hana-img-viewer-demo",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "vite build && node scripts/prerender.mjs",
+    "typecheck": "pnpm run typecheck:react && pnpm run typecheck:vue && pnpm run typecheck:config",
+    "typecheck:vue": "vue-tsc --noEmit -p tsconfig.vue.json",
+    "typecheck:react": "tsc -p tsconfig.react.json --noEmit",
+    "typecheck:config": "tsc -p tsconfig.config.json --noEmit",
+    "verify:dist": "node scripts/verify-dist.mjs"
+  },
+  "dependencies": {
+    "hana-img-viewer": "workspace:*",
+    "hana-img-viewer-react": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:ui-react",
+    "@types/react-dom": "catalog:ui-react",
+    "@vitejs/plugin-react": "catalog:ui-react",
+    "@vitejs/plugin-vue": "catalog:ui-vue",
+    "@vue/server-renderer": "catalog:ui-vue",
+    "element-plus": "catalog:ui-vue",
+    "react": "catalog:ui-react",
+    "react-dom": "catalog:ui-react",
+    "sass": "catalog:ui-vue",
+    "typescript": "catalog:",
+    "unplugin-auto-import": "catalog:ui-vue",
+    "unplugin-vue-components": "catalog:ui-vue",
+    "vite": "catalog:",
+    "vue": "catalog:ui-vue",
+    "vue-tsc": "catalog:ui-vue"
+  }
+}

@@ -7,7 +7,7 @@ The pnpm workspace contains `apps/*` and `packages/*`. The root package orchestr
 - `packages/vue` owns the Vue component, Vue-specific lifecycle, and Vue package output.
 - `packages/react` owns the React component, React-specific lifecycle, and React package output.
 - `packages/core` exposes framework-independent DOM, input, math, and shared types. It must not own framework lifecycle, portal orchestration, animation ownership, or effects.
-- `apps/vue-demo` and `apps/react-demo` are private consumers. They demonstrate source behavior and must not own library implementation.
+- `apps/demo` is a private MPA consumer. It demonstrates both UI libraries' source behavior and must not own library implementation.
 
 Both UI libraries use the private `hana-img-viewer-core` workspace package while developing and building. Vite bundles those imports into each public UI package, so consumers never install core as a runtime dependency. Core does not depend on either framework, and neither UI library may import the other UI library or an app. Local `@/*` aliases resolve to the current package's `src`; cross-package imports use package names.
 

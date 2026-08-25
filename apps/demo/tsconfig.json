@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "paths": {
+      "hana-img-viewer": ["../../packages/vue/src/index.ts"],
+      "hana-img-viewer-react": ["../../packages/react/src/index.ts"],
+      "@/*": ["../../packages/react/src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite-env.d.ts",
+    "vite.config.ts",
+    "vite.ssr.config.ts",
+    "scripts/entries.mjs"
+  ]
+}

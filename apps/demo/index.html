@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HanaImgViewer Demos</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: #fff;
+        color: #213547;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+      }
+      main {
+        text-align: center;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      p {
+        color: #666;
+      }
+      nav {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      nav a {
+        display: block;
+        padding: 12px 24px;
+        border: 1px solid #d7d7d7;
+        border-radius: 8px;
+        background: #f7f7f7;
+        color: #213547;
+        text-decoration: none;
+      }
+      nav a:hover {
+        border-color: #646cff;
+        color: #646cff;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>HanaImgViewer Demos</h1>
+      <p>SPA: client-side rendering. SSR: build-time prerendered with hydration.</p>
+      <nav>
+        <a href="/vue.html">Vue SPA</a>
+        <a href="/react.html">React SPA</a>
+        <a href="/vue-ssr.html">Vue SSR</a>
+        <a href="/react-ssr.html">React SSR</a>
+      </nav>
+    </main>
+  </body>
+</html>

@@ -2,9 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import App from './App'
-import 'hana-img-viewer-react/style.css'
-
-import './demo.css'
+import './styles'
 
 const rootElement = document.getElementById('app')
 if (!rootElement)
