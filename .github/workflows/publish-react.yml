@@ -117,6 +117,8 @@ jobs:
           RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
         run: |
           set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git fetch --force --tags origin
           if git rev-parse --quiet --verify "refs/tags/${PACKAGE_TAG}" > /dev/null; then
