@@ -112,6 +112,7 @@ custom trigger:
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `src` | `string` | required | Thumbnail and initial preview source. |
+| `as` | `keyof HTMLElementTagNameMap` | `'div'` | HTML element used for the visible thumbnail root. |
 | `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
 | `alt` | `string` | `''` | Alternative text for both images. |
 | `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
@@ -149,6 +150,14 @@ Vue provides one `thumbnail` slot. The slot receives an `open` function:
     </button>
   </template>
 </HanaImgViewer>
+```
+
+The thumbnail root is a `div` by default. Choose a non-void element compatible with its parent when the viewer is rendered in a constrained HTML context, such as Markdown prose:
+
+```vue
+<p>
+  <HanaImgViewer as="span" src="/images/post-thumb.jpg" />
+</p>
 ```
 
 ### React props
