@@ -1,5 +1,11 @@
 # hana-img-viewer
 
+## 5.1.1
+
+### Patch Changes
+
+- [#17](https://github.com/nonhana/hana-img-viewer/pull/17) [`52672e3`](https://github.com/nonhana/hana-img-viewer/commit/52672e3c92f38d66fc0d39902c0bb08f452e968d) Thanks [@nonhana](https://github.com/nonhana)! - Added the `as` attribute to control the wrapper element around the `img`.
+
 ## 5.1.0
 
 ### Minor Changes
