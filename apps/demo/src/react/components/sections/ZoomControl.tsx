@@ -5,8 +5,8 @@ import DemoSection from '../DemoSection'
 const coverImg = 'https://grey-flowers-r2.caelum.moe/article-covers/202608/23b4cde2-be1a-47f2-b15a-5abe5dacc3af.jpg'
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 
-const snippet = `{/* No zoom at all */}
-<HanaImgViewer enableZoom={false} src="/covers/summer.jpg" alt="Cover" />
+const snippet = `{/* Default 0.5x-10x zoom */}
+<HanaImgViewer src="/covers/summer.jpg" alt="Cover" />
 
 {/* Wheel, pinch, and double-click clamped to 1x-3x */}
 <HanaImgViewer minZoom={1} maxZoom={3} src="/photos/garden.png" alt="Garden" />`
@@ -17,13 +17,10 @@ export default function ZoomControl() {
       id="zoom-control"
       index="06"
       title="Zoom control"
-      apis={['enableZoom', 'minZoom', 'maxZoom']}
+      apis={['minZoom', 'maxZoom']}
       description={(
         <>
-          Turn zoom off entirely with
-          {' '}
-          <code className="demo-code-inline">enableZoom: false</code>
-          , or keep it on and clamp the wheel, pinch, and double-click range with
+          Zoom is always on. Clamp the wheel, pinch, and double-click range with
           {' '}
           <code className="demo-code-inline">minZoom</code>
           {' '}
@@ -39,11 +36,10 @@ export default function ZoomControl() {
           <span className="demo-stage__cell">
             <HanaImgViewer
               className="demo-thumb"
-              enableZoom={false}
               src={coverImg}
-              alt="Zoom disabled"
+              alt="Default zoom range"
             />
-            <code className="demo-code-inline">enableZoom: false</code>
+            <code className="demo-code-inline">default: 0.5x &middot; 10x</code>
           </span>
           <span className="demo-stage__cell">
             <HanaImgViewer

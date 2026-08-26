@@ -28,7 +28,6 @@ interface ViewerOverlayProps {
   src: string
   previewSrc?: string
   alt: string
-  zoom: boolean
   minZoom: number
   maxZoom: number
   closeOnBackdropClick: boolean
@@ -112,7 +111,6 @@ export const ViewerOverlay = ({
   src,
   previewSrc,
   alt,
-  zoom,
   minZoom,
   maxZoom,
   closeOnBackdropClick,
@@ -454,10 +452,7 @@ export const ViewerOverlay = ({
     }
 
     preview.style.transform = transformToCss(transformRef.current)
-    preview.style.cursor = zoom ? 'grab' : 'default'
-
-    if (!zoom)
-      return
+    preview.style.cursor = 'grab'
 
     const applyTransform = () => {
       if (transformFrame !== null)
@@ -522,9 +517,6 @@ export const ViewerOverlay = ({
     }
 
     const handleWheel = (event: WheelEvent) => {
-      if (!zoom)
-        return
-
       event.preventDefault()
       const sensitivity = detector.detect(event) ? 0.01 : 0.002
       setScale(transformRef.current.scale - event.deltaY * sensitivity, {
@@ -534,9 +526,6 @@ export const ViewerOverlay = ({
     }
 
     const handleDoubleClick = (event: MouseEvent) => {
-      if (!zoom)
-        return
-
       event.preventDefault()
       const currentScale = transformRef.current.scale
       const isBaseline = currentScale === 1
@@ -582,9 +571,6 @@ export const ViewerOverlay = ({
     }
 
     const handleTouchStart = (event: TouchEvent) => {
-      if (!zoom)
-        return
-
       const touches = getTwoTouches(event.touches)
       if (!touches)
         return
@@ -653,7 +639,7 @@ export const ViewerOverlay = ({
       if (transformFrame !== null)
         cancelAnimationFrame(transformFrame)
     }
-  }, [maxZoom, minZoom, phase, zoom])
+  }, [maxZoom, minZoom, phase])
 
   useLayoutEffect(() => {
     const overlay = overlayRef.current
@@ -721,7 +707,7 @@ export const ViewerOverlay = ({
           alt={alt}
           draggable={false}
           style={{
-            cursor: phase !== 'open' || !zoom
+            cursor: phase !== 'open'
               ? 'default'
               : gesture === 'idle'
                 ? 'grab'

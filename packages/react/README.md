@@ -70,7 +70,6 @@ export default function App() {
 | `defaultOpen` | `boolean` | `false` | Initial visibility for uncontrolled usage. |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | Called when the viewer requests a visibility change. |
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, pinch, and double-click zoom. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |

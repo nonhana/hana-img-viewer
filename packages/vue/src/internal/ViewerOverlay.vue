@@ -20,7 +20,6 @@ const props = defineProps<{
   src: string
   previewSrc?: string
   alt: string
-  zoomEnabled: boolean
   minZoom: number
   maxZoom: number
   closeOnBackdropClick: boolean
@@ -274,8 +273,6 @@ const startEnhancement = () => {
 }
 
 const setScale = (nextScale: number, anchor: Point, resetToBaseline = false) => {
-  if (!props.zoomEnabled)
-    return
   const current = { x: transform.x, y: transform.y }
   const scale = resetToBaseline ? 1 : clamp(nextScale, props.minZoom, props.maxZoom)
   if (scale === transform.scale)
@@ -297,7 +294,7 @@ const setScale = (nextScale: number, anchor: Point, resetToBaseline = false) => 
 
 const installGestures = () => {
   const preview = previewRef.value
-  if (!preview || !props.zoomEnabled)
+  if (!preview)
     return () => {}
 
   const detector = createTrackpadDetector()
@@ -444,7 +441,7 @@ watch(() => [props.minZoom, props.maxZoom] as const, () => {
   transform.scale = scale
   writeTransform()
 })
-watch(() => [props.phase, props.zoomEnabled] as const, ([phase]) => {
+watch(() => props.phase, (phase) => {
   if (phase === 'closing') {
     sourceGeneration++
     sourceRequest = null
@@ -522,7 +519,7 @@ onBeforeUnmount(() => {
         :src="displaySrc"
         :alt="alt"
         draggable="false"
-        :style="{ cursor: phase === 'open' && zoomEnabled ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
+        :style="{ cursor: phase === 'open' ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
       >
     </div>
   </div>

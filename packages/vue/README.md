@@ -47,7 +47,6 @@ import { HanaImgViewer } from 'hana-img-viewer'
 | `alt` | `string` | `''` | Alternative text for both images. |
 | `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, drag, and pinch interactions. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
@@ -99,7 +98,6 @@ The component supports both local registration and `app.use(HanaImgViewer)`; the
 | v4 surface | v5 replacement |
 | --- | --- |
 | selector / `'body'` string portal | `container` accepts an `HTMLElement`, `null`, or omission |
-| `enableDrag` | no standalone flag; `enableZoom` controls transform gestures |
 | zoom bounds | `minZoom` / `maxZoom`; default `0.5`–`10` |
 | dismissal/keyboard flags | `closeOnBackdropClick` / `closeOnEscape` |
 | container/thumbnail class/style props | plain attrs |

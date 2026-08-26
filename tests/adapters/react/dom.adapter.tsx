@@ -17,7 +17,6 @@ const ReactHarness = ({ options, requests }: { options: DomMountOptions, request
     previewSrc: options.previewSrc,
     alt: options.alt,
     container: containerFromOptions(options),
-    enableZoom: options.enableZoom,
     minZoom: options.minZoom,
     maxZoom: options.maxZoom,
     closeOnBackdropClick: options.closeOnBackdropClick,

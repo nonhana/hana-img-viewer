@@ -7,8 +7,8 @@ const coverImg = 'https://grey-flowers-r2.caelum.moe/article-covers/202608/23b4c
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 
 const snippet = `<template>
-  <!-- No zoom at all -->
-  <HanaImgViewer :enable-zoom="false" src="/covers/summer.jpg" alt="Cover" />
+  <!-- Default 0.5x-10x zoom -->
+  <HanaImgViewer src="/covers/summer.jpg" alt="Cover" />
 
   <!-- Wheel, pinch, and double-click clamped to 1x-3x -->
   <HanaImgViewer :min-zoom="1" :max-zoom="3" src="/photos/garden.png" alt="Garden" />
@@ -16,17 +16,16 @@ const snippet = `<template>
 </script>
 
 <template>
-  <DemoSection id="zoom-control" index="06" title="Zoom control" :apis="['enableZoom', 'minZoom', 'maxZoom']">
+  <DemoSection id="zoom-control" index="06" title="Zoom control" :apis="['minZoom', 'maxZoom']">
     <template #description>
-      Turn zoom off entirely with <code class="demo-code-inline">enableZoom: false</code>, or
-      keep it on and clamp the wheel, pinch, and double-click range with
+      Zoom is always on. Clamp the wheel, pinch, and double-click range with
       <code class="demo-code-inline">minZoom</code> and <code class="demo-code-inline">maxZoom</code>.
     </template>
     <figure class="demo-card demo-stage">
       <span class="demo-stage__row">
         <span class="demo-stage__cell">
-          <HanaImgViewer class="demo-thumb" :enable-zoom="false" :src="coverImg" alt="Zoom disabled" />
-          <code class="demo-code-inline">enableZoom: false</code>
+          <HanaImgViewer class="demo-thumb" :src="coverImg" alt="Default zoom range" />
+          <code class="demo-code-inline">default: 0.5x · 10x</code>
         </span>
         <span class="demo-stage__cell">
           <HanaImgViewer class="demo-thumb" :min-zoom="1" :max-zoom="3" :src="gardenImg" alt="Zoom clamped between 1x and 3x" />

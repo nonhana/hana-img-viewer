@@ -11,7 +11,6 @@ export interface DomMountOptions {
   alt?: string
   container?: ContainerOption
   visibility?: VisibilityOption
-  enableZoom?: boolean
   minZoom?: number
   maxZoom?: number
   closeOnBackdropClick?: boolean

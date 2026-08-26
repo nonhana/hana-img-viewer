@@ -15,7 +15,6 @@ const VueHarness = defineComponent({
         'src': options.src ?? 'thumb.jpg',
         'previewSrc': options.previewSrc,
         'alt': options.alt,
-        'enableZoom': options.enableZoom,
         'minZoom': options.minZoom,
         'maxZoom': options.maxZoom,
         'closeOnBackdropClick': options.closeOnBackdropClick,

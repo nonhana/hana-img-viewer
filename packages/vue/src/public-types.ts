@@ -14,8 +14,6 @@ export interface HanaImgViewerProps {
    * hydration; explicit `null` keeps an open request pending.
    */
   container?: HTMLElement | null
-  /** Enable wheel, pinch, and double-click zoom. @default true */
-  enableZoom?: boolean
   /** Minimum zoom. Callers must keep `0 < minZoom <= maxZoom`. @default 0.5 */
   minZoom?: number
   /** Maximum zoom. @default 10 */

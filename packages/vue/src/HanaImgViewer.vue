@@ -13,7 +13,6 @@ const props = withDefaults(
   {
     as: 'div',
     alt: '',
-    enableZoom: true,
     minZoom: 0.5,
     maxZoom: 10,
     closeOnBackdropClick: true,
@@ -139,7 +138,6 @@ onMounted(() => {
       :src="src"
       :preview-src="previewSrc"
       :alt="alt"
-      :zoom-enabled="enableZoom"
       :min-zoom="minZoom"
       :max-zoom="maxZoom"
       :close-on-backdrop-click="closeOnBackdropClick"
