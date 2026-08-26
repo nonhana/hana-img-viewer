@@ -1,9 +1,6 @@
 import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import vue from '@vitejs/plugin-vue'
-import AutoImport from 'unplugin-auto-import/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { discoverDemoEntries } from './scripts/entries.mjs'
 
@@ -13,12 +10,6 @@ export default defineConfig({
   plugins: [
     vue(),
     react(),
-    AutoImport({
-      resolvers: [ElementPlusResolver()],
-    }),
-    Components({
-      resolvers: [ElementPlusResolver()],
-    }),
   ],
   resolve: {
     alias: {

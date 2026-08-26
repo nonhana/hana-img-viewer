@@ -3,15 +3,15 @@ import { describe, expect, it, vi } from 'vitest'
 
 export const registerB10FocusDismissal = (adapter: DomAdapter) => {
   describe('[behavior/B10] keyboard, focus, and dismissal', () => {
-    it('restores the exact custom opener after Escape', async () => {
-      const viewer = await adapter.mount({ src: 'thumb.jpg', trigger: 'custom' })
-      const opener = viewer.getTrigger()!
-      opener.focus()
-      opener.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    it('restores focus to the default trigger after Escape', async () => {
+      const viewer = await adapter.mount({ src: 'thumb.jpg' })
+      const trigger = viewer.getTrigger()!
+      trigger.focus()
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       await viewer.settle()
       viewer.getDialog()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       await viewer.settle()
-      expect(document.activeElement).toBe(opener)
+      expect(document.activeElement).toBe(trigger)
       viewer.unmount()
     })
 

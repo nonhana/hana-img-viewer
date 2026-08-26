@@ -26,13 +26,9 @@
     "@vitejs/plugin-react": "catalog:ui-react",
     "@vitejs/plugin-vue": "catalog:ui-vue",
     "@vue/server-renderer": "catalog:ui-vue",
-    "element-plus": "catalog:ui-vue",
     "react": "catalog:ui-react",
     "react-dom": "catalog:ui-react",
-    "sass": "catalog:ui-vue",
     "typescript": "catalog:",
-    "unplugin-auto-import": "catalog:ui-vue",
-    "unplugin-vue-components": "catalog:ui-vue",
     "vite": "catalog:",
     "vue": "catalog:ui-vue",
     "vue-tsc": "catalog:ui-vue"

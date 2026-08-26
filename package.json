@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.23.0",
   "scripts": {
-    "dev:demo": "pnpm -F hana-img-viewer-demo dev",
+    "dev": "pnpm -F hana-img-viewer-demo dev",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "build:vue": "pnpm -F hana-img-viewer build",
     "build:react": "pnpm -F hana-img-viewer-react build",
@@ -47,7 +47,6 @@
     "jsdom": "catalog:",
     "react": "catalog:ui-react",
     "react-dom": "catalog:ui-react",
-    "sass": "catalog:ui-vue",
     "throttle-debounce": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

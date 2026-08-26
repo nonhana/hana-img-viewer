@@ -29,15 +29,6 @@ const ReactHarness = ({ options, requests }: { options: DomMountOptions, request
     },
   }
 
-  if (options.trigger === 'custom') {
-    props.children = ({ open }) => (
-      <>
-        <button type="button">Other action</button>
-        <button className="contract-opener" type="button" onClick={open}>Open preview</button>
-      </>
-    )
-  }
-
   return <HanaImgViewer {...props} />
 }
 
@@ -60,7 +51,7 @@ class ReactHandle implements DomHandle {
   }
 
   getTrigger() {
-    return this.host.querySelector<HTMLElement>('.contract-opener, .hana-img-viewer-thumbnail')
+    return this.host.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
   }
 
   getDialog() {

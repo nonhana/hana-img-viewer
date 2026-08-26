@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 
 /** Public props for the React image viewer. */
 export interface HanaImgViewerProps {
@@ -33,6 +33,4 @@ export interface HanaImgViewerProps {
   className?: string
   /** Style applied to the visible thumbnail root. */
   style?: CSSProperties
-  /** Custom trigger. The consumer owns its semantics and styling. */
-  children?: (controls: { open: () => void }) => ReactNode
 }

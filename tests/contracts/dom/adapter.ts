@@ -16,7 +16,6 @@ export interface DomMountOptions {
   maxZoom?: number
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
-  trigger?: 'default' | 'custom'
 }
 
 export interface DomHandle {

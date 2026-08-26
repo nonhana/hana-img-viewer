@@ -20,8 +20,6 @@ export default antfu({
     '**/node_modules/**',
     '**/*.d.ts',
     '_notes/**',
-    'apps/demo/components.d.ts',
-    'apps/demo/auto-imports.d.ts',
   ],
   rules: {
     'antfu/top-level-function': 'off',

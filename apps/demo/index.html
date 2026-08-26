@@ -4,57 +4,53 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HanaImgViewer Demos</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-        background: #fff;
-        color: #213547;
-        display: grid;
-        place-items: center;
-        min-height: 100vh;
-      }
-      main {
-        text-align: center;
-      }
-      h1 {
-        font-size: 24px;
-      }
-      p {
-        color: #666;
-      }
-      nav {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      nav a {
-        display: block;
-        padding: 12px 24px;
-        border: 1px solid #d7d7d7;
-        border-radius: 8px;
-        background: #f7f7f7;
-        color: #213547;
-        text-decoration: none;
-      }
-      nav a:hover {
-        border-color: #646cff;
-        color: #646cff;
-      }
-    </style>
+    <title>hana-img-viewer · demos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Serif:wght@400;700&display=swap"
+    />
+    <link rel="stylesheet" href="/src/shared/theme.css" />
   </head>
   <body>
-    <main>
-      <h1>HanaImgViewer Demos</h1>
-      <p>SPA: client-side rendering. SSR: build-time prerendered with hydration.</p>
-      <nav>
-        <a href="/vue.html">Vue SPA</a>
-        <a href="/react.html">React SPA</a>
-        <a href="/vue-ssr.html">Vue SSR</a>
-        <a href="/react-ssr.html">React SSR</a>
+    <main class="landing">
+      <header class="landing-hero">
+        <h1>hana-img-viewer demos</h1>
+        <p class="landing-tagline">
+          Currently supports:
+        </p>
+        <ul class="landing-tags">
+          <li class="demo-badge">Vue 3 & SSR</li>
+          <li class="demo-badge">React 19 & SSR</li>
+        </ul>
+      </header>
+      <nav class="landing-grid" aria-label="Demo pages">
+        <a class="demo-card landing-card" href="/vue.html">
+          <span class="demo-meta">SPA · client rendered</span>
+          <h2>Vue</h2>
+          <span class="landing-card__arrow">Open demo →</span>
+        </a>
+        <a class="demo-card landing-card" href="/react.html">
+          <span class="demo-meta">SPA · client rendered</span>
+          <h2>React</h2>
+          <span class="landing-card__arrow">Open demo →</span>
+        </a>
+        <a class="demo-card landing-card" href="/vue-ssr.html">
+          <span class="demo-meta">SSR · prerendered + hydrated</span>
+          <h2>Vue SSR</h2>
+          <span class="landing-card__arrow">Open demo →</span>
+        </a>
+        <a class="demo-card landing-card" href="/react-ssr.html">
+          <span class="demo-meta">SSR · prerendered + hydrated</span>
+          <h2>React SSR</h2>
+          <span class="landing-card__arrow">Open demo →</span>
+        </a>
       </nav>
+      <footer class="landing-footer">
+        <a class="demo-link" href="https://github.com/nonhana/hana-img-viewer" target="_blank" rel="noreferrer">GitHub</a>
+        <span class="demo-meta">MIT licensed</span>
+      </footer>
     </main>
   </body>
 </html>

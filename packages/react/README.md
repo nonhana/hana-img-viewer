@@ -57,18 +57,6 @@ export default function App() {
 }
 ```
 
-Custom trigger:
-
-```tsx
-<HanaImgViewer src="/images/post-thumb.jpg">
-  {({ open }) => (
-    <button type="button" onClick={open}>
-      Open preview
-    </button>
-  )}
-</HanaImgViewer>
-```
-
 ## API
 
 ### Props
@@ -89,8 +77,5 @@ Custom trigger:
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 | `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
 | `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
-| `children` | `(controls: { open: () => void }) => ReactNode` | `undefined` | Render a custom trigger with the provided `open` function. |
 
 `open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.
-
-Custom triggers own their semantics and styles. When a focused custom trigger opens the viewer, focus returns to that exact element after closing. The default image trigger already supports click, Enter, and Space.

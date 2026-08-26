@@ -1,0 +1,611 @@
+/*
+ * Grey Flowers light theme, transplanted as plain CSS custom properties.
+ * Single source of visual truth for the demo MPA: the landing page links it
+ * directly and every app entry imports it from its client entry module.
+ */
+
+:root {
+  /* Accent */
+  --hana-blue: oklch(0.5 0.1102 250.04);
+  --hana-blue-50: oklch(0.96 0.02 200.64);
+  --hana-blue-150: oklch(0.93 0.0305 212.05);
+  --hana-blue-200: oklch(0.84 0.0632 214.03);
+
+  /* Neutrals */
+  --primary-100: oklch(0.95 0.0059 239.82);
+  --primary-400: oklch(0.79 0.0259 246.28);
+  --line: oklch(0.73 0.0336 251.22 / 0.35);
+  --line-soft: oklch(0.73 0.0336 251.22 / 0.2);
+
+  /* Text */
+  --text: oklch(0.16 0.0413 254.41 / 53.33%);
+  --text-strong: oklch(0.26 0 0);
+
+  /* Surfaces */
+  --surface: oklch(1 0 0);
+  --paper: oklch(0.98 0 0);
+  --grid-line: oklch(0.91 0.011 234.83 / 0.6);
+
+  /* Type */
+  --font-serif: 'Noto Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Shape */
+  --radius: 8px;
+  --shadow-lift:
+    0 4px 6px -1px rgb(15 23 42 / 0.1),
+    0 2px 4px -2px rgb(15 23 42 / 0.1);
+}
+
+/* Base ------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(
+      0deg,
+      transparent 24%,
+      var(--grid-line) 25%,
+      var(--grid-line) 26%,
+      transparent 27%,
+      transparent 74%,
+      var(--grid-line) 75%,
+      var(--grid-line) 76%,
+      transparent 77%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 24%,
+      var(--grid-line) 25%,
+      var(--grid-line) 26%,
+      transparent 27%,
+      transparent 74%,
+      var(--grid-line) 75%,
+      var(--grid-line) 76%,
+      transparent 77%
+    ),
+    linear-gradient(oklch(0.84 0.0632 214.03 / 0.12), oklch(0.84 0.0632 214.03 / 0.12));
+  background-size:
+    100px 100px,
+    100px 100px,
+    auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1.3;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--hana-blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--hana-blue-150);
+  color: var(--text-strong);
+}
+
+/* Shared primitives ------------------------------------------------------ */
+
+/* Mono metadata label: the Grey Flowers eyebrow treatment. */
+.demo-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text);
+}
+
+/* Mono pill badge. */
+.demo-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.demo-badge--accent {
+  border-color: var(--hana-blue);
+  color: var(--hana-blue);
+  background: var(--hana-blue-50);
+}
+
+/* Text link with the growing gradient underline. */
+.demo-link {
+  color: var(--hana-blue);
+  text-decoration: none;
+  background-image: linear-gradient(to right, var(--hana-blue), var(--hana-blue));
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 0% 2px;
+  cursor: pointer;
+}
+
+/* Standard button: quiet at rest, blue wash on hover. */
+.demo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-strong);
+  background: var(--surface);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Card: white surface, 8px radius, soft lift. */
+.demo-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Inline code fragment inside prose. */
+.demo-code-inline {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--hana-blue-50);
+  color: var(--text-strong);
+}
+
+/* Code block: mono body inside a bordered panel with caption + copy. */
+.code-block {
+  margin: 0;
+  border: 2px solid var(--primary-400);
+  border-radius: var(--radius);
+  background: var(--primary-100);
+  overflow: hidden;
+}
+
+.code-block__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.code-block__file {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text);
+}
+
+.code-block__copy {
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.code-block__body {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-strong);
+  tab-size: 2;
+}
+
+.code-block__body code {
+  font-family: inherit;
+}
+
+/* App page shell ---------------------------------------------------------- */
+
+/*
+ * The header and everything rendered before the first thumbnail <img> must
+ * stay div-free: the dist verifier captures #app content up to the first
+ * literal </div> and requires an <img> inside it.
+ */
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--line-soft);
+  background: oklch(0.98 0 0 / 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.page-header__nav {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-strong);
+}
+
+.page-header__name {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.page-header__links {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.page-header__github {
+  display: inline-flex;
+  color: var(--text-strong);
+}
+
+.ssr-note {
+  margin: 0;
+  padding: 6px 24px;
+  text-align: center;
+  background: var(--hana-blue-50);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.demo-page {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+.demo-footer {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 14px;
+}
+
+/* Sections ----------------------------------------------------------------- */
+
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-margin-top: 88px;
+}
+
+.demo-section__eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.demo-section__title {
+  font-size: 28px;
+}
+
+.demo-section__title::before {
+  content: '# ';
+  font-weight: 400;
+  color: var(--hana-blue-200);
+}
+
+.demo-section__desc {
+  max-width: 640px;
+  font-size: 15.5px;
+}
+
+.demo-section__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 10px;
+}
+
+@media (max-width: 860px) {
+  .demo-section__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Demo stage: the live example card. */
+.demo-stage {
+  margin: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.demo-stage__note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--text);
+}
+
+.demo-stage__row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.demo-stage__cell {
+  flex: 1 1 150px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Sizing hook applied to the viewer's thumbnail root. */
+.demo-thumb {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+}
+
+/* Native dialog for the custom-container section. */
+.demo-dialog-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.demo-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+.demo-dialog-panel {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.demo-dialog-panel h3 {
+  font-size: 18px;
+}
+
+.demo-dialog-scroll {
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+}
+
+.demo-dialog-spacer {
+  height: 1200px;
+}
+
+/* Landing ---------------------------------------------------------------- */
+
+.landing {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  min-height: 100vh;
+}
+
+.landing-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.landing-hero h1 {
+  font-size: clamp(40px, 7vw, 64px);
+  letter-spacing: -0.02em;
+}
+
+.landing-tagline {
+  max-width: 560px;
+  font-size: 17px;
+}
+
+.landing-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .landing-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.landing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.landing-card h2 {
+  font-size: 24px;
+}
+
+.landing-card p {
+  font-size: 14.5px;
+}
+
+.landing-card__arrow {
+  margin-top: auto;
+  padding-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--hana-blue);
+}
+
+.landing-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 14px;
+}
+
+/* Motion ----------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .demo-link {
+    transition: background-size 500ms ease-out;
+  }
+
+  .demo-link:hover {
+    background-position: left bottom;
+    background-size: 100% 2px;
+  }
+
+  .demo-button {
+    transition:
+      background-color 300ms ease-out,
+      border-color 300ms ease-out,
+      color 300ms ease-out,
+      transform 300ms ease-out;
+  }
+
+  .demo-button:hover {
+    background: var(--hana-blue-150);
+    border-color: var(--hana-blue-150);
+    color: var(--hana-blue);
+  }
+
+  .demo-button:active {
+    transform: scale(0.95);
+  }
+
+  .code-block__copy {
+    transition:
+      background-color 300ms ease-out,
+      color 300ms ease-out,
+      border-color 300ms ease-out;
+  }
+
+  .code-block__copy:hover {
+    background: var(--hana-blue-150);
+    border-color: var(--hana-blue-150);
+    color: var(--hana-blue);
+  }
+
+  .landing-card {
+    transition:
+      transform 300ms ease-out,
+      border-color 300ms ease-out,
+      box-shadow 300ms ease-out;
+  }
+
+  .landing-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--hana-blue-200);
+  }
+
+  .page-header__github {
+    transition: color 300ms ease-out;
+  }
+
+  .page-header__github:hover {
+    color: var(--hana-blue);
+  }
+}
