@@ -11,6 +11,7 @@ defineOptions({ name: 'HanaImgViewer', inheritAttrs: false })
 const props = withDefaults(
   defineProps<HanaImgViewerProps>(),
   {
+    as: 'div',
     alt: '',
     enableZoom: true,
     minZoom: 0.5,
@@ -24,8 +25,8 @@ const openModel = defineModel<boolean>('open', { default: false })
 
 const attrs = useAttrs()
 
-const originRef = useTemplateRef('originRef')
-const thumbnailRef = useTemplateRef('thumbnailRef')
+const originRef = useTemplateRef<HTMLElement>('originRef')
+const thumbnailRef = useTemplateRef<HTMLImageElement>('thumbnailRef')
 
 const hydrated = ref(false)
 
@@ -118,7 +119,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="originRef" class="hana-img-viewer-thumbnail-root" :class="attrs.class" :style="thumbnailStyle" v-bind="rootAttrs">
+  <component :is="as" ref="originRef" class="hana-img-viewer-thumbnail-root" :class="attrs.class" :style="thumbnailStyle" v-bind="rootAttrs">
     <slot name="thumbnail" :open="requestOpen">
       <img
         ref="thumbnailRef"
@@ -132,7 +133,7 @@ onMounted(() => {
         @keydown.space.prevent="requestOpen"
       >
     </slot>
-  </div>
+  </component>
 
   <Teleport v-if="activeTarget && phase !== 'closed'" :to="activeTarget">
     <ViewerOverlay

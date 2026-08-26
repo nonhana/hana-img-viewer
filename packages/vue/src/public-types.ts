@@ -1,6 +1,8 @@
 export interface HanaImgViewerProps {
   /** Thumbnail and initial preview source. */
   src: string
+  /** HTML element used for the visible thumbnail root. @default 'div' */
+  as?: keyof HTMLElementTagNameMap
   /** Higher-quality source that silently replaces `src` after loading. */
   previewSrc?: string
   /** Alternative text for both images. @default '' */
