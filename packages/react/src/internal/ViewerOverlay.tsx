@@ -32,6 +32,7 @@ interface ViewerOverlayProps {
   maxZoom: number
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
+  showCloseButton: boolean
   onRequestClose: () => void
   onOpenFinished: () => void
   onCloseFinished: () => void
@@ -115,6 +116,7 @@ export const ViewerOverlay = ({
   maxZoom,
   closeOnBackdropClick,
   closeOnEscape,
+  showCloseButton,
   onRequestClose,
   onOpenFinished,
   onCloseFinished,
@@ -123,6 +125,7 @@ export const ViewerOverlay = ({
   const backdropRef = useRef<HTMLDivElement>(null)
   const shellRef = useRef<HTMLDivElement>(null)
   const previewRef = useRef<HTMLImageElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const bodyLockOwnerRef = useRef<object>({})
   const transformRef = useRef<Transform>({ x: 0, y: 0, scale: 1 })
   const animationGenerationRef = useRef(0)
@@ -354,6 +357,8 @@ export const ViewerOverlay = ({
         { transform: targetTransform },
       ])
       animate(backdrop, [{ opacity: fromOpacity }, { opacity: 1 }])
+      if (closeButtonRef.current)
+        animate(closeButtonRef.current, [{ opacity: fromOpacity }, { opacity: 1 }])
     }
     else if (phase === 'closing') {
       const computedShellTransform = getComputedStyle(shell).transform
@@ -376,6 +381,12 @@ export const ViewerOverlay = ({
         { opacity: Number.isFinite(computedOpacity) ? computedOpacity : 1 },
         { opacity: 0 },
       ])
+      if (closeButtonRef.current) {
+        animate(closeButtonRef.current, [
+          { opacity: Number.isFinite(computedOpacity) ? computedOpacity : 1 },
+          { opacity: 0 },
+        ])
+      }
     }
     else {
       previousAnimationPhaseRef.current = phase
@@ -690,6 +701,30 @@ export const ViewerOverlay = ({
         className="hana-img-viewer-backdrop"
         aria-hidden="true"
       />
+      {showCloseButton && (
+        <button
+          ref={closeButtonRef}
+          type="button"
+          className="hana-img-viewer-close-button"
+          aria-label="Close"
+          onClick={onRequestClose}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      )}
       <div
         ref={shellRef}
         className="hana-img-viewer-flip-shell"

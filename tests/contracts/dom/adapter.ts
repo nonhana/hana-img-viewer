@@ -15,6 +15,7 @@ export interface DomMountOptions {
   maxZoom?: number
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
+  showCloseButton?: boolean
 }
 
 export interface DomHandle {

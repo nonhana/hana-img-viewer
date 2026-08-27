@@ -29,6 +29,7 @@ export const HanaImgViewer = ({
   maxZoom = 10,
   closeOnBackdropClick = true,
   closeOnEscape = true,
+  showCloseButton = true,
   className,
   style,
 }: HanaImgViewerProps) => {
@@ -182,6 +183,7 @@ export const HanaImgViewer = ({
               maxZoom={maxZoom}
               closeOnBackdropClick={closeOnBackdropClick}
               closeOnEscape={closeOnEscape}
+              showCloseButton={showCloseButton}
               onRequestClose={requestClose}
               onOpenFinished={finishOpening}
               onCloseFinished={finishClosing}

@@ -7,11 +7,14 @@ const artImg = 'https://pixiv-r2.caelum.moe/121909597.png'
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 
 const snippet = `<template>
-  <!-- Backdrop clicks are ignored; press Escape to close -->
+  <!-- Backdrop clicks are ignored; press Escape or the close button -->
   <HanaImgViewer :close-on-backdrop-click="false" src="/a.png" alt="A" />
 
-  <!-- Escape is ignored; click the backdrop to close -->
+  <!-- Escape is ignored; click the backdrop or the close button -->
   <HanaImgViewer :close-on-escape="false" src="/b.png" alt="B" />
+
+  <!-- No close button; backdrop and Escape still close -->
+  <HanaImgViewer :show-close-button="false" src="/c.png" alt="C" />
 </template>`
 </script>
 
@@ -20,11 +23,13 @@ const snippet = `<template>
     id="close-behavior"
     index="07"
     title="Close behavior"
-    :apis="['closeOnBackdropClick', 'closeOnEscape']"
+    :apis="['closeOnBackdropClick', 'closeOnEscape', 'showCloseButton']"
   >
     <template #description>
-      Both escape hatches are opt-out. The left viewer ignores backdrop clicks — press Escape
-      instead. The right one ignores Escape — click the backdrop.
+      All three escape hatches are opt-out: backdrop click, Escape, and the corner
+      <code class="demo-code-inline">showCloseButton</code>. The left viewer ignores
+      backdrop clicks; the middle one ignores Escape; the right one hides the close
+      button.
     </template>
     <figure class="demo-card demo-stage">
       <span class="demo-stage__row">
@@ -33,7 +38,7 @@ const snippet = `<template>
             class="demo-thumb"
             :close-on-backdrop-click="false"
             :src="artImg"
-            alt="Closes with Escape only"
+            alt="Closes with Escape or the close button"
           />
           <code class="demo-code-inline">closeOnBackdropClick: false</code>
         </span>
@@ -42,9 +47,18 @@ const snippet = `<template>
             class="demo-thumb"
             :close-on-escape="false"
             :src="gardenImg"
-            alt="Closes with a backdrop click only"
+            alt="Closes with a backdrop click or the close button"
           />
           <code class="demo-code-inline">closeOnEscape: false</code>
+        </span>
+        <span class="demo-stage__cell">
+          <HanaImgViewer
+            class="demo-thumb"
+            :show-close-button="false"
+            :src="artImg"
+            alt="Closes with the backdrop or Escape only"
+          />
+          <code class="demo-code-inline">showCloseButton: false</code>
         </span>
       </span>
       <figcaption class="demo-stage__note">

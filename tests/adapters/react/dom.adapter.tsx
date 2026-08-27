@@ -21,6 +21,7 @@ const ReactHarness = ({ options, requests }: { options: DomMountOptions, request
     maxZoom: options.maxZoom,
     closeOnBackdropClick: options.closeOnBackdropClick,
     closeOnEscape: options.closeOnEscape,
+    showCloseButton: options.showCloseButton,
     defaultOpen: options.visibility?.kind === 'local' ? options.visibility.initialOpen : undefined,
     open: options.visibility?.kind === 'external' ? options.visibility.open : undefined,
     onOpenChange: (nextOpen) => {

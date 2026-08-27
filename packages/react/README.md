@@ -74,6 +74,7 @@ export default function App() {
 | `maxZoom` | `number` | `10` | Maximum zoom. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
 | `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
 | `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
 

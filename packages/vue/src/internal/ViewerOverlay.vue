@@ -24,6 +24,7 @@ const props = defineProps<{
   maxZoom: number
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
+  showCloseButton: boolean
 }>()
 
 const emit = defineEmits<{
@@ -46,6 +47,7 @@ const overlayRef = useTemplateRef('overlayRef')
 const backdropRef = useTemplateRef('backdropRef')
 const shellRef = useTemplateRef('shellRef')
 const previewRef = useTemplateRef('previewRef')
+const closeButtonRef = useTemplateRef('closeButtonRef')
 
 const destinationRect = ref<{ width: number, height: number } | null>(null)
 const displaySrc = ref(props.src)
@@ -207,6 +209,8 @@ const animatePhase = async () => {
       { transform: currentTransition.openingTargetTransform ?? 'translate(0, 0) scale(1)' },
     ])
     animate(backdrop, [{ opacity: fromOpacity }, { opacity: 1 }])
+    if (closeButtonRef.value)
+      animate(closeButtonRef.value, [{ opacity: fromOpacity }, { opacity: 1 }])
   }
   else {
     if (previewRef.value)
@@ -216,6 +220,8 @@ const animatePhase = async () => {
       { transform: originTransform },
     ])
     animate(backdrop, [{ opacity: fromOpacity }, { opacity: 0 }])
+    if (closeButtonRef.value)
+      animate(closeButtonRef.value, [{ opacity: fromOpacity }, { opacity: 0 }])
   }
 
   try {
@@ -508,6 +514,19 @@ onBeforeUnmount(() => {
     tabindex="-1"
   >
     <div ref="backdropRef" class="hana-img-viewer-backdrop" aria-hidden="true" @click="onBackdropClick" />
+    <button
+      v-if="showCloseButton"
+      ref="closeButtonRef"
+      type="button"
+      class="hana-img-viewer-close-button"
+      aria-label="Close"
+      @click="emit('requestClose')"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    </button>
     <div
       ref="shellRef"
       class="hana-img-viewer-flip-shell"

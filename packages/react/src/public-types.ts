@@ -27,6 +27,8 @@ export interface HanaImgViewerProps {
   closeOnBackdropClick?: boolean
   /** Close when the focused overlay receives Escape. @default true */
   closeOnEscape?: boolean
+  /** Show an explicit close button in the top-right corner of the overlay. @default true */
+  showCloseButton?: boolean
   /** Class applied to the visible thumbnail root. */
   className?: string
   /** Style applied to the visible thumbnail root. */

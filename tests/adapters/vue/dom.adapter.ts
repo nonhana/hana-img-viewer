@@ -19,6 +19,7 @@ const VueHarness = defineComponent({
         'maxZoom': options.maxZoom,
         'closeOnBackdropClick': options.closeOnBackdropClick,
         'closeOnEscape': options.closeOnEscape,
+        'showCloseButton': options.showCloseButton,
         'onUpdate:open': (nextOpen: boolean) => {
           ;(props.requests as boolean[]).push(nextOpen)
         },

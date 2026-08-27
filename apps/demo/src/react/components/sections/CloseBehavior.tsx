@@ -5,11 +5,14 @@ import DemoSection from '../DemoSection'
 const artImg = 'https://pixiv-r2.caelum.moe/121909597.png'
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 
-const snippet = `{/* Backdrop clicks are ignored; press Escape to close */}
+const snippet = `{/* Backdrop clicks are ignored; press Escape or the close button */}
 <HanaImgViewer closeOnBackdropClick={false} src="/a.png" alt="A" />
 
-{/* Escape is ignored; click the backdrop to close */}
-<HanaImgViewer closeOnEscape={false} src="/b.png" alt="B" />`
+{/* Escape is ignored; click the backdrop or the close button */}
+<HanaImgViewer closeOnEscape={false} src="/b.png" alt="B" />
+
+{/* No close button; backdrop and Escape still close */}
+<HanaImgViewer showCloseButton={false} src="/c.png" alt="C" />`
 
 export default function CloseBehavior() {
   return (
@@ -17,11 +20,14 @@ export default function CloseBehavior() {
       id="close-behavior"
       index="07"
       title="Close behavior"
-      apis={['closeOnBackdropClick', 'closeOnEscape']}
+      apis={['closeOnBackdropClick', 'closeOnEscape', 'showCloseButton']}
       description={(
         <>
-          Both escape hatches are opt-out. The left viewer ignores backdrop clicks — press
-          Escape instead. The right one ignores Escape — click the backdrop.
+          All three escape hatches are opt-out: backdrop click, Escape, and the corner
+          {' '}
+          <code className="demo-code-inline">showCloseButton</code>
+          . The left viewer ignores backdrop clicks; the middle one ignores Escape; the
+          right one hides the close button.
         </>
       )}
     >
@@ -32,7 +38,7 @@ export default function CloseBehavior() {
               className="demo-thumb"
               closeOnBackdropClick={false}
               src={artImg}
-              alt="Closes with Escape only"
+              alt="Closes with Escape or the close button"
             />
             <code className="demo-code-inline">closeOnBackdropClick: false</code>
           </span>
@@ -41,9 +47,18 @@ export default function CloseBehavior() {
               className="demo-thumb"
               closeOnEscape={false}
               src={gardenImg}
-              alt="Closes with a backdrop click only"
+              alt="Closes with a backdrop click or the close button"
             />
             <code className="demo-code-inline">closeOnEscape: false</code>
+          </span>
+          <span className="demo-stage__cell">
+            <HanaImgViewer
+              className="demo-thumb"
+              showCloseButton={false}
+              src={artImg}
+              alt="Closes with the backdrop or Escape only"
+            />
+            <code className="demo-code-inline">showCloseButton: false</code>
           </span>
         </span>
         <figcaption className="demo-stage__note">

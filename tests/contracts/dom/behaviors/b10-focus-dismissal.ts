@@ -14,6 +14,22 @@ export const registerB10FocusDismissal = (adapter: DomAdapter) => {
       expect(document.activeElement).toBe(trigger)
       viewer.unmount()
     })
+    it('closes via the explicit close button and omits it when hidden', async () => {
+      const viewer = await adapter.mount({ src: 'thumb.jpg' })
+      viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      await viewer.settle()
+      const closeButton = viewer.getDialog()!.querySelector<HTMLButtonElement>('.hana-img-viewer-close-button')
+      expect(closeButton).not.toBeNull()
+      closeButton!.click()
+      await viewer.settle()
+      expect(viewer.getDialog()).toBeNull()
+
+      const hidden = await adapter.mount({ src: 'hidden.jpg', showCloseButton: false })
+      hidden.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      await hidden.settle()
+      expect(hidden.getDialog()!.querySelector('.hana-img-viewer-close-button')).toBeNull()
+      hidden.unmount()
+    })
 
     it('closes only the focused overlay and keeps disabled paths available to the host', async () => {
       const first = await adapter.mount({ src: 'one.jpg' })
