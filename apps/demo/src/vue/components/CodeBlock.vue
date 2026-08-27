@@ -21,7 +21,6 @@ async function copy() {
     }, 1600)
   }
   catch {
-    // Clipboard access denied; leave the button label unchanged.
   }
 }
 

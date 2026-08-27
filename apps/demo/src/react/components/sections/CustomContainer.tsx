@@ -6,8 +6,6 @@ import DemoSection from '../DemoSection'
 
 const artImg = 'https://pixiv-r2.caelum.moe/121909597.png'
 
-// Joined per line: the prerender guard rejects SSR bundles containing bare
-// `import ... from 'react'` lines, which a template literal would emit verbatim.
 const snippet = [
   'import { HanaImgViewer } from \'hana-img-viewer-react\'',
   'import { useState } from \'react\'',
@@ -36,8 +34,6 @@ export default function CustomContainer() {
   const panelRef = useRef<HTMLDivElement>(null)
   const wasVisibleRef = useRef(false)
 
-  // Escape is bound natively rather than through onKeyDown: the panel is a
-  // non-interactive element, so a React handler would trip jsx-a11y.
   useEffect(() => {
     const panel = panelRef.current
     if (visible) {

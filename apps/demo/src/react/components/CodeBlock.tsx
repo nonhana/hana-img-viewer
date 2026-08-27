@@ -16,7 +16,6 @@ export default function CodeBlock({ file, code }: { file: string, code: string }
       resetTimer.current = setTimeout(setCopied, 1600, false)
     }
     catch {
-      // Clipboard access denied; leave the button label unchanged.
     }
   }
 

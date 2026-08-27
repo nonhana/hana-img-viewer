@@ -8,7 +8,6 @@ import ProgressiveQuality from './components/sections/ProgressiveQuality.vue'
 import TransitionDuration from './components/sections/TransitionDuration.vue'
 import ZoomControl from './components/sections/ZoomControl.vue'
 
-// The SSR entries pass true so the prerendered and hydrated DOM stay identical.
 withDefaults(defineProps<{ ssr?: boolean }>(), { ssr: false })
 </script>
 

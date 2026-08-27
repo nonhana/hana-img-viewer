@@ -5,8 +5,6 @@ import DemoSection from '../DemoSection'
 
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 
-// Joined per line: the prerender guard rejects SSR bundles containing bare
-// `import ... from 'react'` lines, which a template literal would emit verbatim.
 const snippet = [
   'import { HanaImgViewer } from \'hana-img-viewer-react\'',
   'import { useState } from \'react\'',

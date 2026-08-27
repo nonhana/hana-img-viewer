@@ -43,7 +43,7 @@ pnpm changeset status
 pnpm test:dist
 ```
 
-There is no automated browser E2E suite. `pnpm dev:demo` only verifies source-backed SPA interaction. For SSR hydration, build and use the production preview:
+There is no automated browser E2E suite. `pnpm dev` only verifies source-backed SPA interaction. For SSR hydration, build and use the production preview:
 
 ```sh
 pnpm -F hana-img-viewer-demo build

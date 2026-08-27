@@ -4,11 +4,6 @@ import GithubSVG from './GithubSVG.vue'
 defineProps<{ ssr: boolean }>()
 </script>
 
-<!--
-  Rendered before the hero thumbnail, so it must not emit any </div>:
-  the dist verifier captures #app content up to the first closing div
-  and requires an <img> inside it. Stick to header/nav/a/span/strong.
--->
 <template>
   <header
     class="

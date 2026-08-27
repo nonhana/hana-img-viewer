@@ -1,54 +1,31 @@
-/*
- * Tailwind CSS v4 entry — the single source of truth for demo styling.
- *
- * Layered content only:
- *   1. the `tailwindcss` import (theme, preflight, utilities),
- *   2. `@theme` design tokens mirrored verbatim from the legacy
- *      src/shared/theme.css `:root` block,
- *   3. a bounded `@layer base` for globals that cannot live in markup.
- *
- * Class-name conversions live in markup; do not add component rules here.
- */
 @import 'tailwindcss';
 
 @theme {
-  /* Accent */
   --color-hana-blue: oklch(0.5 0.1102 250.04);
   --color-hana-blue-50: oklch(0.96 0.02 200.64);
   --color-hana-blue-150: oklch(0.93 0.0305 212.05);
   --color-hana-blue-200: oklch(0.84 0.0632 214.03);
 
-  /* Neutrals */
   --color-primary-100: oklch(0.95 0.0059 239.82);
   --color-primary-400: oklch(0.79 0.0259 246.28);
   --color-line: oklch(0.73 0.0336 251.22 / 0.35);
   --color-line-soft: oklch(0.73 0.0336 251.22 / 0.2);
 
-  /* Text (--ink replaces legacy --text to read as a color utility name). */
   --color-ink: oklch(0.16 0.0413 254.41 / 53.33%);
   --color-ink-strong: oklch(0.26 0 0);
 
-  /* Surfaces */
   --color-surface: oklch(1 0 0);
   --color-paper: oklch(0.98 0 0);
   --color-grid-line: oklch(0.91 0.011 234.83 / 0.6);
 
-  /* Type */
   --font-serif: 'Noto Serif', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Shape */
   --shadow-lift:
     0 4px 6px -1px rgb(15 23 42 / 0.1),
     0 2px 4px -2px rgb(15 23 42 / 0.1);
 }
 
-/*
- * Bounded globals — exactly the four constructs that cannot live in markup.
- * (`*`, `p`, and `button` sizing plus box-sizing are already covered by
- * Tailwind Preflight; the body background paints the canvas via root
- * propagation regardless of element heights.)
- */
 @layer base {
   body {
     margin: 0;
@@ -81,7 +58,6 @@
         var(--color-grid-line) 76%,
         transparent 77%
       ),
-      /* Legacy literal for --hana-blue-200 at 12% alpha. */
       linear-gradient(oklch(0.84 0.0632 214.03 / 0.12), oklch(0.84 0.0632 214.03 / 0.12));
     background-size:
       100px 100px,
@@ -102,13 +78,6 @@
 
 }
 
-/*
- * `::focus-visible` must stay unlayered: the viewer library ships an
- * unlayered `.hana-img-viewer-overlay { outline: none }`, and layered rules
- * can never beat it. Keeping this global unlayered preserves the legacy
- * cascade authority (theme.css was unlayered too) so keyboard focus rings
- * survive inside library-rendered overlays.
- */
 :focus-visible {
   outline: 2px solid var(--color-hana-blue);
   outline-offset: 2px;

@@ -1,12 +1,12 @@
 # Build
 
-The root `package.json` pins pnpm 11.23.0. Install dependencies from the repository root with `pnpm install`.
+The root `package.json` pins pnpm 11.24.0. Install dependencies from the repository root with `pnpm install`.
 
 ## Root Commands
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev:demo` | Start the source-backed SPA demo dev server (`vue.html`, `react.html`). |
+| `pnpm dev` | Start the source-backed SPA demo dev server (`vue.html`, `react.html`). |
 | `pnpm build:vue` | Build only `hana-img-viewer`. |
 | `pnpm build:react` | Build only `hana-img-viewer-react`. |
 | `pnpm build` | Run all workspace `build` scripts serially; this builds both libraries and the MPA demo. |
@@ -37,7 +37,7 @@ pnpm -F hana-img-viewer-demo typecheck
 ## Release Automation
 
 - `.github/workflows/release.yml` uses Changesets only to create or update the version/changelog PR.
-- Merging that PR triggers `publish-vue.yml` and/or `release-react.yml` according to which public package manifest changed.
+- Merging that PR triggers `publish-vue.yml` and/or `publish-react.yml` according to which public package manifest changed.
 - Each publish workflow rebuilds and validates only its framework, packs a tarball, publishes through npm, then creates the package-scoped tag and GitHub release.
 - The workflows are idempotent around npm, tags, and GitHub releases and can be rerun manually on `main`.
-- npm Trusted Publisher configuration must use the exact publish workflow filename: `publish-vue.yml` for Vue and `release-react.yml` for React. React's published `0.0.0` bootstrap release means the React workflow can use OIDC without an `NPM_TOKEN` secret.
+- npm Trusted Publisher configuration must use the exact publish workflow filename: `publish-vue.yml` for Vue and `publish-react.yml` for React. React's published `0.0.0` bootstrap release means the React workflow can use OIDC without an `NPM_TOKEN` secret.

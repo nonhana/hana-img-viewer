@@ -35,7 +35,7 @@ Keep JSX-visible lifecycle in React state or the reducer. Keep high-frequency DO
 
 ## Vue Ownership
 
-- `src/HanaImgViewer.vue` owns `v-model:open`, thumbnail and slot rendering, hydration-aware Teleport target selection, the active target, and focus restoration.
+- `src/HanaImgViewer.vue` owns `v-model:open`, thumbnail rendering, hydration-aware Teleport target selection, the active target, and focus restoration.
 - `src/internal/ViewerOverlay.vue` owns one overlay session's DOM, source enhancement, animation, gestures, focus, dismissal, and cleanup.
 - `src/internal/viewerState.ts` contains only pure phase transitions; `src/internal/bodyLock.ts` is the cross-instance body-lock ownership seam.
 - `src/public-types.ts` declares public props; `src/index.ts` creates the installable component identity, exports it as default and named, exports the props type, and imports the stylesheet.

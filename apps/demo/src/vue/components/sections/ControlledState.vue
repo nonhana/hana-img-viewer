@@ -7,8 +7,6 @@ import DemoSection from '../DemoSection.vue'
 const gardenImg = 'https://pixiv-r2.caelum.moe/129115891.png'
 const open = ref(false)
 
-// Joined per line: the prerender guard rejects SSR bundles containing bare
-// `import ... from 'vue'` lines, which a template literal would emit verbatim.
 const snippet = [
   '<script setup lang="ts">',
   'import { HanaImgViewer } from \'hana-img-viewer\'',

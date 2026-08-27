@@ -6,6 +6,7 @@
 - Use `pnpm lint` to check and `pnpm lint:fix` to format. The repository has no separate formatter; do not add one for routine changes.
 - Production source under `packages/vue/src`, `packages/react/src`, and `packages/core/src` enforces function expressions and arrow functions through `func-style`.
 - React rules apply to `packages/react` and `apps/demo/src/react`; the configuration disables React rules for Vue demo source (`apps/demo/src/vue`) and other TypeScript and JavaScript files. JSX accessibility checks remain enabled.
+- Demo source in `apps/demo` is additionally checked by `eslint-plugin-better-tailwindcss` against the utilities defined in `apps/demo/src/shared/app.css`; stylistic findings are fixable warnings, and inconsistent variable syntax plus concatenated, conflicting, deprecated, duplicate, or unknown classes are errors.
 - Tests may use non-null assertions; production source may not rely on that test-only override.
 
 ## TypeScript and Imports

@@ -5,11 +5,6 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import { discoverDemoEntries } from './scripts/entries.mjs'
 
-// SSR bundle：构建时预渲染用，产物自包含（noExternal 内联全部依赖），
-// 落在 node_modules/.cache/demo-ssr，不随 dist 发布。
-//
-// 预渲染只需要 HTML 结构，样式由 client bundle 的 css 资产负责；
-// 因此把一切 .css import 替换为空模块，避免 Node 直接加载 .mjs 时撞上 CSS 文件。
 const stripCss = {
   name: 'demo-strip-css',
   enforce: 'pre',

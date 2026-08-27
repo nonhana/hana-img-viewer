@@ -26,8 +26,6 @@ function onPanelKeydown(event: KeyboardEvent) {
     visible.value = false
 }
 
-// Joined per line: the prerender guard rejects SSR bundles containing bare
-// `import ... from 'vue'` lines, which a template literal would emit verbatim.
 const snippet = [
   '<script setup lang="ts">',
   'import { HanaImgViewer } from \'hana-img-viewer\'',
@@ -95,9 +93,6 @@ const snippet = [
       </figcaption>
     </figure>
     <CodeBlock file="CustomContainer.vue" :code="snippet" />
-    <!-- v-if sits on the Teleport itself so SSR emits no teleport anchors;
-         hydrating anchors whose content was never prerendered into <body>
-         corrupts the #app mount node. -->
     <Teleport v-if="visible" to="body">
       <div class="fixed inset-0 z-10000 grid place-items-center p-6">
         <button
