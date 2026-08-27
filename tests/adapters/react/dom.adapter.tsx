@@ -19,6 +19,7 @@ const ReactHarness = ({ options, requests }: { options: DomMountOptions, request
     container: containerFromOptions(options),
     minZoom: options.minZoom,
     maxZoom: options.maxZoom,
+    transitionDuration: options.transitionDuration,
     closeOnBackdropClick: options.closeOnBackdropClick,
     closeOnEscape: options.closeOnEscape,
     showCloseButton: options.showCloseButton,

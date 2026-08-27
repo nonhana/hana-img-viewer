@@ -25,6 +25,7 @@ const props = defineProps<{
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
   showCloseButton: boolean
+  transitionDuration: number
 }>()
 
 const emit = defineEmits<{
@@ -34,7 +35,6 @@ const emit = defineEmits<{
 }>()
 
 const DOUBLE_CLICK_ZOOM = 2
-const FLIP_DURATION = 300
 const FLIP_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
 interface TransitionRun {
@@ -175,9 +175,9 @@ const animatePhase = async () => {
         }
   transitionRun = currentTransition
 
-  const transitionDuration = Math.max(
+  const remainingDuration = Math.max(
     0,
-    FLIP_DURATION - (now - currentTransition.startedAt),
+    props.transitionDuration - (now - currentTransition.startedAt),
   )
   const animations: Animation[] = []
   ownedAnimations = animations
@@ -197,7 +197,7 @@ const animatePhase = async () => {
 
   const animate = (element: HTMLElement, keyframes: Keyframe[]) => {
     animations.push(element.animate(keyframes, {
-      duration: transitionDuration,
+      duration: remainingDuration,
       easing: FLIP_EASING,
       fill: 'forwards',
     }))

@@ -18,6 +18,7 @@ const props = withDefaults(
     closeOnBackdropClick: true,
     closeOnEscape: true,
     showCloseButton: true,
+    transitionDuration: 300,
   },
 )
 
@@ -141,6 +142,7 @@ onMounted(() => {
       :alt="alt"
       :min-zoom="minZoom"
       :max-zoom="maxZoom"
+      :transition-duration="transitionDuration"
       :close-on-backdrop-click="closeOnBackdropClick"
       :close-on-escape="closeOnEscape"
       :show-close-button="showCloseButton"

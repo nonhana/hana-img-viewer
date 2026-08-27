@@ -27,6 +27,7 @@ export const HanaImgViewer = ({
   container,
   minZoom = 0.5,
   maxZoom = 10,
+  transitionDuration = 300,
   closeOnBackdropClick = true,
   closeOnEscape = true,
   showCloseButton = true,
@@ -181,6 +182,7 @@ export const HanaImgViewer = ({
               alt={alt}
               minZoom={minZoom}
               maxZoom={maxZoom}
+              transitionDuration={transitionDuration}
               closeOnBackdropClick={closeOnBackdropClick}
               closeOnEscape={closeOnEscape}
               showCloseButton={showCloseButton}

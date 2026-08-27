@@ -107,6 +107,7 @@ export default function App() {
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
+| `transitionDuration` | `number` | `300` | Open and close FLIP transition duration in milliseconds. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 | `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
@@ -149,6 +150,7 @@ The thumbnail root is a `div` by default. Choose a non-void element compatible w
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
+| `transitionDuration` | `number` | `300` | Open and close FLIP transition duration in milliseconds. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 | `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |

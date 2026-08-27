@@ -4,17 +4,19 @@ import { getAnimationCalls, getPendingAnimationCount, resolvePendingAnimation, s
 
 export const registerB7TransitionOwnership = (adapter: DomAdapter) => {
   describe('[behavior/B7] FLIP transition ownership', () => {
-    it('animates between distinct origin and destination geometry', async () => {
+    it('honors the configured transitionDuration', async () => {
+      setAnimationSequence(['pending', 'pending', 'pending', 'pending'])
       setSelectorRect('.hana-img-viewer-thumbnail-root', { x: 10, y: 20, width: 100, height: 80 })
       setSelectorRect('.hana-img-viewer-flip-shell', { x: 100, y: 120, width: 800, height: 600 })
-      const viewer = await adapter.mount({ src: 'thumb.jpg' })
+
+      const viewer = await adapter.mount({ src: 'thumb.jpg', transitionDuration: 600 })
       viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       await viewer.settle()
 
-      const shellAnimation = getAnimationCalls().find(call => call.element.classList.contains('hana-img-viewer-flip-shell'))
-      expect(shellAnimation).toBeDefined()
-      expect(shellAnimation?.keyframes[0]?.transform).toContain('scale(')
-      expect(shellAnimation?.keyframes[1]?.transform).toContain('scale(1)')
+      const shellAnimations = getAnimationCalls().filter(call => call.element.classList.contains('hana-img-viewer-flip-shell'))
+      expect(shellAnimations.length).toBeGreaterThan(0)
+      for (const call of shellAnimations)
+        expect(call.options.duration).toBe(600)
       viewer.unmount()
     })
 

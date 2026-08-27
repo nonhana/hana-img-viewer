@@ -4,6 +4,7 @@ import CloseBehavior from './components/sections/CloseBehavior'
 import ControlledState from './components/sections/ControlledState'
 import CustomContainer from './components/sections/CustomContainer'
 import ProgressiveQuality from './components/sections/ProgressiveQuality'
+import TransitionDuration from './components/sections/TransitionDuration'
 import ZoomControl from './components/sections/ZoomControl'
 
 // The SSR entries pass true so the prerendered and hydrated DOM stay identical.
@@ -23,6 +24,7 @@ export default function App({ ssr = false }: { ssr?: boolean }) {
         <CustomContainer />
         <ZoomControl />
         <CloseBehavior />
+        <TransitionDuration />
       </main>
       <footer className="demo-footer">
         <a

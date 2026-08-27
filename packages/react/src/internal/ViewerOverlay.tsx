@@ -33,6 +33,7 @@ interface ViewerOverlayProps {
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
   showCloseButton: boolean
+  transitionDuration: number
   onRequestClose: () => void
   onOpenFinished: () => void
   onCloseFinished: () => void
@@ -43,7 +44,6 @@ interface BodyLockSnapshot {
   paddingRight: string
 }
 
-const FLIP_DURATION = 300
 const FLIP_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const bodyLockOwners = new Set<object>()
 let bodyLockSnapshot: BodyLockSnapshot | null = null
@@ -117,6 +117,7 @@ export const ViewerOverlay = ({
   closeOnBackdropClick,
   closeOnEscape,
   showCloseButton,
+  transitionDuration,
   onRequestClose,
   onOpenFinished,
   onCloseFinished,
@@ -303,9 +304,9 @@ export const ViewerOverlay = ({
       }
     }
 
-    const transitionDuration = Math.max(
+    const remainingDuration = Math.max(
       0,
-      FLIP_DURATION - (now - transitionRunRef.current!.startedAt),
+      transitionDuration - (now - transitionRunRef.current!.startedAt),
     )
     const ownedAnimations: Animation[] = []
     let active = true
@@ -325,7 +326,7 @@ export const ViewerOverlay = ({
       keyframes: Keyframe[],
     ): Animation => {
       const animation = element.animate(keyframes, {
-        duration: transitionDuration,
+        duration: remainingDuration,
         easing: FLIP_EASING,
         fill: 'forwards',
       })
@@ -436,6 +437,7 @@ export const ViewerOverlay = ({
     onOpenFinished,
     originRef,
     phase,
+    transitionDuration,
   ])
 
   useEffect(() => {

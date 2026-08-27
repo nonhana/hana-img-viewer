@@ -18,6 +18,11 @@ export interface HanaImgViewerProps {
   minZoom?: number
   /** Maximum zoom. @default 10 */
   maxZoom?: number
+  /**
+   * Open and close FLIP transition duration in milliseconds.
+   * @default 300
+   */
+  transitionDuration?: number
   /** Close when the backdrop is clicked. @default true */
   closeOnBackdropClick?: boolean
   /** Close when the focused overlay receives Escape. @default true */

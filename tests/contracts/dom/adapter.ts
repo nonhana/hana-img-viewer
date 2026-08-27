@@ -13,6 +13,7 @@ export interface DomMountOptions {
   visibility?: VisibilityOption
   minZoom?: number
   maxZoom?: number
+  transitionDuration?: number
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
   showCloseButton?: boolean

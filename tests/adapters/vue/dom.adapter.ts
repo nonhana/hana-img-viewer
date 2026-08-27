@@ -17,6 +17,7 @@ const VueHarness = defineComponent({
         'alt': options.alt,
         'minZoom': options.minZoom,
         'maxZoom': options.maxZoom,
+        'transitionDuration': options.transitionDuration,
         'closeOnBackdropClick': options.closeOnBackdropClick,
         'closeOnEscape': options.closeOnEscape,
         'showCloseButton': options.showCloseButton,
