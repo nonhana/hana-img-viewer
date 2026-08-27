@@ -4,8 +4,7 @@
     "jsx": "preserve",
     "paths": {
       "hana-img-viewer": ["../../packages/vue/src/index.ts"],
-      "hana-img-viewer-react": ["../../packages/react/src/index.ts"],
-      "@/*": ["../../packages/react/src/*"]
+      "hana-img-viewer-react": ["../../packages/react/src/index.ts"]
     },
     "types": ["vite/client"]
   },

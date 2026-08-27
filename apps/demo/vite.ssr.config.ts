@@ -28,16 +28,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      'hana-img-viewer-react/style.css': resolve(
-        import.meta.dirname,
-        '../../packages/react/src/style.css',
-      ),
       'hana-img-viewer-react': resolve(
         import.meta.dirname,
         '../../packages/react/src/index.ts',
       ),
       'hana-img-viewer': resolve(import.meta.dirname, '../../packages/vue/src/index.ts'),
-      '@': resolve(import.meta.dirname, '../../packages/react/src'),
     },
   },
   build: {

@@ -1,7 +1,7 @@
 import type { Point, Transform } from 'hana-img-viewer-core'
 import type { RefObject } from 'react'
 
-import type { ViewerPhase } from '@/internal/viewerReducer'
+import type { ViewerPhase } from './viewerReducer'
 import {
   clamp,
   createTrackpadDetector,

@@ -1,6 +1,6 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 
-import type { HanaImgViewerProps } from '@/public-types'
+import type { HanaImgViewerProps } from './public-types'
 
 import {
   useCallback,
@@ -10,8 +10,8 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
-import { ViewerOverlay } from '@/internal/ViewerOverlay'
-import { initialViewerState, viewerReducer } from '@/internal/viewerReducer'
+import { ViewerOverlay } from './internal/ViewerOverlay'
+import { initialViewerState, viewerReducer } from './internal/viewerReducer'
 
 const subscribeToHydration = (): (() => void) => () => {}
 const getClientSnapshot = (): boolean => true
