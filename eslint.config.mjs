@@ -1,5 +1,6 @@
 import antfu from '@antfu/eslint-config'
 import pluginReact from '@eslint-react/eslint-plugin'
+import htmlParser from '@html-eslint/parser'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 
 // Disable React rules for Vue files
@@ -50,7 +51,7 @@ export default antfu({
     'ts/no-non-null-assertion': 'off',
   },
 }, {
-  files: ['apps/demo/**/*.{ts,tsx,vue,mjs}'],
+  files: ['apps/demo/**/*.{html,ts,tsx,vue,mjs}'],
   plugins: { 'better-tailwindcss': betterTailwindcss },
   settings: {
     'better-tailwindcss': {
@@ -75,5 +76,10 @@ export default antfu({
       ignore: ['^lucide$', '^lucide-github$'],
     }],
     'better-tailwindcss/no-unnecessary-whitespace': 'warn',
+  },
+}, {
+  files: ['apps/demo/**/*.html'],
+  languageOptions: {
+    parser: htmlParser,
   },
 })

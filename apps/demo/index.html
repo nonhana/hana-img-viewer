@@ -14,54 +14,102 @@
     <link rel="stylesheet" href="/src/shared/app.css" />
   </head>
   <body>
-    <main class="mx-auto flex min-h-screen max-w-[1024px] flex-col gap-14 px-6 pb-16 pt-24">
+    <main class="
+      mx-auto flex min-h-screen max-w-5xl flex-col gap-14 px-6 pt-24 pb-16
+    ">
       <header class="flex flex-col items-start gap-5">
         <h1 class="text-[clamp(40px,7vw,64px)] tracking-[-0.02em]">hana-img-viewer demos</h1>
-        <p class="max-w-[560px] text-[17px]">
+        <p class="max-w-140 text-[17px]">
           Currently supports:
         </p>
         <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
-          <li class="inline-block whitespace-nowrap rounded-full border border-line bg-surface px-3 py-[2px] font-mono text-[11px] uppercase tracking-[0.18em] text-ink">Vue 3 &amp; SSR</li>
-          <li class="inline-block whitespace-nowrap rounded-full border border-line bg-surface px-3 py-[2px] font-mono text-[11px] uppercase tracking-[0.18em] text-ink">React 19 &amp; SSR</li>
+          <li class="
+            inline-block rounded-full border border-line bg-surface px-3 py-0.5
+            font-mono text-[11px] tracking-[0.18em] whitespace-nowrap text-ink
+            uppercase
+          ">Vue 3 &amp; SSR</li>
+          <li class="
+            inline-block rounded-full border border-line bg-surface px-3 py-0.5
+            font-mono text-[11px] tracking-[0.18em] whitespace-nowrap text-ink
+            uppercase
+          ">React 19 &amp; SSR</li>
         </ul>
       </header>
       <nav aria-label="Demo pages" class="grid grid-cols-1 gap-5 min-[641px]:grid-cols-2">
         <a
-          class="rounded-[8px] border border-line-soft bg-surface shadow-lift flex flex-col gap-2.5 p-6 text-inherit no-underline motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:translate-y-[-2px] motion-safe:hover:border-hana-blue-200"
+          class="
+            flex flex-col gap-2.5 rounded-lg border border-line-soft bg-surface
+            p-6 text-inherit no-underline shadow-lift
+            motion-safe:transition-[transform,border-color,box-shadow]
+            motion-safe:duration-300 motion-safe:ease-out
+            motion-safe:hover:-translate-y-0.5
+            motion-safe:hover:border-hana-blue-200
+          "
           href="/vue.html"
         >
-          <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">SPA · client rendered</span>
+          <span class="font-mono text-[11px] tracking-[0.18em] text-ink uppercase">SPA · client rendered</span>
           <h2 class="text-[24px]">Vue</h2>
           <span class="mt-auto pt-2 font-mono text-[13px] text-hana-blue">Open demo →</span>
         </a>
         <a
-          class="rounded-[8px] border border-line-soft bg-surface shadow-lift flex flex-col gap-2.5 p-6 text-inherit no-underline motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:translate-y-[-2px] motion-safe:hover:border-hana-blue-200"
+          class="
+            flex flex-col gap-2.5 rounded-lg border border-line-soft bg-surface
+            p-6 text-inherit no-underline shadow-lift
+            motion-safe:transition-[transform,border-color,box-shadow]
+            motion-safe:duration-300 motion-safe:ease-out
+            motion-safe:hover:-translate-y-0.5
+            motion-safe:hover:border-hana-blue-200
+          "
           href="/react.html"
         >
-          <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">SPA · client rendered</span>
+          <span class="font-mono text-[11px] tracking-[0.18em] text-ink uppercase">SPA · client rendered</span>
           <h2 class="text-[24px]">React</h2>
           <span class="mt-auto pt-2 font-mono text-[13px] text-hana-blue">Open demo →</span>
         </a>
         <a
-          class="rounded-[8px] border border-line-soft bg-surface shadow-lift flex flex-col gap-2.5 p-6 text-inherit no-underline motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:translate-y-[-2px] motion-safe:hover:border-hana-blue-200"
+          class="
+            flex flex-col gap-2.5 rounded-lg border border-line-soft bg-surface
+            p-6 text-inherit no-underline shadow-lift
+            motion-safe:transition-[transform,border-color,box-shadow]
+            motion-safe:duration-300 motion-safe:ease-out
+            motion-safe:hover:-translate-y-0.5
+            motion-safe:hover:border-hana-blue-200
+          "
           href="/vue-ssr.html"
         >
-          <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">SSR · prerendered + hydrated</span>
+          <span class="font-mono text-[11px] tracking-[0.18em] text-ink uppercase">SSR · prerendered + hydrated</span>
           <h2 class="text-[24px]">Vue SSR</h2>
           <span class="mt-auto pt-2 font-mono text-[13px] text-hana-blue">Open demo →</span>
         </a>
         <a
-          class="rounded-[8px] border border-line-soft bg-surface shadow-lift flex flex-col gap-2.5 p-6 text-inherit no-underline motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:translate-y-[-2px] motion-safe:hover:border-hana-blue-200"
+          class="
+            flex flex-col gap-2.5 rounded-lg border border-line-soft bg-surface
+            p-6 text-inherit no-underline shadow-lift
+            motion-safe:transition-[transform,border-color,box-shadow]
+            motion-safe:duration-300 motion-safe:ease-out
+            motion-safe:hover:-translate-y-0.5
+            motion-safe:hover:border-hana-blue-200
+          "
           href="/react-ssr.html"
         >
-          <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">SSR · prerendered + hydrated</span>
+          <span class="font-mono text-[11px] tracking-[0.18em] text-ink uppercase">SSR · prerendered + hydrated</span>
           <h2 class="text-[24px]">React SSR</h2>
           <span class="mt-auto pt-2 font-mono text-[13px] text-hana-blue">Open demo →</span>
         </a>
       </nav>
-      <footer class="mt-auto flex items-baseline gap-4 border-t border-line-soft pt-6 text-[14px] leading-[1.7]">
-        <a class="cursor-pointer no-underline text-hana-blue bg-[linear-gradient(to_right,var(--color-hana-blue),var(--color-hana-blue))] bg-no-repeat bg-bottom-right bg-size-[0%_2px] motion-safe:[transition:background-size_500ms_ease-out] motion-safe:hover:bg-bottom-left motion-safe:hover:bg-size-[100%_2px]" href="https://github.com/nonhana/hana-img-viewer" target="_blank" rel="noreferrer">GitHub</a>
-        <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">MIT licensed</span>
+      <footer class="
+        mt-auto flex items-baseline gap-4 border-t border-line-soft pt-6
+        text-[14px] leading-[1.7]
+      ">
+        <a class="
+          cursor-pointer
+          bg-[linear-gradient(to_right,var(--color-hana-blue),var(--color-hana-blue))]
+          bg-size-[0%_2px] bg-bottom-right bg-no-repeat text-hana-blue
+          no-underline
+          motion-safe:[transition:background-size_500ms_ease-out]
+          motion-safe:hover:bg-size-[100%_2px] motion-safe:hover:bg-bottom-left
+        " href="https://github.com/nonhana/hana-img-viewer" target="_blank" rel="noreferrer">GitHub</a>
+        <span class="font-mono text-[11px] tracking-[0.18em] text-ink uppercase">MIT licensed</span>
       </footer>
     </main>
   </body>
