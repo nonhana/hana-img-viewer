@@ -41,6 +41,7 @@
     "@vue/test-utils": "catalog:ui-vue",
     "cpy": "catalog:",
     "eslint": "catalog:",
+    "eslint-plugin-better-tailwindcss": "catalog:",
     "eslint-plugin-jsx-a11y": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
     "fast-glob": "catalog:",

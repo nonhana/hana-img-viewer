@@ -25,24 +25,43 @@ export default function ProgressiveQuality() {
         <>
           Keep
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">src</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            src
+          </code>
           {' '}
           light and pass the full-quality file as
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">previewSrc</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            previewSrc
+          </code>
           . The overlay opens instantly with the thumbnail, then swaps in the high-res image
           the moment it finishes loading — no spinner, no layout shift.
         </>
       )}
     >
-      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <figure className="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+      >
         <HanaImgViewer
-          className="block w-full max-w-[380px]"
+          className="block w-full max-w-95"
           src={coverImg}
           previewSrc={artImg}
           alt="Cover that upgrades to a high-res artwork"
         />
-        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
+        <figcaption className="
+          m-0 text-center font-mono text-xs tracking-[0.02em] text-ink
+        "
+        >
           Open it and watch the image sharpen in place.
         </figcaption>
       </figure>

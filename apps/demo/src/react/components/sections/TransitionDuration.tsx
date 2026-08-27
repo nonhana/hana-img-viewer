@@ -22,34 +22,65 @@ export default function TransitionDuration() {
         <>
           The open and close FLIP runs for
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">transitionDuration</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            transitionDuration
+          </code>
           {' '}
           milliseconds. The left one keeps the default 300 ms; the right one
           stretches the animation to 600 ms.
         </>
       )}
     >
-      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <figure className="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+      >
         <span className="flex w-full flex-wrap justify-center gap-4">
-          <span className="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <span className="
+            flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5
+          "
+          >
             <HanaImgViewer
-              className="block w-full max-w-[380px]"
+              className="block w-full max-w-95"
               src={coverImg}
               alt="Default 300ms transition"
             />
-            <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">default: 300ms</code>
+            <code className="
+              rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+              text-ink-strong
+            "
+            >
+              default: 300ms
+            </code>
           </span>
-          <span className="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <span className="
+            flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5
+          "
+          >
             <HanaImgViewer
-              className="block w-full max-w-[380px]"
+              className="block w-full max-w-95"
               transitionDuration={600}
               src={gardenImg}
               alt="600ms transition"
             />
-            <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">transitionDuration: 600</code>
+            <code className="
+              rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+              text-ink-strong
+            "
+            >
+              transitionDuration: 600
+            </code>
           </span>
         </span>
-        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
+        <figcaption className="
+          m-0 text-center font-mono text-xs tracking-[0.02em] text-ink
+        "
+        >
           Open and close each one — the right viewer animates noticeably slower.
         </figcaption>
       </figure>

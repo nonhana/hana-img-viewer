@@ -67,25 +67,52 @@ export default function CustomContainer() {
         <>
           Mount the overlay anywhere by passing
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">container</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            container
+          </code>
           . Here it renders inside a scrollable panel in a dialog. While the ref is still
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">null</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            null
+          </code>
           {' '}
           an open request simply waits — the viewer resolves it as soon as the container exists.
         </>
       )}
     >
-      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <figure className="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+      >
         <button
           ref={triggerRef}
           type="button"
-          className="inline-flex cursor-pointer select-none items-center gap-2 rounded-[8px] border border-line bg-surface px-4 py-2 font-mono text-[13px] text-ink-strong motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out] motion-safe:hover:border-hana-blue-150 motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue motion-safe:active:scale-[0.95]"
+          className="
+            inline-flex cursor-pointer items-center gap-2 rounded-lg border
+            border-line bg-surface px-4 py-2 font-mono text-[13px]
+            text-ink-strong select-none
+            motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out]
+            motion-safe:hover:border-hana-blue-150
+            motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue
+            motion-safe:active:scale-[0.95]
+          "
           onClick={() => setVisible(true)}
         >
           Preview inside a dialog
         </button>
-        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
+        <figcaption className="
+          m-0 text-center font-mono text-xs tracking-[0.02em] text-ink
+        "
+        >
           The overlay stays inside the dialog's scroll area.
         </figcaption>
       </figure>
@@ -101,18 +128,24 @@ export default function CustomContainer() {
           />
           <div
             ref={panelRef}
-            className="relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift"
+            className="
+              relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3
+              rounded-lg border border-line-soft bg-surface p-6 shadow-lift
+            "
             role="dialog"
             aria-modal="true"
             aria-label="Preview dialog"
             tabIndex={-1}
           >
             <h3 className="text-[18px]">Scroll to the bottom to find the embedded viewer</h3>
-            <div className="overflow-auto rounded-[6px] border border-line-soft p-3">
-              <div className="h-[1200px]" />
+            <div className="
+              overflow-auto rounded-md border border-line-soft p-3
+            "
+            >
+              <div className="h-300" />
               <div ref={setContainer} />
               <HanaImgViewer
-                className="block w-full max-w-[380px]"
+                className="block w-full max-w-95"
                 container={container}
                 closeOnEscape={false}
                 src={artImg}

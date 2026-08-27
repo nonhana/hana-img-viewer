@@ -22,37 +22,74 @@ export default function ZoomControl() {
         <>
           Zoom is always on. Clamp the wheel, pinch, and double-click range with
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">minZoom</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            minZoom
+          </code>
           {' '}
           and
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">maxZoom</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            maxZoom
+          </code>
           .
         </>
       )}
     >
-      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <figure className="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+      >
         <span className="flex w-full flex-wrap justify-center gap-4">
-          <span className="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <span className="
+            flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5
+          "
+          >
             <HanaImgViewer
-              className="block w-full max-w-[380px]"
+              className="block w-full max-w-95"
               src={coverImg}
               alt="Default zoom range"
             />
-            <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">default: 0.5x &middot; 10x</code>
+            <code className="
+              rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+              text-ink-strong
+            "
+            >
+              default: 0.5x &middot; 10x
+            </code>
           </span>
-          <span className="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <span className="
+            flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5
+          "
+          >
             <HanaImgViewer
-              className="block w-full max-w-[380px]"
+              className="block w-full max-w-95"
               minZoom={1}
               maxZoom={3}
               src={gardenImg}
               alt="Zoom clamped between 1x and 3x"
             />
-            <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">minZoom: 1 · maxZoom: 3</code>
+            <code className="
+              rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+              text-ink-strong
+            "
+            >
+              minZoom: 1 · maxZoom: 3
+            </code>
           </span>
         </span>
-        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
+        <figcaption className="
+          m-0 text-center font-mono text-xs tracking-[0.02em] text-ink
+        "
+        >
           Open each one and try the scroll wheel or a double-click.
         </figcaption>
       </figure>

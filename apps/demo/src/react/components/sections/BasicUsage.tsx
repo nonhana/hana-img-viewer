@@ -26,7 +26,13 @@ export default function BasicUsage() {
         <>
           Point
           {' '}
-          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">src</code>
+          <code className="
+            rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+            text-ink-strong
+          "
+          >
+            src
+          </code>
           {' '}
           at an image and the thumbnail becomes a full viewer: click it to open, scroll or
           double-click to zoom, pinch on touch, drag to pan. Escape or a backdrop click closes
@@ -34,9 +40,16 @@ export default function BasicUsage() {
         </>
       )}
     >
-      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
-        <HanaImgViewer className="block w-full max-w-[380px]" src={artImg} alt="Artwork 121909597" />
-        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
+      <figure className="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+      >
+        <HanaImgViewer className="block w-full max-w-95" src={artImg} alt="Artwork 121909597" />
+        <figcaption className="
+          m-0 text-center font-mono text-xs tracking-[0.02em] text-ink
+        "
+        >
           Click the artwork to open the viewer.
         </figcaption>
       </figure>

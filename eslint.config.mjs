@@ -1,5 +1,6 @@
 import antfu from '@antfu/eslint-config'
 import pluginReact from '@eslint-react/eslint-plugin'
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 
 // Disable React rules for Vue files
 const disableReactForVue = Object.fromEntries(
@@ -47,5 +48,32 @@ export default antfu({
   files: ['**/tests/**', '**/*.test.{ts,tsx}'],
   rules: {
     'ts/no-non-null-assertion': 'off',
+  },
+}, {
+  files: ['apps/demo/**/*.{ts,tsx,vue,mjs}'],
+  plugins: { 'better-tailwindcss': betterTailwindcss },
+  settings: {
+    'better-tailwindcss': {
+      cwd: './apps/demo',
+      entryPoint: 'src/shared/app.css',
+      rootFontSize: 16,
+      strictness: 'loose',
+    },
+  },
+  rules: {
+    'better-tailwindcss/enforce-canonical-classes': 'warn',
+    'better-tailwindcss/enforce-consistent-class-order': 'warn',
+    'better-tailwindcss/enforce-consistent-important-position': 'warn',
+    'better-tailwindcss/enforce-consistent-line-wrapping': 'warn',
+    'better-tailwindcss/enforce-consistent-variable-syntax': 'error',
+    'better-tailwindcss/enforce-consistent-variant-order': 'warn',
+    'better-tailwindcss/no-concatenated-classes': 'error',
+    'better-tailwindcss/no-conflicting-classes': 'error',
+    'better-tailwindcss/no-deprecated-classes': 'error',
+    'better-tailwindcss/no-duplicate-classes': 'error',
+    'better-tailwindcss/no-unknown-classes': ['error', {
+      ignore: ['^lucide$', '^lucide-github$'],
+    }],
+    'better-tailwindcss/no-unnecessary-whitespace': 'warn',
   },
 })

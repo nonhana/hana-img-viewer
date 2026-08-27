@@ -53,16 +53,39 @@ const snippet = [
 <template>
   <DemoSection id="custom-container" index="05" title="Custom container" :apis="['container']">
     <template #description>
-      Mount the overlay anywhere by passing <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">container</code>.
+      Mount the overlay anywhere by passing <code
+        class="
+          rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+          text-ink-strong
+        "
+      >container</code>.
       Here it renders inside a scrollable panel in a dialog. While the ref is still
-      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">null</code> an open request simply waits — the viewer
+      <code
+        class="
+          rounded-sm bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em]
+          text-ink-strong
+        "
+      >null</code> an open request simply waits — the viewer
       resolves it as soon as the container exists.
     </template>
-    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+    <figure
+      class="
+        m-0 flex flex-col items-center justify-center gap-3.5 rounded-lg border
+        border-line-soft bg-surface p-6 shadow-lift
+      "
+    >
       <button
         ref="triggerRef"
         type="button"
-        class="inline-flex cursor-pointer select-none items-center gap-2 rounded-[8px] border border-line bg-surface px-4 py-2 font-mono text-[13px] text-ink-strong motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out] motion-safe:hover:border-hana-blue-150 motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue motion-safe:active:scale-[0.95]"
+        class="
+          inline-flex cursor-pointer items-center gap-2 rounded-lg border
+          border-line bg-surface px-4 py-2 font-mono text-[13px] text-ink-strong
+          select-none
+          motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out]
+          motion-safe:hover:border-hana-blue-150
+          motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue
+          motion-safe:active:scale-[0.95]
+        "
         @click="visible = true"
       >
         Preview inside a dialog
@@ -86,7 +109,10 @@ const snippet = [
         />
         <div
           ref="panelRef"
-          class="relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift"
+          class="
+            relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3
+            rounded-lg border border-line-soft bg-surface p-6 shadow-lift
+          "
           role="dialog"
           aria-modal="true"
           aria-label="Preview dialog"
@@ -96,11 +122,11 @@ const snippet = [
           <h3 class="text-[18px]">
             Scroll to the bottom to find the embedded viewer
           </h3>
-          <div class="overflow-auto rounded-[6px] border border-line-soft p-3">
-            <div class="h-[1200px]" />
+          <div class="overflow-auto rounded-md border border-line-soft p-3">
+            <div class="h-300" />
             <div ref="container" />
             <HanaImgViewer
-              class="block w-full max-w-[380px]"
+              class="block w-full max-w-95"
               :container="container"
               :close-on-escape="false"
               :src="artImg"
