@@ -21,6 +21,8 @@
     "hana-img-viewer-react": "workspace:*"
   },
   "devDependencies": {
+    "@shikijs/langs": "catalog:",
+    "@shikijs/themes": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/react": "catalog:ui-react",
     "@types/react-dom": "catalog:ui-react",
@@ -29,6 +31,7 @@
     "@vue/server-renderer": "catalog:ui-vue",
     "react": "catalog:ui-react",
     "react-dom": "catalog:ui-react",
+    "shiki": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

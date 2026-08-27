@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { highlightCode } from '../../shared/highlighter'
 
 export default function CodeBlock({ file, code }: { file: string, code: string }) {
+  const html = useMemo(() => highlightCode(code, file), [code, file])
   const [copied, setCopied] = useState(false)
   const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -20,7 +22,8 @@ export default function CodeBlock({ file, code }: { file: string, code: string }
 
   return (
     <figure className="
-      m-0 overflow-hidden rounded-lg border-2 border-primary-400 bg-primary-100
+      m-0 self-start overflow-hidden rounded-lg border-2 border-primary-400
+      bg-primary-100
     "
     >
       <figcaption className="
@@ -43,13 +46,7 @@ export default function CodeBlock({ file, code }: { file: string, code: string }
           {copied ? 'Copied' : 'Copy'}
         </button>
       </figcaption>
-      <pre className="
-        m-0 overflow-x-auto px-4 py-3.5 font-mono text-[12.5px] leading-[1.65]
-        tab-2 text-ink-strong
-      "
-      >
-        <code>{code}</code>
-      </pre>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
     </figure>
   )
 }

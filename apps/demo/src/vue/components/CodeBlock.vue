@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
+import { highlightCode } from '../../shared/highlighter'
 
 const props = defineProps<{
   file: string
   code: string
 }>()
+const html = highlightCode(props.code, props.file)
 
 const copied = ref(false)
 let resetTimer: ReturnType<typeof setTimeout> | undefined
@@ -29,7 +31,8 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
 <template>
   <figure
     class="
-      m-0 overflow-hidden rounded-lg border-2 border-primary-400 bg-primary-100
+      m-0 self-start overflow-hidden rounded-lg border-2 border-primary-400
+      bg-primary-100
     "
   >
     <figcaption
@@ -53,11 +56,6 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
         {{ copied ? 'Copied' : 'Copy' }}
       </button>
     </figcaption>
-    <pre
-      class="
-        m-0 overflow-x-auto px-4 py-3.5 font-mono text-[12.5px] leading-[1.65]
-        tab-2 text-ink-strong
-      "
-    ><code>{{ code }}</code></pre>
+    <div v-html="html" />
   </figure>
 </template>
