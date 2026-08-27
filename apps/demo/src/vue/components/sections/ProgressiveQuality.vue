@@ -21,19 +21,19 @@ const fullRes = '/covers/summer-2400w.png'
 <template>
   <DemoSection id="progressive-quality" index="02" title="Progressive quality" :apis="['previewSrc']">
     <template #description>
-      Keep <code class="demo-code-inline">src</code> light and pass the full-quality file as
-      <code class="demo-code-inline">previewSrc</code>. The overlay opens instantly with the
+      Keep <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">src</code> light and pass the full-quality file as
+      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">previewSrc</code>. The overlay opens instantly with the
       thumbnail, then swaps in the high-res image the moment it finishes loading — no spinner,
       no layout shift.
     </template>
-    <figure class="demo-card demo-stage">
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
       <HanaImgViewer
-        class="demo-thumb"
+        class="block w-full max-w-[380px]"
         :src="coverImg"
         :preview-src="artImg"
         alt="Cover that upgrades to a high-res artwork"
       />
-      <figcaption class="demo-stage__note">
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         Open it and watch the image sharpen in place.
       </figcaption>
     </figure>

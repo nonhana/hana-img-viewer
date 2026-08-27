@@ -20,13 +20,13 @@ import { HanaImgViewer } from 'hana-img-viewer'
 <template>
   <DemoSection id="basic-usage" index="01" title="Basic usage" :apis="['src', 'alt']">
     <template #description>
-      Point <code class="demo-code-inline">src</code> at an image and the thumbnail becomes a
+      Point <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">src</code> at an image and the thumbnail becomes a
       full viewer: click it to open, scroll or double-click to zoom, pinch on touch, drag to
       pan. Escape or a backdrop click closes it again.
     </template>
-    <figure class="demo-card demo-stage">
-      <HanaImgViewer class="demo-thumb" :src="artImg" alt="Artwork 121909597" />
-      <figcaption class="demo-stage__note">
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <HanaImgViewer class="block w-full max-w-[380px]" :src="artImg" alt="Artwork 121909597" />
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         Click the artwork to open the viewer.
       </figcaption>
     </figure>

@@ -19,14 +19,18 @@ export default function CodeBlock({ file, code }: { file: string, code: string }
   }
 
   return (
-    <figure className="code-block">
-      <figcaption className="code-block__bar">
-        <span className="code-block__file">{file}</span>
-        <button type="button" className="code-block__copy" onClick={copy}>
+    <figure className="m-0 overflow-hidden rounded-[8px] border-2 border-primary-400 bg-primary-100">
+      <figcaption className="flex items-center justify-between gap-3 border-b border-line-soft px-3 py-1.5">
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">{file}</span>
+        <button
+          type="button"
+          className="cursor-pointer rounded-full border border-line bg-surface px-2.5 py-[2px] font-mono text-[11px] tracking-[0.08em] text-ink motion-safe:[transition:background-color_300ms_ease-out,color_300ms_ease-out,border-color_300ms_ease-out] motion-safe:hover:bg-hana-blue-150 motion-safe:hover:border-hana-blue-150 motion-safe:hover:text-hana-blue"
+          onClick={copy}
+        >
           {copied ? 'Copied' : 'Copy'}
         </button>
       </figcaption>
-      <pre className="code-block__body"><code>{code}</code></pre>
+      <pre className="m-0 overflow-x-auto px-4 py-3.5 font-mono text-[12.5px] leading-[1.65] text-ink-strong tab-2"><code>{code}</code></pre>
     </figure>
   )
 }

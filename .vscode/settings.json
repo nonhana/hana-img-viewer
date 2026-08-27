@@ -4,11 +4,13 @@
   "prettier.enable": false,
   "oxc.enable": false,
   "editor.formatOnSave": false,
+  "unocss.disable": true,
 
   // Auto fix
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "never"
+    "source.organizeImports": "never",
+    "source.fixAll.tailwindcss": "always"
   },
 
   // Silent the stylistic rules in you IDE, but still auto fix them

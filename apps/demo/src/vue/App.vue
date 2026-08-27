@@ -14,10 +14,10 @@ withDefaults(defineProps<{ ssr?: boolean }>(), { ssr: false })
 
 <template>
   <PageHeader :ssr="ssr" />
-  <p v-if="ssr" class="ssr-note">
-    <span class="demo-meta">Prerendered at build time · hydrated on load</span>
+  <p v-if="ssr" class="border-b border-line-soft bg-hana-blue-50 px-6 py-1.5 text-center">
+    <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">Prerendered at build time · hydrated on load</span>
   </p>
-  <main class="demo-page">
+  <main class="mx-auto flex max-w-[1024px] flex-col gap-18 px-6 pb-20 pt-14">
     <BasicUsage />
     <ProgressiveQuality />
     <ControlledState />
@@ -26,14 +26,14 @@ withDefaults(defineProps<{ ssr?: boolean }>(), { ssr: false })
     <CloseBehavior />
     <TransitionDuration />
   </main>
-  <footer class="demo-footer">
+  <footer class="mx-auto flex max-w-[1024px] items-baseline gap-5 border-t border-line-soft px-6 pb-14 pt-7 text-[14px]">
     <a
-      class="demo-link"
+      class="cursor-pointer no-underline text-hana-blue bg-[linear-gradient(to_right,var(--color-hana-blue),var(--color-hana-blue))] bg-no-repeat bg-bottom-right bg-size-[0%_2px] motion-safe:[transition:background-size_500ms_ease-out] motion-safe:hover:bg-bottom-left motion-safe:hover:bg-size-[100%_2px]"
       href="https://github.com/nonhana/hana-img-viewer"
       target="_blank"
       rel="noreferrer"
     >GitHub</a>
-    <a class="demo-link" href="/">All demos</a>
-    <span class="demo-meta">MIT licensed</span>
+    <a class="cursor-pointer no-underline text-hana-blue bg-[linear-gradient(to_right,var(--color-hana-blue),var(--color-hana-blue))] bg-no-repeat bg-bottom-right bg-size-[0%_2px] motion-safe:[transition:background-size_500ms_ease-out] motion-safe:hover:bg-bottom-left motion-safe:hover:bg-size-[100%_2px]" href="/">All demos</a>
+    <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">MIT licensed</span>
   </footer>
 </template>

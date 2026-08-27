@@ -53,21 +53,21 @@ const snippet = [
 <template>
   <DemoSection id="custom-container" index="05" title="Custom container" :apis="['container']">
     <template #description>
-      Mount the overlay anywhere by passing <code class="demo-code-inline">container</code>.
+      Mount the overlay anywhere by passing <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">container</code>.
       Here it renders inside a scrollable panel in a dialog. While the ref is still
-      <code class="demo-code-inline">null</code> an open request simply waits — the viewer
+      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">null</code> an open request simply waits — the viewer
       resolves it as soon as the container exists.
     </template>
-    <figure class="demo-card demo-stage">
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
       <button
         ref="triggerRef"
         type="button"
-        class="demo-button"
+        class="inline-flex cursor-pointer select-none items-center gap-2 rounded-[8px] border border-line bg-surface px-4 py-2 font-mono text-[13px] text-ink-strong motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out] motion-safe:hover:border-hana-blue-150 motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue motion-safe:active:scale-[0.95]"
         @click="visible = true"
       >
         Preview inside a dialog
       </button>
-      <figcaption class="demo-stage__note">
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         The overlay stays inside the dialog's scroll area.
       </figcaption>
     </figure>
@@ -76,29 +76,31 @@ const snippet = [
          hydrating anchors whose content was never prerendered into <body>
          corrupts the #app mount node. -->
     <Teleport v-if="visible" to="body">
-      <div class="demo-dialog-mask">
+      <div class="fixed inset-0 z-10000 grid place-items-center p-6">
         <button
           type="button"
-          class="demo-dialog-backdrop"
+          class="absolute inset-0 cursor-pointer border-0 bg-black/40 p-0"
           tabindex="-1"
           aria-label="Close preview dialog"
           @click="visible = false"
         />
         <div
           ref="panelRef"
-          class="demo-card demo-dialog-panel"
+          class="relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift"
           role="dialog"
           aria-modal="true"
           aria-label="Preview dialog"
           tabindex="-1"
           @keydown="onPanelKeydown"
         >
-          <h3>Scroll to the bottom to find the embedded viewer</h3>
-          <div class="demo-dialog-scroll">
-            <div class="demo-dialog-spacer" />
+          <h3 class="text-[18px]">
+            Scroll to the bottom to find the embedded viewer
+          </h3>
+          <div class="overflow-auto rounded-[6px] border border-line-soft p-3">
+            <div class="h-[1200px]" />
             <div ref="container" />
             <HanaImgViewer
-              class="demo-thumb"
+              class="block w-full max-w-[380px]"
               :container="container"
               :close-on-escape="false"
               :src="artImg"

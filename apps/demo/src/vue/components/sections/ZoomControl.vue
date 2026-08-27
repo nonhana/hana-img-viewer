@@ -19,20 +19,20 @@ const snippet = `<template>
   <DemoSection id="zoom-control" index="06" title="Zoom control" :apis="['minZoom', 'maxZoom']">
     <template #description>
       Zoom is always on. Clamp the wheel, pinch, and double-click range with
-      <code class="demo-code-inline">minZoom</code> and <code class="demo-code-inline">maxZoom</code>.
+      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">minZoom</code> and <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">maxZoom</code>.
     </template>
-    <figure class="demo-card demo-stage">
-      <span class="demo-stage__row">
-        <span class="demo-stage__cell">
-          <HanaImgViewer class="demo-thumb" :src="coverImg" alt="Default zoom range" />
-          <code class="demo-code-inline">default: 0.5x · 10x</code>
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <span class="flex w-full flex-wrap justify-center gap-4">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <HanaImgViewer class="block w-full max-w-[380px]" :src="coverImg" alt="Default zoom range" />
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">default: 0.5x · 10x</code>
         </span>
-        <span class="demo-stage__cell">
-          <HanaImgViewer class="demo-thumb" :min-zoom="1" :max-zoom="3" :src="gardenImg" alt="Zoom clamped between 1x and 3x" />
-          <code class="demo-code-inline">minZoom: 1 · maxZoom: 3</code>
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <HanaImgViewer class="block w-full max-w-[380px]" :min-zoom="1" :max-zoom="3" :src="gardenImg" alt="Zoom clamped between 1x and 3x" />
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">minZoom: 1 · maxZoom: 3</code>
         </span>
       </span>
-      <figcaption class="demo-stage__note">
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         Open each one and try the scroll wheel or a double-click.
       </figcaption>
     </figure>

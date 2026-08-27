@@ -27,41 +27,41 @@ const snippet = `<template>
   >
     <template #description>
       All three escape hatches are opt-out: backdrop click, Escape, and the corner
-      <code class="demo-code-inline">showCloseButton</code>. The left viewer ignores
+      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">showCloseButton</code>. The left viewer ignores
       backdrop clicks; the middle one ignores Escape; the right one hides the close
       button.
     </template>
-    <figure class="demo-card demo-stage">
-      <span class="demo-stage__row">
-        <span class="demo-stage__cell">
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <span class="flex w-full flex-wrap justify-center gap-4">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
           <HanaImgViewer
-            class="demo-thumb"
+            class="block w-full max-w-[380px]"
             :close-on-backdrop-click="false"
             :src="artImg"
             alt="Closes with Escape or the close button"
           />
-          <code class="demo-code-inline">closeOnBackdropClick: false</code>
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">closeOnBackdropClick: false</code>
         </span>
-        <span class="demo-stage__cell">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
           <HanaImgViewer
-            class="demo-thumb"
+            class="block w-full max-w-[380px]"
             :close-on-escape="false"
             :src="gardenImg"
             alt="Closes with a backdrop click or the close button"
           />
-          <code class="demo-code-inline">closeOnEscape: false</code>
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">closeOnEscape: false</code>
         </span>
-        <span class="demo-stage__cell">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
           <HanaImgViewer
-            class="demo-thumb"
+            class="block w-full max-w-[380px]"
             :show-close-button="false"
             :src="artImg"
             alt="Closes with the backdrop or Escape only"
           />
-          <code class="demo-code-inline">showCloseButton: false</code>
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">showCloseButton: false</code>
         </span>
       </span>
-      <figcaption class="demo-stage__note">
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         Try the wrong close gesture first — nothing happens.
       </figcaption>
     </figure>

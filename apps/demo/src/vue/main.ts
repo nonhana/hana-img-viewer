@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import '../shared/theme.css'
+import '../shared/app.css'
 
 const app = createApp(App, { ssr: false })
 

@@ -24,27 +24,27 @@ const snippet = `<template>
   >
     <template #description>
       The open and close FLIP runs for
-      <code class="demo-code-inline">transitionDuration</code> milliseconds. The
+      <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">transitionDuration</code> milliseconds. The
       left viewer keeps the 300&nbsp;ms default; the right one stretches the
       animation to 600&nbsp;ms.
     </template>
-    <figure class="demo-card demo-stage">
-      <span class="demo-stage__row">
-        <span class="demo-stage__cell">
-          <HanaImgViewer class="demo-thumb" :src="coverImg" alt="Default 300ms transition" />
-          <code class="demo-code-inline">default: 300ms</code>
+    <figure class="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
+      <span class="flex w-full flex-wrap justify-center gap-4">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
+          <HanaImgViewer class="block w-full max-w-[380px]" :src="coverImg" alt="Default 300ms transition" />
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">default: 300ms</code>
         </span>
-        <span class="demo-stage__cell">
+        <span class="flex min-w-0 flex-[1_1_150px] flex-col items-center gap-2.5">
           <HanaImgViewer
-            class="demo-thumb"
+            class="block w-full max-w-[380px]"
             :transition-duration="600"
             :src="gardenImg"
             alt="600ms transition"
           />
-          <code class="demo-code-inline">transitionDuration: 600</code>
+          <code class="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">transitionDuration: 600</code>
         </span>
       </span>
-      <figcaption class="demo-stage__note">
+      <figcaption class="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
         Open and close each one — the right viewer animates noticeably slower.
       </figcaption>
     </figure>

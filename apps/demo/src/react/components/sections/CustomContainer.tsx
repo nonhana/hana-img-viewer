@@ -67,52 +67,52 @@ export default function CustomContainer() {
         <>
           Mount the overlay anywhere by passing
           {' '}
-          <code className="demo-code-inline">container</code>
+          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">container</code>
           . Here it renders inside a scrollable panel in a dialog. While the ref is still
           {' '}
-          <code className="demo-code-inline">null</code>
+          <code className="rounded-[4px] bg-hana-blue-50 px-1.5 py-px font-mono text-[0.85em] text-ink-strong">null</code>
           {' '}
           an open request simply waits — the viewer resolves it as soon as the container exists.
         </>
       )}
     >
-      <figure className="demo-card demo-stage">
+      <figure className="m-0 flex flex-col items-center justify-center gap-3.5 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift">
         <button
           ref={triggerRef}
           type="button"
-          className="demo-button"
+          className="inline-flex cursor-pointer select-none items-center gap-2 rounded-[8px] border border-line bg-surface px-4 py-2 font-mono text-[13px] text-ink-strong motion-safe:[transition:background-color_300ms_ease-out,border-color_300ms_ease-out,color_300ms_ease-out,transform_300ms_ease-out] motion-safe:hover:border-hana-blue-150 motion-safe:hover:bg-hana-blue-150 motion-safe:hover:text-hana-blue motion-safe:active:scale-[0.95]"
           onClick={() => setVisible(true)}
         >
           Preview inside a dialog
         </button>
-        <figcaption className="demo-stage__note">
+        <figcaption className="m-0 text-center font-mono text-xs tracking-[0.02em] text-ink">
           The overlay stays inside the dialog's scroll area.
         </figcaption>
       </figure>
       <CodeBlock file="CustomContainer.tsx" code={snippet} />
       {visible && createPortal(
-        <div className="demo-dialog-mask">
+        <div className="fixed inset-0 z-10000 grid place-items-center p-6">
           <button
             type="button"
-            className="demo-dialog-backdrop"
+            className="absolute inset-0 cursor-pointer border-0 bg-black/40 p-0"
             tabIndex={-1}
             aria-label="Close preview dialog"
             onClick={() => setVisible(false)}
           />
           <div
             ref={panelRef}
-            className="demo-card demo-dialog-panel"
+            className="relative flex max-h-[80vh] w-[min(480px,100%)] flex-col gap-3 rounded-[8px] border border-line-soft bg-surface p-6 shadow-lift"
             role="dialog"
             aria-modal="true"
             aria-label="Preview dialog"
             tabIndex={-1}
           >
-            <h3>Scroll to the bottom to find the embedded viewer</h3>
-            <div className="demo-dialog-scroll">
-              <div className="demo-dialog-spacer" />
+            <h3 className="text-[18px]">Scroll to the bottom to find the embedded viewer</h3>
+            <div className="overflow-auto rounded-[6px] border border-line-soft p-3">
+              <div className="h-[1200px]" />
               <div ref={setContainer} />
               <HanaImgViewer
-                className="demo-thumb"
+                className="block w-full max-w-[380px]"
                 container={container}
                 closeOnEscape={false}
                 src={artImg}
