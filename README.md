@@ -93,18 +93,6 @@ export default function App() {
 }
 ```
 
-custom trigger:
-
-```tsx
-<HanaImgViewer src="/images/post-thumb.jpg">
-  {({ open }) => (
-    <button type="button" onClick={open}>
-      Open preview
-    </button>
-  )}
-</HanaImgViewer>
-```
-
 ## API
 
 ### Vue props
@@ -117,11 +105,12 @@ custom trigger:
 | `alt` | `string` | `''` | Alternative text for both images. |
 | `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
-| `enableZoom` | `boolean` | `true` | Enable transform interactions. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
+| `transitionDuration` | `number` | `300` | Open and close FLIP transition duration in milliseconds. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
 
 Vue emits only `update:open`. Use `v-model:open` to keep the state in sync:
 
@@ -138,18 +127,6 @@ const open = ref(false)
     src="/images/post-thumb.jpg"
   />
 </template>
-```
-
-Vue provides one `thumbnail` slot. The slot receives an `open` function:
-
-```vue
-<HanaImgViewer src="/images/post-thumb.jpg">
-  <template #thumbnail="{ open }">
-    <button type="button" @click="open">
-      Open preview
-    </button>
-  </template>
-</HanaImgViewer>
 ```
 
 The thumbnail root is a `div` by default. Choose a non-void element compatible with its parent when the viewer is rendered in a constrained HTML context, such as Markdown prose:
@@ -171,15 +148,13 @@ The thumbnail root is a `div` by default. Choose a non-void element compatible w
 | `defaultOpen` | `boolean` | `false` | Initial visibility for uncontrolled usage. |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | Called when the viewer requests a visibility change. |
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, pinch, and double-click zoom. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
+| `transitionDuration` | `number` | `300` | Open and close FLIP transition duration in milliseconds. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
 | `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
 | `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
-| `children` | `(controls: { open: () => void }) => ReactNode` | `undefined` | Render a custom trigger with the provided `open` function. |
 
 `open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.
-
-Custom triggers own their semantics and styles. When a focused custom trigger opens the viewer, focus returns to that exact element after closing. The default image trigger already supports click, Enter, and Space.

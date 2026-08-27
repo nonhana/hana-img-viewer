@@ -47,11 +47,12 @@ import { HanaImgViewer } from 'hana-img-viewer'
 | `alt` | `string` | `''` | Alternative text for both images. |
 | `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
 | `container` | `HTMLElement \| null` | `undefined` | Overlay mount container. `undefined` uses `document.body`; `null` waits for a container. |
-| `enableZoom` | `boolean` | `true` | Enable wheel, double-click, drag, and pinch interactions. |
 | `minZoom` | `number` | `0.5` | Minimum zoom. Must be greater than `0` and no greater than `maxZoom`. |
 | `maxZoom` | `number` | `10` | Maximum zoom. |
+| `transitionDuration` | `number` | `300` | Open and close FLIP transition duration in milliseconds. |
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
+| `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
 
 The component emits only `update:open`. Use `v-model:open` to keep the state in sync:
 
@@ -67,16 +68,6 @@ const open = ref(false)
 </template>
 ```
 
-It provides one `thumbnail` slot, which receives an `open` function:
-
-```vue
-<HanaImgViewer v-model:open="open" src="/images/post-thumb.jpg" preview-src="/images/post-full.jpg">
-  <template #thumbnail="{ open }">
-    <button type="button" @click="open">Open preview</button>
-  </template>
-</HanaImgViewer>
-```
-
 The thumbnail root is a `div` by default. Choose a non-void element compatible with its parent when the viewer is rendered in a constrained HTML context, such as Markdown prose:
 
 ```vue
@@ -85,7 +76,7 @@ The thumbnail root is a `div` by default. Choose a non-void element compatible w
 </p>
 ```
 
-Plain `class`, `style`, and other attrs fall through to the visible thumbnail root. Use the `thumbnail` slot when you need full control over the image node.
+Plain `class`, `style`, and other attrs fall through to the visible thumbnail root.
 
 A custom mount target only accepts an `HTMLElement`:
 
@@ -109,10 +100,9 @@ The component supports both local registration and `app.use(HanaImgViewer)`; the
 | v4 surface | v5 replacement |
 | --- | --- |
 | selector / `'body'` string portal | `container` accepts an `HTMLElement`, `null`, or omission |
-| `enableDrag` | no standalone flag; `enableZoom` controls transform gestures |
 | zoom bounds | `minZoom` / `maxZoom`; default `0.5`–`10` |
 | dismissal/keyboard flags | `closeOnBackdropClick` / `closeOnEscape` |
-| container/thumbnail class/style props | plain attrs; use the `thumbnail` slot for image-level customization |
+| container/thumbnail class/style props | plain attrs |
 | `open`, `close`, `load`, `error` emits | listen only to `update:open` |
 | `open()`, `close()`, `reset()` exposed methods | change state through `v-model:open` |
 | `HanaImgViewerEmits`, `HanaImgViewerExposed`, core aliases | import `HanaImgViewerProps` only |

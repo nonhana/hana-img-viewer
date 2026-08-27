@@ -13,11 +13,12 @@ const props = withDefaults(
   {
     as: 'div',
     alt: '',
-    enableZoom: true,
     minZoom: 0.5,
     maxZoom: 10,
     closeOnBackdropClick: true,
     closeOnEscape: true,
+    showCloseButton: true,
+    transitionDuration: 300,
   },
 )
 
@@ -75,9 +76,7 @@ watch(
     if (currentPhase === 'closed') {
       if (desiredOpen && target && currentTarget !== target) {
         activeTarget.value = target
-        originFocus.value = originRef.value?.contains(document.activeElement)
-          ? document.activeElement as HTMLElement
-          : thumbnailRef.value
+        originFocus.value = thumbnailRef.value
         dispatch({ type: 'SHOW' })
       }
       else if ((!desiredOpen || !target) && currentTarget) {
@@ -120,19 +119,17 @@ onMounted(() => {
 
 <template>
   <component :is="as" ref="originRef" class="hana-img-viewer-thumbnail-root" :class="attrs.class" :style="thumbnailStyle" v-bind="rootAttrs">
-    <slot name="thumbnail" :open="requestOpen">
-      <img
-        ref="thumbnailRef"
-        class="hana-img-viewer-thumbnail"
-        :src="src"
-        :alt="alt"
-        role="button"
-        tabindex="0"
-        @click="requestOpen"
-        @keydown.enter.prevent="requestOpen"
-        @keydown.space.prevent="requestOpen"
-      >
-    </slot>
+    <img
+      ref="thumbnailRef"
+      class="hana-img-viewer-thumbnail"
+      :src="src"
+      :alt="alt"
+      role="button"
+      tabindex="0"
+      @click="requestOpen"
+      @keydown.enter.prevent="requestOpen"
+      @keydown.space.prevent="requestOpen"
+    >
   </component>
 
   <Teleport v-if="activeTarget && phase !== 'closed'" :to="activeTarget">
@@ -143,11 +140,12 @@ onMounted(() => {
       :src="src"
       :preview-src="previewSrc"
       :alt="alt"
-      :zoom-enabled="enableZoom"
       :min-zoom="minZoom"
       :max-zoom="maxZoom"
+      :transition-duration="transitionDuration"
       :close-on-backdrop-click="closeOnBackdropClick"
       :close-on-escape="closeOnEscape"
+      :show-close-button="showCloseButton"
       @request-close="requestClose"
       @open-finished="handleOpenFinished"
       @close-finished="handleCloseFinished"

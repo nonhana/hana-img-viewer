@@ -3,16 +3,32 @@ import { describe, expect, it, vi } from 'vitest'
 
 export const registerB10FocusDismissal = (adapter: DomAdapter) => {
   describe('[behavior/B10] keyboard, focus, and dismissal', () => {
-    it('restores the exact custom opener after Escape', async () => {
-      const viewer = await adapter.mount({ src: 'thumb.jpg', trigger: 'custom' })
-      const opener = viewer.getTrigger()!
-      opener.focus()
-      opener.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    it('restores focus to the default trigger after Escape', async () => {
+      const viewer = await adapter.mount({ src: 'thumb.jpg' })
+      const trigger = viewer.getTrigger()!
+      trigger.focus()
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       await viewer.settle()
       viewer.getDialog()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       await viewer.settle()
-      expect(document.activeElement).toBe(opener)
+      expect(document.activeElement).toBe(trigger)
       viewer.unmount()
+    })
+    it('closes via the explicit close button and omits it when hidden', async () => {
+      const viewer = await adapter.mount({ src: 'thumb.jpg' })
+      viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      await viewer.settle()
+      const closeButton = viewer.getDialog()!.querySelector<HTMLButtonElement>('.hana-img-viewer-close-button')
+      expect(closeButton).not.toBeNull()
+      closeButton!.click()
+      await viewer.settle()
+      expect(viewer.getDialog()).toBeNull()
+
+      const hidden = await adapter.mount({ src: 'hidden.jpg', showCloseButton: false })
+      hidden.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      await hidden.settle()
+      expect(hidden.getDialog()!.querySelector('.hana-img-viewer-close-button')).toBeNull()
+      hidden.unmount()
     })
 
     it('closes only the focused overlay and keeps disabled paths available to the host', async () => {

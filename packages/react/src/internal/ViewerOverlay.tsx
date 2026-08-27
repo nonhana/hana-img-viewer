@@ -1,7 +1,7 @@
 import type { Point, Transform } from 'hana-img-viewer-core'
 import type { RefObject } from 'react'
 
-import type { ViewerPhase } from '@/internal/viewerReducer'
+import type { ViewerPhase } from './viewerReducer'
 import {
   clamp,
   createTrackpadDetector,
@@ -28,11 +28,12 @@ interface ViewerOverlayProps {
   src: string
   previewSrc?: string
   alt: string
-  zoom: boolean
   minZoom: number
   maxZoom: number
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
+  showCloseButton: boolean
+  transitionDuration: number
   onRequestClose: () => void
   onOpenFinished: () => void
   onCloseFinished: () => void
@@ -43,7 +44,6 @@ interface BodyLockSnapshot {
   paddingRight: string
 }
 
-const FLIP_DURATION = 300
 const FLIP_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const bodyLockOwners = new Set<object>()
 let bodyLockSnapshot: BodyLockSnapshot | null = null
@@ -112,11 +112,12 @@ export const ViewerOverlay = ({
   src,
   previewSrc,
   alt,
-  zoom,
   minZoom,
   maxZoom,
   closeOnBackdropClick,
   closeOnEscape,
+  showCloseButton,
+  transitionDuration,
   onRequestClose,
   onOpenFinished,
   onCloseFinished,
@@ -125,6 +126,7 @@ export const ViewerOverlay = ({
   const backdropRef = useRef<HTMLDivElement>(null)
   const shellRef = useRef<HTMLDivElement>(null)
   const previewRef = useRef<HTMLImageElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const bodyLockOwnerRef = useRef<object>({})
   const transformRef = useRef<Transform>({ x: 0, y: 0, scale: 1 })
   const animationGenerationRef = useRef(0)
@@ -302,9 +304,9 @@ export const ViewerOverlay = ({
       }
     }
 
-    const transitionDuration = Math.max(
+    const remainingDuration = Math.max(
       0,
-      FLIP_DURATION - (now - transitionRunRef.current!.startedAt),
+      transitionDuration - (now - transitionRunRef.current!.startedAt),
     )
     const ownedAnimations: Animation[] = []
     let active = true
@@ -324,7 +326,7 @@ export const ViewerOverlay = ({
       keyframes: Keyframe[],
     ): Animation => {
       const animation = element.animate(keyframes, {
-        duration: transitionDuration,
+        duration: remainingDuration,
         easing: FLIP_EASING,
         fill: 'forwards',
       })
@@ -356,6 +358,8 @@ export const ViewerOverlay = ({
         { transform: targetTransform },
       ])
       animate(backdrop, [{ opacity: fromOpacity }, { opacity: 1 }])
+      if (closeButtonRef.current)
+        animate(closeButtonRef.current, [{ opacity: fromOpacity }, { opacity: 1 }])
     }
     else if (phase === 'closing') {
       const computedShellTransform = getComputedStyle(shell).transform
@@ -378,6 +382,12 @@ export const ViewerOverlay = ({
         { opacity: Number.isFinite(computedOpacity) ? computedOpacity : 1 },
         { opacity: 0 },
       ])
+      if (closeButtonRef.current) {
+        animate(closeButtonRef.current, [
+          { opacity: Number.isFinite(computedOpacity) ? computedOpacity : 1 },
+          { opacity: 0 },
+        ])
+      }
     }
     else {
       previousAnimationPhaseRef.current = phase
@@ -427,6 +437,7 @@ export const ViewerOverlay = ({
     onOpenFinished,
     originRef,
     phase,
+    transitionDuration,
   ])
 
   useEffect(() => {
@@ -454,10 +465,7 @@ export const ViewerOverlay = ({
     }
 
     preview.style.transform = transformToCss(transformRef.current)
-    preview.style.cursor = zoom ? 'grab' : 'default'
-
-    if (!zoom)
-      return
+    preview.style.cursor = 'grab'
 
     const applyTransform = () => {
       if (transformFrame !== null)
@@ -522,9 +530,6 @@ export const ViewerOverlay = ({
     }
 
     const handleWheel = (event: WheelEvent) => {
-      if (!zoom)
-        return
-
       event.preventDefault()
       const sensitivity = detector.detect(event) ? 0.01 : 0.002
       setScale(transformRef.current.scale - event.deltaY * sensitivity, {
@@ -534,9 +539,6 @@ export const ViewerOverlay = ({
     }
 
     const handleDoubleClick = (event: MouseEvent) => {
-      if (!zoom)
-        return
-
       event.preventDefault()
       const currentScale = transformRef.current.scale
       const isBaseline = currentScale === 1
@@ -582,9 +584,6 @@ export const ViewerOverlay = ({
     }
 
     const handleTouchStart = (event: TouchEvent) => {
-      if (!zoom)
-        return
-
       const touches = getTwoTouches(event.touches)
       if (!touches)
         return
@@ -653,7 +652,7 @@ export const ViewerOverlay = ({
       if (transformFrame !== null)
         cancelAnimationFrame(transformFrame)
     }
-  }, [maxZoom, minZoom, phase, zoom])
+  }, [maxZoom, minZoom, phase])
 
   useLayoutEffect(() => {
     const overlay = overlayRef.current
@@ -704,6 +703,30 @@ export const ViewerOverlay = ({
         className="hana-img-viewer-backdrop"
         aria-hidden="true"
       />
+      {showCloseButton && (
+        <button
+          ref={closeButtonRef}
+          type="button"
+          className="hana-img-viewer-close-button"
+          aria-label="Close"
+          onClick={onRequestClose}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      )}
       <div
         ref={shellRef}
         className="hana-img-viewer-flip-shell"
@@ -721,7 +744,7 @@ export const ViewerOverlay = ({
           alt={alt}
           draggable={false}
           style={{
-            cursor: phase !== 'open' || !zoom
+            cursor: phase !== 'open'
               ? 'default'
               : gesture === 'idle'
                 ? 'grab'

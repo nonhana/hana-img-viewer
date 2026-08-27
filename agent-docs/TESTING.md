@@ -13,6 +13,7 @@ Vitest 4 is the test runner. The core package and UI packages own pure unit test
 | Vue contracts | `pnpm test:contract:vue` | Vue DOM, hydration, and server adapter evidence. |
 | React distribution | `pnpm test:dist:react` | Fresh React build plus shared B14 distribution contract. |
 | Vue distribution | `pnpm test:dist:vue` | Fresh Vue build plus shared B14 distribution contract. |
+| Demo MPA artifact | `pnpm verify:demo` | Five HTML entries, navigation, module scripts, CSS links, and SSR content. |
 
 UI package `test` scripts run only their package-local unit config. Component, SSR, and distribution suites are root-owned.
 
@@ -34,12 +35,19 @@ For a full repository check, run:
 pnpm lint
 pnpm -F hana-img-viewer-core typecheck
 pnpm typecheck
-pnpm -F hana-img-viewer-demo-vue typecheck
-pnpm -F hana-img-viewer-demo-react typecheck
+pnpm -F hana-img-viewer-demo typecheck
 pnpm test
 pnpm build
+pnpm verify:demo
 pnpm changeset status
 pnpm test:dist
 ```
 
-There is no automated browser E2E suite. Use `pnpm dev:vue` or `pnpm dev:react` for a manual interaction smoke test; demos consume source aliases and are not distribution verification.
+There is no automated browser E2E suite. `pnpm dev` only verifies source-backed SPA interaction. For SSR hydration, build and use the production preview:
+
+```sh
+pnpm -F hana-img-viewer-demo build
+pnpm -F hana-img-viewer-demo preview --host 127.0.0.1
+```
+
+Open `/`, `/vue.html`, `/react.html`, `/vue-ssr.html`, and `/react-ssr.html`. Confirm that SSR pages contain thumbnails before hydration, the browser console has no hydration warnings, and viewer open/close plus the Dialog custom-container interaction work on the SPA and SSR pages.

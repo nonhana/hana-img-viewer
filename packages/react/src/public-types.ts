@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 
 /** Public props for the React image viewer. */
 export interface HanaImgViewerProps {
@@ -19,20 +19,23 @@ export interface HanaImgViewerProps {
    * hydration; explicit `null` keeps an open request pending.
    */
   container?: HTMLElement | null
-  /** Enable wheel, pinch, and double-click zoom. @default true */
-  enableZoom?: boolean
   /** Minimum zoom. Callers must keep `0 < minZoom <= maxZoom`. @default 0.5 */
   minZoom?: number
   /** Maximum zoom. @default 10 */
   maxZoom?: number
+  /**
+   * Open and close FLIP transition duration in milliseconds.
+   * @default 300
+   */
+  transitionDuration?: number
   /** Close when the backdrop is clicked. @default true */
   closeOnBackdropClick?: boolean
   /** Close when the focused overlay receives Escape. @default true */
   closeOnEscape?: boolean
+  /** Show an explicit close button in the top-right corner of the overlay. @default true */
+  showCloseButton?: boolean
   /** Class applied to the visible thumbnail root. */
   className?: string
   /** Style applied to the visible thumbnail root. */
   style?: CSSProperties
-  /** Custom trigger. The consumer owns its semantics and styling. */
-  children?: (controls: { open: () => void }) => ReactNode
 }

@@ -53,20 +53,6 @@ export const registerB5PointerDrag = (adapter: DomAdapter) => {
       viewer.unmount()
     })
 
-    it('does not install transform gestures when zoom is disabled', async () => {
-      const viewer = await adapter.mount({ src: 'thumb.jpg', enableZoom: false })
-      viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-      await viewer.settle()
-      const preview = viewer.getPreview()!
-      const initialTransform = preview.style.transform
-      preview.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -100, clientX: 100, clientY: 100 }))
-      preview.dispatchEvent(createPointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, pointerId: 1 }))
-      preview.dispatchEvent(createPointerEvent('pointermove', { bubbles: true, cancelable: true, clientX: 20, clientY: 20, pointerId: 1 }))
-      await viewer.settle()
-      expect(preview.style.transform).toBe(initialTransform)
-      viewer.unmount()
-    })
-
     it('preserves translation when a dynamic bound clamps the scale', async () => {
       const viewer = await adapter.mount({ src: 'thumb.jpg' })
       viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))

@@ -37,9 +37,4 @@ export default defineConfig({
       external: ['vue'],
     },
   },
-  resolve: {
-    alias: {
-      '@': resolve(import.meta.dirname, 'src'),
-    },
-  },
 })

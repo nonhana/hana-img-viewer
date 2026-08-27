@@ -149,5 +149,5 @@ dist
 .cursor/
 
 # generated example type helpers
-apps/vue-demo/auto-imports.d.ts
-apps/vue-demo/components.d.ts
+apps/demo/auto-imports.d.ts
+apps/demo/components.d.ts

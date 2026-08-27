@@ -2,6 +2,10 @@
 
 A pnpm monorepo containing independent Vue 3 and React 19 image-viewer libraries, a shared framework-agnostic core, and two source-linked demos.
 
+## Rules
+
+- Write docs and comments in English, use of Chinese is prohibited.
+
 ## Agent Docs
 
 - [BUILD.md](./agent-docs/BUILD.md) — before installing, running, building, or releasing

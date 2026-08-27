@@ -7,7 +7,7 @@ The pnpm workspace contains `apps/*` and `packages/*`. The root package orchestr
 - `packages/vue` owns the Vue component, Vue-specific lifecycle, and Vue package output.
 - `packages/react` owns the React component, React-specific lifecycle, and React package output.
 - `packages/core` exposes framework-independent DOM, input, math, and shared types. It must not own framework lifecycle, portal orchestration, animation ownership, or effects.
-- `apps/vue-demo` and `apps/react-demo` are private consumers. They demonstrate source behavior and must not own library implementation.
+- `apps/demo` is a private MPA consumer. It demonstrates both UI libraries' source behavior and must not own library implementation.
 
 Both UI libraries use the private `hana-img-viewer-core` workspace package while developing and building. Vite bundles those imports into each public UI package, so consumers never install core as a runtime dependency. Core does not depend on either framework, and neither UI library may import the other UI library or an app. Local `@/*` aliases resolve to the current package's `src`; cross-package imports use package names.
 
@@ -35,7 +35,7 @@ Keep JSX-visible lifecycle in React state or the reducer. Keep high-frequency DO
 
 ## Vue Ownership
 
-- `src/HanaImgViewer.vue` owns `v-model:open`, thumbnail and slot rendering, hydration-aware Teleport target selection, the active target, and focus restoration.
+- `src/HanaImgViewer.vue` owns `v-model:open`, thumbnail rendering, hydration-aware Teleport target selection, the active target, and focus restoration.
 - `src/internal/ViewerOverlay.vue` owns one overlay session's DOM, source enhancement, animation, gestures, focus, dismissal, and cleanup.
 - `src/internal/viewerState.ts` contains only pure phase transitions; `src/internal/bodyLock.ts` is the cross-instance body-lock ownership seam.
 - `src/public-types.ts` declares public props; `src/index.ts` creates the installable component identity, exports it as default and named, exports the props type, and imports the stylesheet.

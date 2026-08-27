@@ -10,7 +10,7 @@ Both UI packages are ESM-only. Their package roots resolve to `dist/index.js` wi
 
 - default and named `HanaImgViewer` as the same installable Vue component identity;
 - the `HanaImgViewerProps` type;
-- only the `update:open` event and `thumbnail` slot described in the root README.
+- only the `update:open` event described in the root README.
 
 Its `sideEffects` contract is `['**/*.css', 'src/index.ts']`, its peer is Vue `^3.5.0`, its package files are limited to `dist`, and it has no runtime dependency on the private core workspace package.
 

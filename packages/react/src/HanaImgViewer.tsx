@@ -1,6 +1,6 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 
-import type { HanaImgViewerProps } from '@/public-types'
+import type { HanaImgViewerProps } from './public-types'
 
 import {
   useCallback,
@@ -10,8 +10,8 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
-import { ViewerOverlay } from '@/internal/ViewerOverlay'
-import { initialViewerState, viewerReducer } from '@/internal/viewerReducer'
+import { ViewerOverlay } from './internal/ViewerOverlay'
+import { initialViewerState, viewerReducer } from './internal/viewerReducer'
 
 const subscribeToHydration = (): (() => void) => () => {}
 const getClientSnapshot = (): boolean => true
@@ -25,14 +25,14 @@ export const HanaImgViewer = ({
   defaultOpen = false,
   onOpenChange,
   container,
-  enableZoom = true,
   minZoom = 0.5,
   maxZoom = 10,
+  transitionDuration = 300,
   closeOnBackdropClick = true,
   closeOnEscape = true,
+  showCloseButton = true,
   className,
   style,
-  children,
 }: HanaImgViewerProps) => {
   const [isControlled] = useState(() => open !== undefined)
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
@@ -103,20 +103,11 @@ export const HanaImgViewer = ({
         restoreFocusRef.current = false
         const capturedFocus = originFocusRef.current
         originFocusRef.current = null
-        const focusTarget
-          = capturedFocus?.isConnected
-            ? capturedFocus
-            : originRef.current?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
-        focusTarget?.focus({ preventScroll: true })
+        capturedFocus?.focus({ preventScroll: true })
       }
 
       if (desiredOpen && requestedContainer) {
-        const origin = originRef.current
-        const activeElement = document.activeElement
-        originFocusRef.current
-          = origin?.contains(activeElement) && activeElement instanceof HTMLElement
-            ? activeElement
-            : origin?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail') ?? null
+        originFocusRef.current = originRef.current?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail') ?? null
         // Portal ownership can only be committed after the client container exists.
         // eslint-disable-next-line react/set-state-in-effect
         setActiveContainer(requestedContainer)
@@ -168,20 +159,16 @@ export const HanaImgViewer = ({
           visibility: isOverlayMounted ? 'hidden' : style?.visibility,
         }}
       >
-        {children
-          ? children({ open: requestOpen })
-          : (
-              <img
-                className="hana-img-viewer-thumbnail"
-                src={src}
-                alt={alt}
-                /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role */
-                role="button"
-                tabIndex={0}
-                onClick={requestOpen}
-                onKeyDown={handleThumbnailKeyDown}
-              />
-            )}
+        <img
+          className="hana-img-viewer-thumbnail"
+          src={src}
+          alt={alt}
+          /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role */
+          role="button"
+          tabIndex={0}
+          onClick={requestOpen}
+          onKeyDown={handleThumbnailKeyDown}
+        />
       </div>
 
       {overlayPhase && activeContainer
@@ -193,11 +180,12 @@ export const HanaImgViewer = ({
               src={src}
               previewSrc={previewSrc}
               alt={alt}
-              zoom={enableZoom}
               minZoom={minZoom}
               maxZoom={maxZoom}
+              transitionDuration={transitionDuration}
               closeOnBackdropClick={closeOnBackdropClick}
               closeOnEscape={closeOnEscape}
+              showCloseButton={showCloseButton}
               onRequestClose={requestClose}
               onOpenFinished={finishOpening}
               onCloseFinished={finishClosing}

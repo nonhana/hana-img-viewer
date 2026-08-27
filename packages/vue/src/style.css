@@ -23,6 +23,27 @@
   inset: 0;
   background-color: rgba(0, 0, 0, 0.3);
 }
+.hana-img-viewer-close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.hana-img-viewer-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
 
 .hana-img-viewer-flip-shell {
   position: relative;

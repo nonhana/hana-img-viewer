@@ -12,7 +12,6 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "hana-img-viewer-core",
-    "hana-img-viewer-demo-vue",
-    "hana-img-viewer-demo-react"
+    "hana-img-viewer-demo"
   ]
 }

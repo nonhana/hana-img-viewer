@@ -11,12 +11,12 @@ export interface DomMountOptions {
   alt?: string
   container?: ContainerOption
   visibility?: VisibilityOption
-  enableZoom?: boolean
   minZoom?: number
   maxZoom?: number
+  transitionDuration?: number
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
-  trigger?: 'default' | 'custom'
+  showCloseButton?: boolean
 }
 
 export interface DomHandle {

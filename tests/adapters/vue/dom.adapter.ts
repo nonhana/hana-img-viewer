@@ -15,11 +15,12 @@ const VueHarness = defineComponent({
         'src': options.src ?? 'thumb.jpg',
         'previewSrc': options.previewSrc,
         'alt': options.alt,
-        'enableZoom': options.enableZoom,
         'minZoom': options.minZoom,
         'maxZoom': options.maxZoom,
+        'transitionDuration': options.transitionDuration,
         'closeOnBackdropClick': options.closeOnBackdropClick,
         'closeOnEscape': options.closeOnEscape,
+        'showCloseButton': options.showCloseButton,
         'onUpdate:open': (nextOpen: boolean) => {
           ;(props.requests as boolean[]).push(nextOpen)
         },
@@ -30,14 +31,6 @@ const VueHarness = defineComponent({
         viewerProps.container = options.container.element
       if (options.visibility?.kind === 'external') {
         viewerProps.open = options.visibility.open
-      }
-      if (options.trigger === 'custom') {
-        viewerProps['v-slots'] = {
-          thumbnail: ({ open }: { open: () => void }) => [
-            h('button', { type: 'button' }, 'Other action'),
-            h('button', { class: 'contract-opener', type: 'button', onClick: open }, 'Open preview'),
-          ],
-        }
       }
       return h(HanaImgViewer, viewerProps as never)
     }
@@ -67,7 +60,7 @@ class VueHandle implements DomHandle {
   }
 
   getTrigger() {
-    return this.host.querySelector<HTMLElement>('.contract-opener, .hana-img-viewer-thumbnail')
+    return this.host.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
   }
 
   getDialog() {

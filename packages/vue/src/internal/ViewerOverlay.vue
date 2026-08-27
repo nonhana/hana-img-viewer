@@ -20,11 +20,12 @@ const props = defineProps<{
   src: string
   previewSrc?: string
   alt: string
-  zoomEnabled: boolean
   minZoom: number
   maxZoom: number
   closeOnBackdropClick: boolean
   closeOnEscape: boolean
+  showCloseButton: boolean
+  transitionDuration: number
 }>()
 
 const emit = defineEmits<{
@@ -34,7 +35,6 @@ const emit = defineEmits<{
 }>()
 
 const DOUBLE_CLICK_ZOOM = 2
-const FLIP_DURATION = 300
 const FLIP_EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
 interface TransitionRun {
@@ -47,6 +47,7 @@ const overlayRef = useTemplateRef('overlayRef')
 const backdropRef = useTemplateRef('backdropRef')
 const shellRef = useTemplateRef('shellRef')
 const previewRef = useTemplateRef('previewRef')
+const closeButtonRef = useTemplateRef('closeButtonRef')
 
 const destinationRect = ref<{ width: number, height: number } | null>(null)
 const displaySrc = ref(props.src)
@@ -174,9 +175,9 @@ const animatePhase = async () => {
         }
   transitionRun = currentTransition
 
-  const transitionDuration = Math.max(
+  const remainingDuration = Math.max(
     0,
-    FLIP_DURATION - (now - currentTransition.startedAt),
+    props.transitionDuration - (now - currentTransition.startedAt),
   )
   const animations: Animation[] = []
   ownedAnimations = animations
@@ -196,7 +197,7 @@ const animatePhase = async () => {
 
   const animate = (element: HTMLElement, keyframes: Keyframe[]) => {
     animations.push(element.animate(keyframes, {
-      duration: transitionDuration,
+      duration: remainingDuration,
       easing: FLIP_EASING,
       fill: 'forwards',
     }))
@@ -208,6 +209,8 @@ const animatePhase = async () => {
       { transform: currentTransition.openingTargetTransform ?? 'translate(0, 0) scale(1)' },
     ])
     animate(backdrop, [{ opacity: fromOpacity }, { opacity: 1 }])
+    if (closeButtonRef.value)
+      animate(closeButtonRef.value, [{ opacity: fromOpacity }, { opacity: 1 }])
   }
   else {
     if (previewRef.value)
@@ -217,6 +220,8 @@ const animatePhase = async () => {
       { transform: originTransform },
     ])
     animate(backdrop, [{ opacity: fromOpacity }, { opacity: 0 }])
+    if (closeButtonRef.value)
+      animate(closeButtonRef.value, [{ opacity: fromOpacity }, { opacity: 0 }])
   }
 
   try {
@@ -274,8 +279,6 @@ const startEnhancement = () => {
 }
 
 const setScale = (nextScale: number, anchor: Point, resetToBaseline = false) => {
-  if (!props.zoomEnabled)
-    return
   const current = { x: transform.x, y: transform.y }
   const scale = resetToBaseline ? 1 : clamp(nextScale, props.minZoom, props.maxZoom)
   if (scale === transform.scale)
@@ -297,7 +300,7 @@ const setScale = (nextScale: number, anchor: Point, resetToBaseline = false) => 
 
 const installGestures = () => {
   const preview = previewRef.value
-  if (!preview || !props.zoomEnabled)
+  if (!preview)
     return () => {}
 
   const detector = createTrackpadDetector()
@@ -444,7 +447,7 @@ watch(() => [props.minZoom, props.maxZoom] as const, () => {
   transform.scale = scale
   writeTransform()
 })
-watch(() => [props.phase, props.zoomEnabled] as const, ([phase]) => {
+watch(() => props.phase, (phase) => {
   if (phase === 'closing') {
     sourceGeneration++
     sourceRequest = null
@@ -511,6 +514,19 @@ onBeforeUnmount(() => {
     tabindex="-1"
   >
     <div ref="backdropRef" class="hana-img-viewer-backdrop" aria-hidden="true" @click="onBackdropClick" />
+    <button
+      v-if="showCloseButton"
+      ref="closeButtonRef"
+      type="button"
+      class="hana-img-viewer-close-button"
+      aria-label="Close"
+      @click="emit('requestClose')"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    </button>
     <div
       ref="shellRef"
       class="hana-img-viewer-flip-shell"
@@ -522,7 +538,7 @@ onBeforeUnmount(() => {
         :src="displaySrc"
         :alt="alt"
         draggable="false"
-        :style="{ cursor: phase === 'open' && zoomEnabled ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
+        :style="{ cursor: phase === 'open' ? gesture === 'idle' ? 'grab' : 'grabbing' : 'default', transform: transformToCss(transform) }"
       >
     </div>
   </div>

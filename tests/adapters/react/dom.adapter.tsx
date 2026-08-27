@@ -17,25 +17,17 @@ const ReactHarness = ({ options, requests }: { options: DomMountOptions, request
     previewSrc: options.previewSrc,
     alt: options.alt,
     container: containerFromOptions(options),
-    enableZoom: options.enableZoom,
     minZoom: options.minZoom,
     maxZoom: options.maxZoom,
+    transitionDuration: options.transitionDuration,
     closeOnBackdropClick: options.closeOnBackdropClick,
     closeOnEscape: options.closeOnEscape,
+    showCloseButton: options.showCloseButton,
     defaultOpen: options.visibility?.kind === 'local' ? options.visibility.initialOpen : undefined,
     open: options.visibility?.kind === 'external' ? options.visibility.open : undefined,
     onOpenChange: (nextOpen) => {
       requests.push(nextOpen)
     },
-  }
-
-  if (options.trigger === 'custom') {
-    props.children = ({ open }) => (
-      <>
-        <button type="button">Other action</button>
-        <button className="contract-opener" type="button" onClick={open}>Open preview</button>
-      </>
-    )
   }
 
   return <HanaImgViewer {...props} />
@@ -60,7 +52,7 @@ class ReactHandle implements DomHandle {
   }
 
   getTrigger() {
-    return this.host.querySelector<HTMLElement>('.contract-opener, .hana-img-viewer-thumbnail')
+    return this.host.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
   }
 
   getDialog() {
