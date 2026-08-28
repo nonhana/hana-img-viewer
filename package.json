@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.24.0",
   "scripts": {
     "dev": "pnpm -F hana-img-viewer-demo dev",
+    "preview": "pnpm -F hana-img-viewer-demo preview",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "build:vue": "pnpm -F hana-img-viewer build",
     "build:react": "pnpm -F hana-img-viewer-react build",
