@@ -9,12 +9,12 @@
   "scripts": {
     "dev": "vite",
     "preview": "vite preview",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && tsx scripts/prerender.mts",
     "typecheck": "pnpm run typecheck:react && pnpm run typecheck:vue && pnpm run typecheck:config",
     "typecheck:vue": "vue-tsc --noEmit -p tsconfig.vue.json",
     "typecheck:react": "tsc -p tsconfig.react.json --noEmit",
     "typecheck:config": "tsc -p tsconfig.config.json --noEmit",
-    "verify:dist": "node scripts/verify-dist.mjs"
+    "verify:dist": "tsx scripts/verify-dist.mts"
   },
   "dependencies": {
     "hana-img-viewer": "workspace:*",
@@ -33,6 +33,7 @@
     "react-dom": "catalog:ui-react",
     "shiki": "catalog:",
     "tailwindcss": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vue": "catalog:ui-vue",

@@ -3,15 +3,20 @@ import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFil
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { discoverDemoEntries } from './entries.mjs'
+import { discoverDemoEntries } from './entries.mts'
 
 const rootDir = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const distDir = resolve(rootDir, 'dist')
 const cacheDir = resolve(rootDir, 'node_modules/.cache/demo-ssr')
 const mountMarker = '<div id="app"></div>'
 
-function collectBundleFiles(directory) {
-  const files = []
+interface PendingWrite {
+  outputPath: string
+  temporaryPath: string
+}
+
+function collectBundleFiles(directory: string): string[] {
+  const files: string[] = []
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     const path = resolve(directory, entry.name)
     if (entry.isDirectory())
@@ -50,7 +55,7 @@ for (const bundlePath of collectBundleFiles(cacheDir)) {
     throw new Error(`SSR bundle contains an external framework or CSS import: ${bundlePath}`)
 }
 
-const pendingWrites = []
+const pendingWrites: PendingWrite[] = []
 try {
   for (const entry of entries.ssrEntries) {
     const bundlePath = resolve(cacheDir, `${entry.framework}.mjs`)
@@ -58,7 +63,7 @@ try {
     if (typeof mod.default !== 'function')
       throw new Error(`SSR entry ${entry.framework} has no default render function`)
 
-    const rendered = await mod.default()
+    const rendered: unknown = await mod.default()
     if (typeof rendered !== 'string' || rendered.trim().length === 0)
       throw new Error(`SSR entry ${entry.framework} rendered empty HTML`)
 
