@@ -14,7 +14,7 @@ export const reactDistributionAdapter: DistributionAdapter = {
       files: ['dist'],
       main: './dist/index.js',
       module: './dist/index.js',
-      sideEffects: ['**/*.css'],
+      sideEffects: ['**/*.css', 'src/index.ts'],
       types: './dist/index.d.ts',
       peerDependencies: { 'react': '^19.0.0', 'react-dom': '^19.0.0' },
       publishConfig: { access: 'public' },

@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v6.0.10
 
@@ -38,7 +40,8 @@ jobs:
         run: pnpm verify:demo
 
       - name: Changeset status
-        run: pnpm changeset status
+        if: github.event_name == 'pull_request' && github.base_ref == 'main' && !startsWith(github.head_ref, 'changeset-release/')
+        run: pnpm changeset status --since=origin/main
 
       - name: Dist contract
         run: pnpm test:dist
