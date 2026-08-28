@@ -1,6 +1,6 @@
 import { hydrateRoot } from 'react-dom/client'
 import App from './App'
-import './styles'
+import '../shared/app.css'
 
 const rootElement = document.getElementById('app')
 if (!rootElement)
