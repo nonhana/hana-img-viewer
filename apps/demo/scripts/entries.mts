@@ -1,13 +1,28 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-const SSR_SUFFIX = '-ssr.html'
-const SOURCE_EXTENSIONS = ['.ts', '.tsx']
+export interface DemoSsrEntry {
+  framework: string
+  html: string
+  htmlPath: string
+  ssrPath: string
+  hydrationPath: string
+}
 
-function findSource(rootDir, framework, basename) {
+export interface DemoEntries {
+  htmlFiles: string[]
+  clientInputs: Record<string, string>
+  ssrEntries: DemoSsrEntry[]
+  expectedBundles: string[]
+}
+
+const SSR_SUFFIX = '-ssr.html'
+const SOURCE_EXTENSIONS = ['.ts', '.tsx'] as const
+
+function findSource(rootDir: string, framework: string, basename: string): string {
   const matches = SOURCE_EXTENSIONS
     .map(extension => resolve(rootDir, 'src', framework, `${basename}${extension}`))
-    .filter(existsSync)
+    .filter(path => existsSync(path))
 
   if (matches.length !== 1) {
     throw new Error(
@@ -18,7 +33,7 @@ function findSource(rootDir, framework, basename) {
   return matches[0]
 }
 
-export function discoverDemoEntries(rootDir) {
+export function discoverDemoEntries(rootDir: string): DemoEntries {
   const absoluteRoot = resolve(rootDir)
   const htmlFiles = readdirSync(absoluteRoot, { withFileTypes: true })
     .filter(entry => entry.isFile() && entry.name.endsWith('.html'))
@@ -30,7 +45,7 @@ export function discoverDemoEntries(rootDir) {
 
   const ssrEntries = htmlFiles
     .filter(file => file.endsWith(SSR_SUFFIX))
-    .map((html) => {
+    .map((html): DemoSsrEntry => {
       const framework = html.slice(0, -SSR_SUFFIX.length)
       if (!framework)
         throw new Error(`Invalid SSR HTML entry name: ${html}`)

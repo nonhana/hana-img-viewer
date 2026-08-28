@@ -51,7 +51,7 @@ export default antfu({
     'ts/no-non-null-assertion': 'off',
   },
 }, {
-  files: ['apps/demo/**/*.{html,ts,tsx,vue,mjs}'],
+  files: ['apps/demo/**/*.{html,ts,tsx,vue,mts}'],
   plugins: { 'better-tailwindcss': betterTailwindcss },
   settings: {
     'better-tailwindcss': {

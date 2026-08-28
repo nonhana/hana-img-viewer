@@ -10,14 +10,14 @@ const appPages = ['vue.html', 'react.html', 'vue-ssr.html', 'react-ssr.html']
 const spaPages = ['vue.html', 'react.html']
 const ssrPages = ['vue-ssr.html', 'react-ssr.html']
 
-const countMatches = (source, pattern) => [...source.matchAll(pattern)].length
+const countMatches = (source: string, pattern: RegExp) => [...source.matchAll(pattern)].length
 
-function fail(message) {
+function fail(message: string): never {
   throw new Error(`Demo dist verification failed: ${message}`)
 }
 
-function walk(directory) {
-  const paths = []
+function walk(directory: string): string[] {
+  const paths: string[] = []
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     const path = resolve(directory, entry.name)
     if (entry.isDirectory())

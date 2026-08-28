@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
-import { discoverDemoEntries } from './scripts/entries.mjs'
+import { discoverDemoEntries } from './scripts/entries.mts'
 
 const demoEntries = discoverDemoEntries(import.meta.dirname)
 
