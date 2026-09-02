@@ -39,7 +39,7 @@ export default defineConfig({
     ssr: true,
     outDir: 'node_modules/.cache/demo-ssr',
     emptyOutDir: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: Object.fromEntries(
         demoEntries.ssrEntries.map(entry => [entry.framework, entry.ssrPath]),
       ),
