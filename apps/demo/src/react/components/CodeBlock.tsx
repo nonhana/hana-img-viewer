@@ -1,8 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { highlightCode } from '../../shared/highlighter'
 
 export default function CodeBlock({ file, code }: { file: string, code: string }) {
-  const html = useMemo(() => highlightCode(code, file), [code, file])
+  const [html, setHtml] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    highlightCode(code, file).then((value) => {
+      if (alive)
+        setHtml(value)
+    })
+    return () => {
+      alive = false
+    }
+  }, [code, file])
+
   const [copied, setCopied] = useState(false)
   const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 

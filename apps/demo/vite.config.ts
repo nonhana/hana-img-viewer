@@ -27,7 +27,7 @@ export default defineConfig({
     force: true,
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       input: demoEntries.clientInputs,
     },
   },

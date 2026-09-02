@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { highlightCode } from '../../shared/highlighter'
 
 const props = defineProps<{
   file: string
   code: string
 }>()
-const html = highlightCode(props.code, props.file)
+const html = ref('')
+
+onMounted(async () => {
+  html.value = await highlightCode(props.code, props.file)
+})
 
 const copied = ref(false)
 let resetTimer: ReturnType<typeof setTimeout> | undefined
