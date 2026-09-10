@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [ main, dev ]
   pull_request:
-    branches: [main, dev]
+    branches: [ main, dev ]
 
 jobs:
   lint-and-build:
@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@v6.1.0
 
       - uses: actions/setup-node@v7.0.0
         with:
@@ -40,7 +40,8 @@ jobs:
         run: pnpm verify:demo
 
       - name: Changeset status
-        if: github.event_name == 'pull_request' && github.base_ref == 'main' && !startsWith(github.head_ref, 'changeset-release/')
+        if: github.event_name == 'pull_request' && github.base_ref == 'main' &&
+          !startsWith(github.head_ref, 'changeset-release/')
         run: pnpm changeset status --since=origin/main
 
       - name: Dist contract
