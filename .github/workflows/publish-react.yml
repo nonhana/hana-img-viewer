@@ -101,14 +101,15 @@ jobs:
             npm publish "$PACKAGE_TARBALL" --access public --provenance
           fi
 
-          for attempt in 1 2 3 4 5; do
+          for attempt in $(seq 1 20); do
             if curl --fail --silent --show-error "$registry_url" > /dev/null; then
               exit 0
             fi
-            sleep $((attempt * 2))
+            sleep 15
           done
 
-          echo "Registry did not expose ${PACKAGE_NAME}@${PACKAGE_VERSION} after publishing"
+          echo "Registry did not expose ${PACKAGE_NAME}@${PACKAGE_VERSION} within 5 minutes after publishing"
+          echo "npm publish exited successfully; once the package is visible, rerun this workflow on main to finish tagging and release"
           exit 1
 
       - name: Create React tag
