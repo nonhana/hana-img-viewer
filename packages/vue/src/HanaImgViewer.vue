@@ -11,7 +11,6 @@ defineOptions({ name: 'HanaImgViewer', inheritAttrs: false })
 const props = withDefaults(
   defineProps<HanaImgViewerProps>(),
   {
-    as: 'div',
     alt: '',
     minZoom: 0.5,
     maxZoom: 10,
@@ -26,8 +25,7 @@ const openModel = defineModel<boolean>('open', { default: false })
 
 const attrs = useAttrs()
 
-const originRef = useTemplateRef<HTMLElement>('originRef')
-const thumbnailRef = useTemplateRef<HTMLImageElement>('thumbnailRef')
+const originRef = useTemplateRef<HTMLImageElement>('originRef')
 
 const hydrated = ref(false)
 
@@ -39,19 +37,21 @@ const phase = ref<ViewerPhase>(initialViewerPhase)
 const originFocus = shallowRef<HTMLElement | null>(null)
 
 const overlayMounted = computed(() => phase.value !== 'closed' && activeTarget.value !== null)
-const rootAttrs = computed(() => Object.fromEntries(
-  Object.entries(attrs).filter(([attributeName]) => attributeName !== 'class' && attributeName !== 'style'),
+const imgAttrs = computed(() => Object.fromEntries(
+  Object.entries(attrs).filter(
+    ([attributeName]) =>
+      attributeName !== 'class'
+      && attributeName !== 'style'
+      && attributeName !== 'onClick'
+      && attributeName !== 'onKeydown',
+  ),
 ))
+
 const thumbnailStyle = computed<StyleValue>(() => [
-  {
-    display: 'inline-block',
-  },
   attrs.style,
-  {
-    ...(overlayMounted.value
-      ? { visibility: 'hidden' as CSSProperties['visibility'] }
-      : {}),
-  },
+  ...(overlayMounted.value
+    ? [{ visibility: 'hidden' as CSSProperties['visibility'] }]
+    : []),
 ])
 
 const dispatch = (event: ViewerEvent) => {
@@ -61,6 +61,19 @@ const dispatch = (event: ViewerEvent) => {
 const requestOpen = () => openModel.value = true
 
 const requestClose = () => openModel.value = false
+
+const handleThumbnailClick = (event: MouseEvent) => {
+  ;(attrs.onClick as ((event: MouseEvent) => void) | undefined)?.(event)
+  requestOpen()
+}
+
+const handleThumbnailKeydown = (event: KeyboardEvent) => {
+  ;(attrs.onKeydown as ((event: KeyboardEvent) => void) | undefined)?.(event)
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    requestOpen()
+  }
+}
 
 watchEffect(() => {
   if (!hydrated.value) {
@@ -76,7 +89,7 @@ watch(
     if (currentPhase === 'closed') {
       if (desiredOpen && target && currentTarget !== target) {
         activeTarget.value = target
-        originFocus.value = thumbnailRef.value
+        originFocus.value = originRef.value
         dispatch({ type: 'SHOW' })
       }
       else if ((!desiredOpen || !target) && currentTarget) {
@@ -118,19 +131,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <component :is="as" ref="originRef" class="hana-img-viewer-thumbnail-root" :class="attrs.class" :style="thumbnailStyle" v-bind="rootAttrs">
-    <img
-      ref="thumbnailRef"
-      class="hana-img-viewer-thumbnail"
-      :src="src"
-      :alt="alt"
-      role="button"
-      tabindex="0"
-      @click="requestOpen"
-      @keydown.enter.prevent="requestOpen"
-      @keydown.space.prevent="requestOpen"
-    >
-  </component>
+  <img
+    ref="originRef"
+    v-bind="imgAttrs"
+    class="hana-img-viewer-thumbnail"
+    :class="attrs.class"
+    :style="thumbnailStyle"
+    role="button"
+    tabindex="0"
+    :src="src"
+    :alt="alt"
+    @click="handleThumbnailClick"
+    @keydown="handleThumbnailKeydown"
+  >
 
   <Teleport v-if="activeTarget && phase !== 'closed'" :to="activeTarget">
     <ViewerOverlay

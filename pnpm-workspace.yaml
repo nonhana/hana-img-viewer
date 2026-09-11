@@ -1,10 +1,11 @@
 minimumReleaseAge: 0
-
-shellEmulator: true
+minimumReleaseAgeExcludePrune: true
 
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
+
+shellEmulator: true
 
 packages:
   - apps/*
@@ -12,6 +13,10 @@ packages:
 
 overrides:
   typescript: 'catalog:'
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
 
 catalog:
   '@antfu/eslint-config': ^9.5.1
@@ -58,6 +63,3 @@ catalogs:
     unplugin-dts: ^1.1.0
     vue: ^3.5.42
     vue-tsc: ^3.3.11
-allowBuilds:
-  '@parcel/watcher': true
-  esbuild: true

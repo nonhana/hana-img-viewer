@@ -24,7 +24,7 @@ interface ViewerRect {
 interface ViewerOverlayProps {
   phase: Exclude<ViewerPhase, 'closed'>
   container: HTMLElement
-  originRef: RefObject<HTMLDivElement | null>
+  originRef: RefObject<HTMLImageElement | null>
   src: string
   previewSrc?: string
   alt: string
@@ -156,12 +156,10 @@ export const ViewerOverlay = ({
 
   useLayoutEffect(() => {
     const measure = () => {
-      const origin = originRef.current
-      const originImage = origin?.querySelector('img')
-      const originRect = origin?.getBoundingClientRect() ?? null
+      const originRect = originRef.current?.getBoundingClientRect() ?? null
       const overlay = overlayRef.current
       const overlayRect = overlay?.getBoundingClientRect()
-      const aspectRatio = resolveAspectRatio(originImage, originRect)
+      const aspectRatio = resolveAspectRatio(originRef.current, originRect)
       const viewportWidth
         = overlay?.clientWidth || overlayRect?.width || window.innerWidth
       const viewportHeight
@@ -198,7 +196,7 @@ export const ViewerOverlay = ({
     }
 
     measure()
-    const thumbnailImage = originRef.current?.querySelector('img')
+    const thumbnailImage = originRef.current
     const resizeObserver
       = typeof ResizeObserver === 'undefined'
         ? null

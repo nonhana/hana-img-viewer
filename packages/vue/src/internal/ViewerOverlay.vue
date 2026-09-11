@@ -16,7 +16,7 @@ import { acquireBodyLock, releaseBodyLock } from './bodyLock'
 const props = defineProps<{
   phase: Exclude<ViewerPhase, 'closed'>
   container: HTMLElement
-  originElement: HTMLElement | null
+  originElement: HTMLImageElement | null
   src: string
   previewSrc?: string
   alt: string
@@ -89,11 +89,9 @@ const resetTransform = () => {
 }
 
 const measure = () => {
-  const origin = props.originElement
-  const originImage = origin?.querySelector('img')
-  const originRect = origin?.getBoundingClientRect() ?? null
+  const originRect = props.originElement?.getBoundingClientRect() ?? null
   const overlayRect = overlayRef.value?.getBoundingClientRect()
-  const aspectRatio = resolveAspectRatio(originImage, originRect)
+  const aspectRatio = resolveAspectRatio(props.originElement, originRect)
   const viewportWidth = overlayRef.value?.clientWidth || overlayRect?.width || window.innerWidth
   const viewportHeight = overlayRef.value?.clientHeight || overlayRect?.height || window.innerHeight
   const maxWidth = viewportWidth * 0.9
@@ -475,8 +473,7 @@ onMounted(() => {
   if (props.container === document.body)
     acquireBodyLock(owner)
   measure()
-  const image = props.originElement?.querySelector('img')
-  image?.addEventListener('load', scheduleMeasure)
+  props.originElement?.addEventListener('load', scheduleMeasure)
   window.addEventListener('resize', scheduleMeasure)
   resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(scheduleMeasure)
   if (overlayRef.value)
@@ -485,9 +482,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  overlayRef.value?.removeEventListener('keydown', onKeyDown)
-  const image = props.originElement?.querySelector('img')
-  image?.removeEventListener('load', scheduleMeasure)
+  props.originElement?.removeEventListener('load', scheduleMeasure)
   window.removeEventListener('resize', scheduleMeasure)
   resizeObserver?.disconnect()
   if (resizeFrame !== null)

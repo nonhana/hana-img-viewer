@@ -100,7 +100,6 @@ export default function App() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `src` | `string` | required | Thumbnail and initial preview source. |
-| `as` | `keyof HTMLElementTagNameMap` | `'div'` | HTML element used for the visible thumbnail root. |
 | `previewSrc` | `string` | `undefined` | Higher-quality source that silently replaces `src` after loading. |
 | `alt` | `string` | `''` | Alternative text for both images. |
 | `open` | `boolean` | `false` | Viewer visibility, usually used with `v-model:open`. |
@@ -111,6 +110,7 @@ export default function App() {
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 | `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
+| *any other attribute* | — | — | Standard `img` attributes (`width`, `height`, `loading`, `data-*`, `aria-*`, listeners, ...) pass through to the rendered `img`. |
 
 Vue emits only `update:open`. Use `v-model:open` to keep the state in sync:
 
@@ -129,12 +129,22 @@ const open = ref(false)
 </template>
 ```
 
-The thumbnail root is a `div` by default. Choose a non-void element compatible with its parent when the viewer is rendered in a constrained HTML context, such as Markdown prose:
+### Native img semantics
+
+The component renders a native `img` as the thumbnail: it sizes like a plain image, accepts the same attributes, styles, and listeners, and works in inline contexts such as paragraphs without wrapper elements. `class`, `style`, and every unknown attribute fall through to that `img` directly.
+
+The viewer manages the interactive semantics it needs: `role="button"`, `tabindex="0"`, `src`, `alt`, and the click/keyboard open handlers. These are owned by the component and should not be overridden.
+
+### Thumbnail sizing
+
+Style the thumbnail exactly like a plain `img`: apply classes and styles directly on the component.
 
 ```vue
-<p>
-  <HanaImgViewer as="span" src="/images/post-thumb.jpg" />
-</p>
+<HanaImgViewer src="/images/photo.jpg" class="mx-auto max-h-[25rem] w-auto" />
+```
+
+```tsx
+<HanaImgViewer src="/images/photo.jpg" className="mx-auto max-h-[25rem] w-auto" />
 ```
 
 ### React props
@@ -154,7 +164,6 @@ The thumbnail root is a `div` by default. Choose a non-void element compatible w
 | `closeOnBackdropClick` | `boolean` | `true` | Request close when the backdrop is clicked. |
 | `closeOnEscape` | `boolean` | `true` | Request close when the focused viewer receives Escape. |
 | `showCloseButton` | `boolean` | `true` | Show an explicit close button in the top-right corner of the overlay. |
-| `className` | `string` | `undefined` | Class name for the visible thumbnail root. |
-| `style` | `CSSProperties` | `undefined` | Inline style for the visible thumbnail root. |
+| *any other prop* | — | — | Standard `img` props (`width`, `height`, `loading`, `decoding`, listeners, ...) pass through to the rendered `img`. |
 
 `open` selects controlled usage when it is defined on the first render. Use `defaultOpen` for uncontrolled initial visibility. Do not switch between the two modes while the component is mounted.

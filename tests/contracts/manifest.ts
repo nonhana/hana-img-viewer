@@ -13,6 +13,7 @@ export const contractManifest = {
   B12: 'dom',
   B13: ['server', 'hydration'],
   B14: 'distribution',
+  B15: 'dom',
 } as const
 
 export type ContractId = keyof typeof contractManifest

@@ -2,7 +2,7 @@ name: Publish Vue
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - packages/vue/package.json
   workflow_dispatch:

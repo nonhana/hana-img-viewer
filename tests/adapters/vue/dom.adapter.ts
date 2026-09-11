@@ -21,6 +21,10 @@ const VueHarness = defineComponent({
         'closeOnBackdropClick': options.closeOnBackdropClick,
         'closeOnEscape': options.closeOnEscape,
         'showCloseButton': options.showCloseButton,
+        'class': options.imgClass,
+        'style': options.imgStyle,
+        'data-testid': options.imgAttributes?.['data-testid'],
+        'aria-label': options.imgAttributes?.['aria-label'],
         'onUpdate:open': (nextOpen: boolean) => {
           ;(props.requests as boolean[]).push(nextOpen)
         },
@@ -56,7 +60,7 @@ class VueHandle implements DomHandle {
   }
 
   getOrigin() {
-    return this.host.querySelector<HTMLElement>('.hana-img-viewer-thumbnail-root')
+    return this.host.querySelector<HTMLElement>('.hana-img-viewer-thumbnail')
   }
 
   getTrigger() {

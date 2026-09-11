@@ -12,7 +12,7 @@ const adapterPaths = fg.sync(['tests/adapters/**/*.ts', 'tests/adapters/**/*.tsx
 describe('[governance] contract coverage', () => {
   it('keeps behavior IDs in the spec and manifest exactly aligned', () => {
     const spec = readFileSync(specPath, 'utf8')
-    const specIds = [...spec.matchAll(/^\|\s*(B(?:1[0-4]|[1-9]))\s*\|/gm)].map(match => match[1])
+    const specIds = [...spec.matchAll(/^\|\s*(B(?:1[0-5]|[1-9]))\s*\|/gm)].map(match => match[1])
     expect([...new Set(specIds)].sort()).toEqual([...contractIds].sort())
   })
 
