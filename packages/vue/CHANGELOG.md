@@ -1,5 +1,11 @@
 # hana-img-viewer
 
+## 6.0.0
+
+### Major Changes
+
+- [#25](https://github.com/nonhana/hana-img-viewer/pull/25) [`19a414d`](https://github.com/nonhana/hana-img-viewer/commit/19a414dd0e440f5bf1929af351f7e37b10ab3916) Thanks [@nonhana](https://github.com/nonhana)! - Render the thumbnail as a native `img` element. `class`, `style`, and every unknown attribute now fall through to the rendered `img` instead of a wrapper element, and built-in sizing styles were removed so the thumbnail behaves like a plain image. The `as` prop was removed; the component renders an `img` and needs no wrapper element in constrained HTML contexts.
+
 ## 5.2.0
 
 ### Minor Changes
