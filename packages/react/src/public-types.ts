@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react'
+import type { ImgHTMLAttributes } from 'react'
 
 /** Public props for the React image viewer. */
-export interface HanaImgViewerProps {
+export interface HanaImgViewerProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'alt' | 'children' | 'dangerouslySetInnerHTML' | 'src'> {
   /** Thumbnail and initial preview source. */
   src: string
   /** Higher-quality source that silently replaces `src` after loading. */
@@ -34,8 +34,4 @@ export interface HanaImgViewerProps {
   closeOnEscape?: boolean
   /** Show an explicit close button in the top-right corner of the overlay. @default true */
   showCloseButton?: boolean
-  /** Class applied to the visible thumbnail root. */
-  className?: string
-  /** Style applied to the visible thumbnail root. */
-  style?: CSSProperties
 }

@@ -12,20 +12,24 @@ const containerFromOptions = (options: DomMountOptions): HTMLElement | null | un
 }
 
 const ReactHarness = ({ options, requests }: { options: DomMountOptions, requests: boolean[] }) => {
-  const props: ComponentProps<typeof HanaImgViewer> = {
-    src: options.src ?? 'thumb.jpg',
-    previewSrc: options.previewSrc,
-    alt: options.alt,
-    container: containerFromOptions(options),
-    minZoom: options.minZoom,
-    maxZoom: options.maxZoom,
-    transitionDuration: options.transitionDuration,
-    closeOnBackdropClick: options.closeOnBackdropClick,
-    closeOnEscape: options.closeOnEscape,
-    showCloseButton: options.showCloseButton,
-    defaultOpen: options.visibility?.kind === 'local' ? options.visibility.initialOpen : undefined,
-    open: options.visibility?.kind === 'external' ? options.visibility.open : undefined,
-    onOpenChange: (nextOpen) => {
+  const props: ComponentProps<typeof HanaImgViewer> & Record<'aria-label' | 'data-testid', string | undefined> = {
+    'src': options.src ?? 'thumb.jpg',
+    'previewSrc': options.previewSrc,
+    'alt': options.alt,
+    'container': containerFromOptions(options),
+    'minZoom': options.minZoom,
+    'maxZoom': options.maxZoom,
+    'transitionDuration': options.transitionDuration,
+    'closeOnBackdropClick': options.closeOnBackdropClick,
+    'closeOnEscape': options.closeOnEscape,
+    'showCloseButton': options.showCloseButton,
+    'className': options.imgClass,
+    'style': options.imgStyle as ComponentProps<typeof HanaImgViewer>['style'],
+    'data-testid': options.imgAttributes?.['data-testid'],
+    'aria-label': options.imgAttributes?.['aria-label'],
+    'defaultOpen': options.visibility?.kind === 'local' ? options.visibility.initialOpen : undefined,
+    'open': options.visibility?.kind === 'external' ? options.visibility.open : undefined,
+    'onOpenChange': (nextOpen) => {
       requests.push(nextOpen)
     },
   }

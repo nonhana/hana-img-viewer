@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@v6.1.0
 
       - uses: actions/setup-node@v7.0.0
         with:
@@ -29,7 +29,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create or update release pull request
-        uses: changesets/action@v2.1.1
+        uses: changesets/action@v2.1.2
         with:
           version-script: pnpm changeset version
           pr-title: 'chore: version packages'

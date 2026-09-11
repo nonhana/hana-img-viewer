@@ -1,4 +1,4 @@
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 
 import type { HanaImgViewerProps } from './public-types'
 
@@ -33,6 +33,7 @@ export const HanaImgViewer = ({
   showCloseButton = true,
   className,
   style,
+  ...rest
 }: HanaImgViewerProps) => {
   const [isControlled] = useState(() => open !== undefined)
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
@@ -45,7 +46,7 @@ export const HanaImgViewer = ({
     null,
   )
   const [viewerState, dispatch] = useReducer(viewerReducer, initialViewerState)
-  const originRef = useRef<HTMLDivElement>(null)
+  const originRef = useRef<HTMLImageElement>(null)
   const originFocusRef = useRef<HTMLElement | null>(null)
   const restoreFocusRef = useRef(false)
   const desiredOpen = isControlled ? open === true : uncontrolledOpen
@@ -107,7 +108,7 @@ export const HanaImgViewer = ({
       }
 
       if (desiredOpen && requestedContainer) {
-        originFocusRef.current = originRef.current?.querySelector<HTMLElement>('.hana-img-viewer-thumbnail') ?? null
+        originFocusRef.current = originRef.current
         // Portal ownership can only be committed after the client container exists.
         // eslint-disable-next-line react/set-state-in-effect
         setActiveContainer(requestedContainer)
@@ -135,9 +136,15 @@ export const HanaImgViewer = ({
     dispatch({ type: 'SHOW' })
   }, [activeContainer, desiredOpen, phase, requestedContainer])
 
+  const handleThumbnailClick = (event: ReactMouseEvent<HTMLImageElement>) => {
+    rest.onClick?.(event)
+    requestOpen()
+  }
+
   const handleThumbnailKeyDown = (
     event: ReactKeyboardEvent<HTMLImageElement>,
   ) => {
+    rest.onKeyDown?.(event)
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       requestOpen()
@@ -150,26 +157,22 @@ export const HanaImgViewer = ({
 
   return (
     <>
-      <div
+      <img
         ref={originRef}
-        className={className}
+        {...rest}
+        className={`hana-img-viewer-thumbnail${className ? ` ${className}` : ''}`}
         style={{
-          display: 'inline-block',
           ...style,
           visibility: isOverlayMounted ? 'hidden' : style?.visibility,
         }}
-      >
-        <img
-          className="hana-img-viewer-thumbnail"
-          src={src}
-          alt={alt}
-          /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role */
-          role="button"
-          tabIndex={0}
-          onClick={requestOpen}
-          onKeyDown={handleThumbnailKeyDown}
-        />
-      </div>
+        src={src}
+        alt={alt}
+        /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role */
+        role="button"
+        tabIndex={0}
+        onClick={handleThumbnailClick}
+        onKeyDown={handleThumbnailKeyDown}
+      />
 
       {overlayPhase && activeContainer
         ? (

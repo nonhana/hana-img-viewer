@@ -17,12 +17,6 @@ Install:
 pnpm add hana-img-viewer
 ```
 
-Import `style.css` in `main.ts`:
-
-```ts
-import 'hana-img-viewer/style.css'
-```
-
 Import in a `.vue` component:
 
 ```vue
@@ -33,6 +27,12 @@ import { HanaImgViewer } from 'hana-img-viewer'
 <template>
   <HanaImgViewer src="/images/post-thumb.jpg" alt="Article cover" />
 </template>
+```
+
+Import `style.css` in `main.ts`:
+
+```ts
+import 'hana-img-viewer/style.css'
 ```
 
 ## API
@@ -95,15 +95,3 @@ const container = ref<HTMLElement | null>(null)
 
 The component supports both local registration and `app.use(HanaImgViewer)`; the default and named exports are the same component reference.
 
-## Migrating from v4
-
-| v4 surface | v5 replacement |
-| --- | --- |
-| selector / `'body'` string portal | `container` accepts an `HTMLElement`, `null`, or omission |
-| zoom bounds | `minZoom` / `maxZoom`; default `0.5`–`10` |
-| dismissal/keyboard flags | `closeOnBackdropClick` / `closeOnEscape` |
-| container/thumbnail class/style props | plain attrs |
-| `open`, `close`, `load`, `error` emits | listen only to `update:open` |
-| `open()`, `close()`, `reset()` exposed methods | change state through `v-model:open` |
-| `HanaImgViewerEmits`, `HanaImgViewerExposed`, core aliases | import `HanaImgViewerProps` only |
-| `@vueuse/core` peer | no longer needs separate installation |

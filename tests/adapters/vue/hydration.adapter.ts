@@ -5,13 +5,13 @@ import { createSSRApp, h, nextTick } from 'vue'
 import { HanaImgViewer } from '@/index'
 
 type HydrationOptions = Parameters<HydrationAdapter['hydrate']>[0]
+
 interface VueHydrationOptions extends HydrationOptions {
-  as?: keyof HTMLElementTagNameMap
   parentTag?: 'p'
 }
 
 const hydrate = async (options: VueHydrationOptions): Promise<HydrationResult> => {
-  const viewer = () => h(HanaImgViewer, { src: options.src, open: options.open, as: options.as })
+  const viewer = () => h(HanaImgViewer, { src: options.src, open: options.open })
   const Root = {
     render: () => options.parentTag ? h(options.parentTag, [viewer()]) : viewer(),
   }
@@ -52,7 +52,6 @@ const hydrate = async (options: VueHydrationOptions): Promise<HydrationResult> =
 
 export const hydrateVueInParagraph = (options: HydrationOptions): Promise<HydrationResult> => hydrate({
   ...options,
-  as: 'span',
   parentTag: 'p',
 })
 

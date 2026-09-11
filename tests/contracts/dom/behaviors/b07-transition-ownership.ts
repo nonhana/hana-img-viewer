@@ -1,15 +1,14 @@
 import type { DomAdapter } from '../adapter'
 import { describe, expect, it } from 'vitest'
-import { getAnimationCalls, getPendingAnimationCount, resolvePendingAnimation, setAnimationSequence, setSelectorRect, triggerResizeObservers } from '../../../environment/dom.setup'
+import { getAnimationCalls, getPendingAnimationCount, resolvePendingAnimation, setAnimationSequence, setElementRect, setSelectorRect, triggerResizeObservers } from '../../../environment/dom.setup'
 
 export const registerB7TransitionOwnership = (adapter: DomAdapter) => {
   describe('[behavior/B7] FLIP transition ownership', () => {
     it('honors the configured transitionDuration', async () => {
-      setAnimationSequence(['pending', 'pending', 'pending', 'pending'])
-      setSelectorRect('.hana-img-viewer-thumbnail-root', { x: 10, y: 20, width: 100, height: 80 })
+      const viewer = await adapter.mount({ src: 'thumb.jpg', transitionDuration: 600 })
+      setElementRect(viewer.getTrigger()!, { x: 10, y: 20, width: 100, height: 80 })
       setSelectorRect('.hana-img-viewer-flip-shell', { x: 100, y: 120, width: 800, height: 600 })
 
-      const viewer = await adapter.mount({ src: 'thumb.jpg', transitionDuration: 600 })
       viewer.getTrigger()!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       await viewer.settle()
 

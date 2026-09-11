@@ -17,6 +17,9 @@ export interface DomMountOptions {
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
   showCloseButton?: boolean
+  imgClass?: string
+  imgStyle?: Record<string, string>
+  imgAttributes?: Record<string, string>
 }
 
 export interface DomHandle {

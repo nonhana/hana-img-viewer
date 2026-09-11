@@ -11,6 +11,7 @@ import { registerB9SourceEnhancement } from './behaviors/b09-source-enhancement'
 import { registerB10FocusDismissal } from './behaviors/b10-focus-dismissal'
 import { registerB11ContainerLifecycle } from './behaviors/b11-container-lifecycle'
 import { registerB12BodyLock } from './behaviors/b12-body-lock'
+import { registerB15NativeAttributes } from './behaviors/b15-native-attributes'
 
 export const defineDomContract = (adapter: DomAdapter) => {
   registerB1OpenClose(adapter)
@@ -25,4 +26,5 @@ export const defineDomContract = (adapter: DomAdapter) => {
   registerB10FocusDismissal(adapter)
   registerB11ContainerLifecycle(adapter)
   registerB12BodyLock(adapter)
+  registerB15NativeAttributes(adapter)
 }

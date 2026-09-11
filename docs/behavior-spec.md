@@ -29,7 +29,7 @@ This contract is an agreement about observable behavior, not a requirement that 
 
 | Term | Meaning |
 | --- | --- |
-| Origin | The visible thumbnail root and its thumbnail trigger. |
+| Origin | The visible thumbnail `img`, which is also the default trigger. |
 | Overlay | The mounted dialog, backdrop, preview shell, and preview image. |
 | Desired visibility | The open or closed state requested by the local component or its external owner. |
 | Session | The period from mounting an overlay in a resolved container until that overlay is unmounted. |
@@ -56,6 +56,7 @@ Normative results include the cross-framework alignment decisions confirmed on 2
 | B12 | Body scroll lock | Only an overlay actually mounted to `document.body` may own the body lock. Multiple owners MUST be reference-safe. Final cleanup MUST restore only the styles still owned by the viewer and MUST NOT overwrite host changes made while the lock was active. | Two body-mounted instances close in sequence; the lock survives the first close and final cleanup preserves a host style write. |
 | B13 | SSR and hydration | Server output and the first hydration snapshot MUST contain only the origin, even when desired visibility is open. Container resolution and portal creation MUST begin only after the client commit. Hydration and lifecycle replay MUST NOT produce mismatch warnings, leaked overlays, locks, listeners, or animations. | Closed and open SSR output contain no overlay; hydration first preserves origin-only markup and then mounts exactly one client overlay without leaked effects. |
 | B14 | Distribution and styles | Each UI package MUST publish ESM output with an extracted stylesheet. JavaScript MUST NOT inject CSS at runtime. Package metadata, runtime exports, and reachable public declarations MUST match the framework's documented public surface. | A fresh build and distribution-contract suite verify artifacts, CSS extraction, metadata, runtime identity, and declaration exports. |
+| B15 | Native img attributes | The viewer renders a native `img` as the default trigger. Caller class and style MUST be applied to that `img` together with the built-in thumbnail class, unknown HTML attributes MUST fall through to it, and the built-in thumbnail class MUST always be present. The default render MUST carry only the built-in thumbnail class. | Mounting and updating a forwarded class proves it lands on the native `img` (which is the origin trigger), is replaced on update, falls through unknown attributes, and the default render carries only the built-in class. |
 
 ## Framework Interface Mapping
 
@@ -66,6 +67,7 @@ The same behavioral concept may be expressed differently by each framework. The 
 | Visibility ownership | `v-model:open` and the `update:open` event. An omitted model uses local state; a provided model is owned by the host. | `open` selects controlled ownership when defined on the first render. `defaultOpen` initializes local ownership, and `onOpenChange` reports requests. Ownership MUST NOT switch during a mount. |
 | Container | `container?: HTMLElement \| null`; omission means body after mount and `null` means pending. | `container?: HTMLElement \| null`; omission means body after hydration and `null` means pending. |
 | Dismissal | `closeOnBackdropClick` and `closeOnEscape` decide whether the viewer consumes and handles those paths. | `closeOnBackdropClick` and `closeOnEscape` decide whether the viewer consumes and handles those paths. |
+| Native img attributes | Unknown attributes (`class`, `style`, listeners, `data-*`, `aria-*`) fall through to the thumbnail `img`. | `className`, `style`, and unknown props spread onto the thumbnail `img`. |
 
 Selector strings are not supported by either UI package, even though `hana-img-viewer-core` still exposes selector-aware portal utilities for its own independent API compatibility.
 
