@@ -1,5 +1,11 @@
 # hana-img-viewer-react
 
+## 2.0.0
+
+### Major Changes
+
+- [#25](https://github.com/nonhana/hana-img-viewer/pull/25) [`19a414d`](https://github.com/nonhana/hana-img-viewer/commit/19a414dd0e440f5bf1929af351f7e37b10ab3916) Thanks [@nonhana](https://github.com/nonhana)! - Render the thumbnail as a native `img`. `className`, `style`, and every unknown prop now spread onto the rendered `img` instead of a wrapper element, and built-in sizing styles were removed so the thumbnail sizes like a plain image.
+
 ## 1.1.1
 
 ### Patch Changes
